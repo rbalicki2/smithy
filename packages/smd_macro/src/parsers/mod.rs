@@ -22,7 +22,6 @@ named!(
     |vec| {
       let as_token = util::reduce_vec_to_tokens(&vec);
       let a = quote!(#as_token);
-      println!("vec -> {}", a);
       a
     }
   )

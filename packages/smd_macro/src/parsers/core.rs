@@ -25,8 +25,8 @@ named!(
       apply!(util::match_punct, Some('<'), Some(Spacing::Alone), vec![]),
       apply!(util::match_ident, None, false),
       tuple!(
-        apply!(util::match_punct, Some('/'), None, vec![]),
-        apply!(util::match_punct, Some('>'), Some(Spacing::Joint), vec![])
+        apply!(util::match_punct, Some('/'), Some(Spacing::Joint), vec![]),
+        apply!(util::match_punct, Some('>'), None, vec![])
       )
     ),
     |a| { quote!(#a) }

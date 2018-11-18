@@ -20,7 +20,6 @@ pub type Path = [usize];
 /// In the above, there are multiple references to app_state.count, one of which is a
 /// mutable reference. This works because after the macro expands, it becomes
 ///
-/// ```
 /// match phase {
 ///   Phase::Render => PhaseResult::Render(HtmlToken {
 ///     node_type: "div".into(),
@@ -35,7 +34,6 @@ pub type Path = [usize];
 ///     _ => PhaseResult::EventHandling(false),
 ///   }
 /// }
-/// ```
 ///
 /// Thus, the mutable and immutable references end up in different branches
 /// of the match statement, causing them not to conflict.

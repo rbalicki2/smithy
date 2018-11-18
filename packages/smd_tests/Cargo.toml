@@ -5,3 +5,4 @@ authors = ["Robert Balicki <robert.balicki@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+smd_macro = { path = "../smd_macro" }

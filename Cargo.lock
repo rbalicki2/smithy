@@ -211,6 +211,9 @@ dependencies = [
 [[package]]
 name = "smd_tests"
 version = "0.1.0"
+dependencies = [
+ "smd_macro 0.1.0",
+]
 
 [[package]]
 name = "smithy_types"
