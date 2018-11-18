@@ -1,0 +1,31 @@
+[package]
+name = "smithy_types"
+version = "0.1.0"
+authors = ["Robert Balicki <robert.balicki@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+web-sys = { version = "0.3.5", features = [
+  "Document",
+  "DocumentFragment",
+  "Element",
+  "Window",
+  "HtmlElement",
+  "HtmlTemplateElement",
+  "Event",
+  "UiEvent",
+  "ClipboardEvent",
+  "KeyboardEvent",
+  "InputEvent",
+  "FocusEvent",
+  "MouseEvent",
+  "PointerEvent",
+  "TouchEvent",
+  "ScrollAreaEvent",
+  "AnimationEvent",
+  "TransitionEvent",
+  "EventTarget",
+  "Node",
+  "NodeList",
+  "console"
+] }
