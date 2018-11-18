@@ -4,8 +4,10 @@ use proc_macro2::{
   Group,
   Literal,
   Spacing,
+  TokenStream,
 };
 use quote::quote;
+use quote::ToTokens;
 use std::iter;
 
 pub type TtsIResult<'a, T> = nom::IResult<TokenTreeSlice<'a>, T>;
@@ -163,4 +165,8 @@ pub fn reduce_vec_to_tokens(v: &Vec<proc_macro2::TokenStream>) -> proc_macro2::T
   quote!(vec![
     #vec_contents
   ])
+}
+
+pub fn enquote<T: ToTokens>(t: T) -> TokenStream {
+  quote!(#t)
 }

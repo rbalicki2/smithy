@@ -23,13 +23,16 @@ named!(
   map!(
     delimited!(
       apply!(util::match_punct, Some('<'), Some(Spacing::Alone), vec![]),
-      apply!(util::match_ident, None, false),
+      tuple!(
+        apply!(util::match_ident, None, false),
+        many_0_custom!(super::attributes::match_attribute)
+      ),
       tuple!(
         apply!(util::match_punct, Some('/'), Some(Spacing::Joint), vec![]),
         apply!(util::match_punct, Some('>'), None, vec![])
       )
     ),
-    |a| { quote!(#a) }
+    |a| { println!("{:?}", a); let name = a.0; quote!(#name) }
   )
 );
 

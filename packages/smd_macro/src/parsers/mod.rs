@@ -9,6 +9,7 @@ use quote::quote;
 
 #[macro_use]
 mod many_custom;
+mod attributes;
 mod core;
 mod util;
 

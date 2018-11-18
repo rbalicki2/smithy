@@ -6,6 +6,6 @@ extern crate smd_macro;
 mod tests {
   #[test]
   fn it_works() {
-    let a = smd!(<div />);
+    let a = smd!(<div foo="FI" bar={a} />);
   }
 }
