@@ -59,3 +59,7 @@ pub fn make_component(token: TokenStream) -> TokenStream {
     component
   })
 }
+
+pub fn make_text_node(s: String) -> TokenStream {
+  quote!(smithy_types::Node::Text(#s.into()))
+}

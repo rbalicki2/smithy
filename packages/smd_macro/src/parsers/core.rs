@@ -14,8 +14,12 @@ use proc_macro2::{
   Spacing,
   TokenStream,
 };
+use quote::quote;
 
-use super::make_smithy_tokens::make_html_tokens;
+use super::make_smithy_tokens::{
+  make_html_tokens,
+  make_text_node,
+};
 use super::util;
 
 named!(
@@ -65,7 +69,7 @@ named!(
   map!(
     tuple!(
       match_opening_tag,
-      many_0_custom!(match_html_token),
+      many_0_custom!(match_node),
       match_closing_tag
     ),
     |((name, attributes), children, closing_tag_name)| {
@@ -83,10 +87,36 @@ named!(
   )
 );
 
+// N.B. this is separated because there seems to be a bug
+// in many_1_custom. TODO look at this
+named!(
+  match_ident_2 <TokenTreeSlice, String>,
+  apply!(util::match_ident, None, true)
+);
+
+named!(
+  match_string_as_node <TokenTreeSlice, TokenStream>,
+  map!(
+    many_1_custom!(match_ident_2),
+    |vec| {
+      let joined = vec.iter().map(|ident| ident.to_string()).collect::<Vec<String>>().join(" ");
+      make_text_node(joined)
+    }
+  )
+);
+
+named!(
+  match_node <TokenTreeSlice, TokenStream>,
+  alt!(
+    match_html_token
+      | match_string_as_node
+  )
+);
+
 named!(
   pub match_html_component <TokenTreeSlice, TokenStream>,
   map!(
-    match_html_token,
+    match_node,
     |token| super::make_smithy_tokens::make_component(token)
   )
 );
