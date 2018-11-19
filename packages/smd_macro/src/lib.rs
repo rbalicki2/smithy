@@ -1,4 +1,5 @@
 #![feature(proc_macro_span, proc_macro_raw_ident)]
+#![recursion_limit = "128"]
 
 extern crate proc_macro;
 
@@ -8,6 +9,7 @@ mod types;
 #[proc_macro]
 pub fn smd(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let input_2: proc_macro2::TokenStream = input.into();
+  println!("input {:?}", input_2);
   let vec_of_trees: Vec<proc_macro2::TokenTree> = input_2.into_iter().collect();
 
   let parsed = parsers::match_smd(&vec_of_trees);

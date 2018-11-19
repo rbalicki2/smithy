@@ -1,6 +1,6 @@
 pub type Attributes = std::collections::HashMap<String, String>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct HtmlToken {
   pub node_type: String,
   pub children: Vec<HtmlToken>,
@@ -9,7 +9,7 @@ pub struct HtmlToken {
 
 pub type Path = [usize];
 
-/// A Component is invoked in one of two phases: Render and EventHandling.
+/// A Component is invoked in one of two phases: Rendering and EventHandling.
 ///
 /// Internally, this is represented as a match statement, allowing us to handle
 /// situations like:
@@ -21,7 +21,7 @@ pub type Path = [usize];
 /// mutable reference. This works because after the macro expands, it becomes
 ///
 /// match phase {
-///   Phase::Render => PhaseResult::Render(HtmlToken {
+///   Phase::Rendering => PhaseResult::Rendering(HtmlToken {
 ///     node_type: "div".into(),
 ///     children: vec![app_state.count.into()], // immutable reference
 ///     attributes: HashMap::new(),
@@ -38,7 +38,7 @@ pub type Path = [usize];
 /// Thus, the mutable and immutable references end up in different branches
 /// of the match statement, causing them not to conflict.
 pub enum Phase<'a> {
-  Render,
+  Rendering,
   EventHandling((crate::Event, &'a Path)),
 }
 
@@ -47,7 +47,7 @@ pub type EventHandled = bool;
 /// PhaseResult is returned from an EventHandler
 ///
 /// This is the worst part of smithy at the moment, because a Component
-/// passed Phase::Render *must* return a PhaseResult::Render, and likewise
+/// passed Phase::Rendering *must* return a PhaseResult::Rendering, and likewise
 /// a Component passed a Phase::EventHandling *must* return a
 /// PhaseResult::EventHandling.
 ///
@@ -58,15 +58,15 @@ pub type EventHandled = bool;
 /// and conform to this restriction.
 #[derive(Debug)]
 pub enum PhaseResult {
-  Render(HtmlToken),
+  Rendering(HtmlToken),
   EventHandling(EventHandled),
 }
 
 impl PhaseResult {
   pub fn unwrap_html_token(self) -> HtmlToken {
     match self {
-      PhaseResult::Render(token) => token,
-      _ => panic!("unwrap_html_token called on PhaseResult that was not of variant Render"),
+      PhaseResult::Rendering(token) => token,
+      _ => panic!("unwrap_html_token called on PhaseResult that was not of variant Rendering"),
     }
   }
 
@@ -84,4 +84,10 @@ impl PhaseResult {
 ///
 /// I would not recommend writing these yourself, although you absolutely
 /// can, if you want.
-pub type Component = FnMut(Phase) -> PhaseResult;
+pub struct Component(pub Box<FnMut(Phase) -> PhaseResult>);
+
+impl Component {
+  pub fn render(&mut self) -> HtmlToken {
+    self.0(Phase::Rendering).unwrap_html_token()
+  }
+}

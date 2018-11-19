@@ -6,6 +6,10 @@ extern crate smd_macro;
 mod tests {
   #[test]
   fn it_works() {
-    let a = smd!(<div foo="FI" bar={a} />);
+    let attr = "Foo";
+    let mut a = smd!(<div foo="FI" bar={attr} fo />);
+    for x in &mut a {
+      println!("token: {:?}", x.render());
+    }
   }
 }

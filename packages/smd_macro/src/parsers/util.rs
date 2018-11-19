@@ -25,7 +25,7 @@ pub fn match_punct(
       nom::ErrorKind::Custom(42)
     )))
   };
-  let filler_spaces = get_filler_spaces(input, true);
+  let filler_spaces = get_filler_spaces(input);
 
   match input.split_first() {
     Some((first, rest)) => match first {
@@ -60,7 +60,11 @@ pub fn match_ident(
     )))
   };
 
-  let filler_spaces = get_filler_spaces(input, include_filler);
+  let filler_spaces = if include_filler {
+    get_filler_spaces(input)
+  } else {
+    "".into()
+  };
   match input.split_first() {
     Some((first, rest)) => match first {
       TokenTree::Ident(ref ident) => {
@@ -131,17 +135,11 @@ pub fn match_literal(input: TokenTreeSlice) -> TtsIResult<Literal> {
 }
 
 pub fn match_literal_as_string(input: TokenTreeSlice) -> TtsIResult<String> {
-  let filler_spaces = get_filler_spaces(input, true);
-
+  let filler_spaces = get_filler_spaces(input);
   match_literal(input).map(|(rest, lit)| (rest, format!("{}{}", lit.to_string(), filler_spaces)))
 }
 
-pub fn get_filler_spaces(input: TokenTreeSlice, do_it: bool) -> String {
-  // LOL but seriously, would rather have this logic here than strewn about
-  if !do_it {
-    return "".into();
-  }
-
+pub fn get_filler_spaces(input: TokenTreeSlice) -> String {
   let first_opt = input.get(0).map(|i| i.span().end());
   let second_opt = input.get(1).map(|i| i.span().start());
   match (first_opt, second_opt) {
