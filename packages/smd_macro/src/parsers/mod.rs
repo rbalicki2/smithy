@@ -11,6 +11,7 @@ use quote::quote;
 mod many_custom;
 mod attributes;
 mod core;
+mod make_smithy_tokens;
 mod util;
 
 named!(
@@ -19,11 +20,11 @@ named!(
     // TODO
     // * figure out why many_0_custom does not consume the remaining vector
     // * consider using many_0_custom here
-    many_1_custom!(self::core::match_html_token),
+    many_1_custom!(self::core::match_html_component),
     |vec| {
       let as_token = util::reduce_vec_to_tokens(&vec);
-      let a = quote!(#as_token);
-      a
+      let quoted = quote!(#as_token);
+      quoted
     }
   )
 );

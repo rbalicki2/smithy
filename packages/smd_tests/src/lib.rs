@@ -7,9 +7,10 @@ mod tests {
   #[test]
   fn it_works() {
     let attr = "Foo";
-    let mut a = smd!(<div foo="FI" bar={attr} fo />);
+    let mut a = smd!(<outer><inner /></outer>);
     for x in &mut a {
       println!("token: {:?}", x.render());
+      // println!("token: {:?}", x);
     }
   }
 }
