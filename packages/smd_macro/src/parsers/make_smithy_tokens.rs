@@ -40,6 +40,7 @@ pub fn make_html_tokens(
     quote!(vec![])
   };
 
+  // TODO implement and call .flatten_children
   quote!(smithy_types::Node::Dom(smithy_types::HtmlToken {
     node_type: #name.into(),
     attributes: #attribute_initialization,

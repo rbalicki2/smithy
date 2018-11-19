@@ -6,8 +6,10 @@ extern crate smd_macro;
 mod tests {
   #[test]
   fn it_works() {
-    let attr = "Foo";
-    let mut a = smd!(<outer attr={attr}>foo bar  baaak.!          ! asdffd</outer>);
+    // let attr = "Foo";
+    let mut inner = smd!(<inner />);
+    // let inner = "inner".to_string();
+    let mut a = smd!(<outer>{ &mut inner } akka { "next" }</outer>);
     // let mut a = smd!(foo  bar);
     for x in &mut a {
       println!("token: {:?}", x.render());

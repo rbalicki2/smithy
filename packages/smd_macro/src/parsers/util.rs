@@ -168,3 +168,7 @@ pub fn reduce_vec_to_tokens(v: &Vec<proc_macro2::TokenStream>) -> proc_macro2::T
 pub fn enquote<T: ToTokens>(t: T) -> TokenStream {
   quote!(#t)
 }
+
+pub fn enquote_into<T: ToTokens>(t: T) -> TokenStream {
+  quote!(#t.into())
+}

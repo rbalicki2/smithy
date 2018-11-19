@@ -11,10 +11,10 @@ use nom::{
   tuple_parser,
 };
 use proc_macro2::{
+  Delimiter,
   Spacing,
   TokenStream,
 };
-use quote::quote;
 
 use super::make_smithy_tokens::{
   make_html_tokens,
@@ -94,6 +94,7 @@ named!(
   alt!(
     apply!(util::match_ident, None, true)
       | apply!(util::match_punct, None, None, vec!['<'])
+      | call!(util::match_literal_as_string)
   )
 );
 
@@ -109,10 +110,19 @@ named!(
 );
 
 named!(
+  match_group <TokenTreeSlice, TokenStream>,
+  map!(
+    apply!(util::match_group, Some(Delimiter::Brace)),
+    util::enquote_into
+  )
+);
+
+named!(
   match_node <TokenTreeSlice, TokenStream>,
   alt!(
     match_html_token
       | match_string_as_node
+      | match_group
   )
 );
 

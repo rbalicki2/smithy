@@ -1,9 +1,36 @@
+use custom_derive::custom_derive;
+use enum_derive::{
+  enum_derive_util,
+  EnumFromInner,
+};
+
 pub type Attributes = std::collections::HashMap<String, String>;
 
-#[derive(Debug, Clone)]
-pub enum Node {
-  Dom(HtmlToken),
-  Text(String),
+custom_derive! {
+  #[derive(Debug, Clone, EnumFromInner)]
+  pub enum Node {
+    Dom(HtmlToken),
+    Text(String),
+    Vec(Vec<Node>),
+  }
+}
+
+impl From<&mut Vec<Component>> for Node {
+  fn from(v: &mut Vec<Component>) -> Node {
+    Node::Vec(v.iter_mut().map(Component::render).collect())
+  }
+}
+
+impl From<&str> for Node {
+  fn from(s: &str) -> Self {
+    Node::Text(s.to_string())
+  }
+}
+
+impl From<&String> for Node {
+  fn from(s: &String) -> Self {
+    Node::Text(s.to_string())
+  }
 }
 
 #[derive(Debug, Clone)]
