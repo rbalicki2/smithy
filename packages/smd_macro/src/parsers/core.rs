@@ -60,7 +60,7 @@ named!(
       apply!(util::match_punct, Some('/'), Some(Spacing::Alone), vec![])
     ),
     apply!(util::match_ident, None, false),
-    apply!(util::match_punct, Some('>'), Some(Spacing::Alone), vec![])
+    apply!(util::match_punct, Some('>'), None, vec![])
   )
 );
 
