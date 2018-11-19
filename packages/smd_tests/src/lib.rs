@@ -7,7 +7,7 @@ mod tests {
   #[test]
   fn it_works() {
     let attr = "Foo";
-    let mut a = smd!(<outer>foo bar  baaak.!          ! </outer>);
+    let mut a = smd!(<outer attr={attr}>foo bar  baaak.!          ! asdffd</outer>);
     // let mut a = smd!(foo  bar);
     for x in &mut a {
       println!("token: {:?}", x.render());

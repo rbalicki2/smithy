@@ -97,4 +97,8 @@ impl Component {
   pub fn render(&mut self) -> Node {
     self.0(Phase::Rendering).unwrap_node()
   }
+
+  pub fn handle_event(&mut self, event: crate::Event, path: &Path) -> EventHandled {
+    self.0(Phase::EventHandling((event, path))).unwrap_event_handled()
+  }
 }
