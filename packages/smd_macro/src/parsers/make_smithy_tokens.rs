@@ -40,11 +40,11 @@ pub fn make_html_tokens(
     quote!(vec![])
   };
 
-  quote!(smithy_types::HtmlToken {
+  quote!(smithy_types::Node::Dom(smithy_types::HtmlToken {
     node_type: #name.into(),
     attributes: #attribute_initialization,
     children: #child_initialization,
-  })
+  }))
 }
 
 pub fn make_component(token: TokenStream) -> TokenStream {

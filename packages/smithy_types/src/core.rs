@@ -1,9 +1,15 @@
 pub type Attributes = std::collections::HashMap<String, String>;
 
 #[derive(Debug, Clone)]
+pub enum Node {
+  Dom(HtmlToken),
+  Text(String),
+}
+
+#[derive(Debug, Clone)]
 pub struct HtmlToken {
   pub node_type: String,
-  pub children: Vec<HtmlToken>,
+  pub children: Vec<Node>,
   pub attributes: Attributes,
 }
 
@@ -58,15 +64,16 @@ pub type EventHandled = bool;
 /// and conform to this restriction.
 #[derive(Debug)]
 pub enum PhaseResult {
-  Rendering(HtmlToken),
+  // TODO make this an Option<Node>
+  Rendering(Node),
   EventHandling(EventHandled),
 }
 
 impl PhaseResult {
-  pub fn unwrap_html_token(self) -> HtmlToken {
+  pub fn unwrap_node(self) -> Node {
     match self {
-      PhaseResult::Rendering(token) => token,
-      _ => panic!("unwrap_html_token called on PhaseResult that was not of variant Rendering"),
+      PhaseResult::Rendering(node) => node,
+      _ => panic!("unwrap_node called on PhaseResult that was not of variant Rendering"),
     }
   }
 
@@ -87,7 +94,7 @@ impl PhaseResult {
 pub struct Component(pub Box<FnMut(Phase) -> PhaseResult>);
 
 impl Component {
-  pub fn render(&mut self) -> HtmlToken {
-    self.0(Phase::Rendering).unwrap_html_token()
+  pub fn render(&mut self) -> Node {
+    self.0(Phase::Rendering).unwrap_node()
   }
 }
