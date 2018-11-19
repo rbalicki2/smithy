@@ -91,7 +91,10 @@ named!(
 // in many_1_custom. TODO look at this
 named!(
   match_ident_2 <TokenTreeSlice, String>,
-  apply!(util::match_ident, None, true)
+  alt!(
+    apply!(util::match_ident, None, true)
+      | apply!(util::match_punct, None, None, vec!['<'])
+  )
 );
 
 named!(
@@ -99,7 +102,7 @@ named!(
   map!(
     many_1_custom!(match_ident_2),
     |vec| {
-      let joined = vec.iter().map(|ident| ident.to_string()).collect::<Vec<String>>().join(" ");
+      let joined = vec.iter().map(|ident| ident.to_string()).collect::<Vec<String>>().join("");
       make_text_node(joined)
     }
   )
