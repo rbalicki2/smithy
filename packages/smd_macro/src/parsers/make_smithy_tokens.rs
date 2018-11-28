@@ -1,6 +1,13 @@
 use proc_macro2::TokenStream;
 use quote::quote;
 
+pub type EventHandlingInfo = (
+  Box<smithy_types::Path>,
+  // This should be a way to match the event, maybe a TokenStream
+  (),
+  TokenStream,
+);
+
 // TODO handle children and event handling attributes
 pub fn make_html_tokens(
   name: String,
@@ -48,7 +55,11 @@ pub fn make_html_tokens(
   }))
 }
 
-pub fn make_component(token: TokenStream) -> TokenStream {
+pub fn make_component(
+  token: TokenStream,
+  event_handling_infos: Vec<EventHandlingInfo>,
+) -> TokenStream {
+  // let event_handling_tokens = ...
   quote!({
     let component: smithy_types::Component = smithy_types::Component(Box::new(move |phase| {
       match phase {

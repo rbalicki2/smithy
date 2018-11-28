@@ -13,6 +13,8 @@ mod tests {
     // let mut a = smd!(foo  bar);
     for x in &mut a {
       println!("token: {:?}", x.render());
+      let response = x.handle_event(smithy_types::Event::OnTest(false), &[0]);
+      println!("response {:?}", response);
       // println!("token: {:?}", x);
     }
   }

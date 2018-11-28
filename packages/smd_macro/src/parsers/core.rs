@@ -130,6 +130,6 @@ named!(
   pub match_html_component <TokenTreeSlice, TokenStream>,
   map!(
     match_node,
-    |token| super::make_smithy_tokens::make_component(token)
+    |token| super::make_smithy_tokens::make_component(token, vec![])
   )
 );

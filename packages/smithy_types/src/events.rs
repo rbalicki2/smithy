@@ -14,6 +14,8 @@ use web_sys::{
 
 /// An enum of all Events a dom node can handle
 pub enum Event {
+  // TODO make sure this gets deleted or goes behind a #[cfg(test)]
+  OnTest(bool),
   // --Clipboard
   OnCopy(ClipboardEvent),
   OnCut(ClipboardEvent),
