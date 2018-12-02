@@ -26,7 +26,7 @@ use proc_macro2::{
 //
 // In the EventHandler case, the string *is changed to upper camel case*
 // to match the Event type! Beware!
-// (Should we use a new_type?)
+// (Should we use a newtype?)
 
 fn assert_is_not_event_handler(string: &String) {
   assert!(
