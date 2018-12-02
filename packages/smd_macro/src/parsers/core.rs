@@ -19,7 +19,6 @@ use nom::{
 use proc_macro2::{
   Delimiter,
   Spacing,
-  TokenStream,
 };
 use quote::quote;
 use std::iter::Extend;

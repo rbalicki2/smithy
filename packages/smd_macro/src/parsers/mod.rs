@@ -24,10 +24,10 @@ named!(
     // many_1_custom!(self::core::match_html_component),
     many_1_custom!(self::core::match_node),
     |vec| {
-      let vec = vec.into_iter().enumerate().map(|(i, mut val)| {
+      let vec = vec.into_iter().enumerate().map(|(i, val)| {
         let component = val.0;
         let mut event_handling_infos = val.1;
-        for mut event_handling_info in event_handling_infos.iter_mut() {
+        for event_handling_info in event_handling_infos.iter_mut() {
           event_handling_info.reversed_path.push(i);
         }
         make_smithy_tokens::make_component(component, event_handling_infos)

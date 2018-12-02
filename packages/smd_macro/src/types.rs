@@ -2,8 +2,8 @@ pub use proc_macro2::{
   TokenStream,
   TokenTree,
 };
-use std::iter::Extend;
 
+#[derive(Debug)]
 pub struct EventHandlingInfo {
   pub reversed_path: Vec<usize>,
   /// None implies we're matching on all events
@@ -80,8 +80,9 @@ impl SplitByType<Vec<TokenStream>, Vec<EventHandlingInfo>>
       (child_token_streams, child_event_handling_infos),
       |(mut child_token_streams, mut child_event_handling_infos), item| {
         child_token_streams.push(item.0);
-        for mut current_event_handling_info in item.1.into_iter() {
+        for (i, mut current_event_handling_info) in item.1.into_iter().enumerate() {
           // TODO maybe append or prepend to current_event_handling_info.path
+          current_event_handling_info.reversed_path.push(i);
           child_event_handling_infos.push(current_event_handling_info);
         }
         (child_token_streams, child_event_handling_infos)
