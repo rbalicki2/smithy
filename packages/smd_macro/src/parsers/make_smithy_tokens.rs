@@ -60,15 +60,11 @@ pub fn make_html_tokens(
 }
 
 fn path_to_tokens(path: Box<[usize]>) -> TokenStream {
-  // let inner = path.into_iter().fold(quote!{}, |accum, path_item| {
-  //   #accum
-  //   #path_item,
-  // });
-  // quote!{
-  //   [ #inner ]
-  // }
+  let inner = path.into_iter().fold(quote!{}, |accum, path_item| {
+    quote!{ #accum #path_item, }
+  });
   quote!{
-    []
+    [ #inner ]
   }
 }
 
