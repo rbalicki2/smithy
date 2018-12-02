@@ -3,6 +3,7 @@ use enum_derive::{
   enum_derive_util,
   EnumFromInner,
 };
+use std::iter::Extend;
 
 pub type Attributes = std::collections::HashMap<String, String>;
 
@@ -109,7 +110,7 @@ impl PhaseResult {
       PhaseResult::EventHandling(event_handled) => event_handled,
       _ => {
         panic!("unwrap_event_handled called on PhaseResult that was not of variant EventHandling")
-      }
+      },
     }
   }
 }
@@ -120,12 +121,32 @@ impl PhaseResult {
 /// can, if you want.
 pub struct Component(pub Box<FnMut(Phase) -> PhaseResult>);
 
+// TODO figure out best practices for blanket impls and such
+
+pub trait EventHandler {
+  fn handle_event(&mut self, event: crate::Event, path: &Path) -> EventHandled;
+}
+
 impl Component {
   pub fn render(&mut self) -> Node {
     self.0(Phase::Rendering).unwrap_node()
   }
+}
 
-  pub fn handle_event(&mut self, event: crate::Event, path: &Path) -> EventHandled {
+impl EventHandler for Component {
+  fn handle_event(&mut self, event: crate::Event, path: &Path) -> EventHandled {
     self.0(Phase::EventHandling((event, path))).unwrap_event_handled()
+  }
+}
+
+impl EventHandler for Vec<Component> {
+  fn handle_event(&mut self, event: crate::Event, path: &Path) -> EventHandled {
+    match path.split_first() {
+      Some((first, rest)) => match self.get_mut(*first) {
+        Some(component) => component.handle_event(event, rest),
+        None => false,
+      },
+      None => false,
+    }
   }
 }

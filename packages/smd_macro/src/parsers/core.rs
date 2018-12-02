@@ -21,6 +21,7 @@ use proc_macro2::{
   Spacing,
   TokenStream,
 };
+use quote::quote;
 use std::iter::Extend;
 
 use super::make_smithy_tokens::{
@@ -135,12 +136,15 @@ named!(
 named!(
   match_group <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
   map!(
-    map!(
-      apply!(util::match_group, Some(Delimiter::Brace)),
-      util::enquote_into
-    ),
+    apply!(util::match_group, Some(Delimiter::Brace)),
     // TODO what do we do here?
-    |x| (x, vec![])
+    |x| (quote!(#x.into()), vec![
+      EventHandlingInfo {
+        path: Box::new([4,5,6]),
+        event: None,
+        callback: quote!(#x),
+      }
+    ])
   )
 );
 
@@ -157,6 +161,7 @@ named!(
   pub match_html_component <TokenTreeSlice, TokenStream>,
   map!(
     match_node,
-    |(token, event_handling_infos)| super::make_smithy_tokens::make_component(token, event_handling_infos)
+    |(token, event_handling_infos)|
+      super::make_smithy_tokens::make_component(token, event_handling_infos)
   )
 );

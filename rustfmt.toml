@@ -1,2 +1,3 @@
 tab_spaces = 2
 imports_layout = "Vertical"
+match_block_trailing_comma = true

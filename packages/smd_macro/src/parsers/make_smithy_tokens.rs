@@ -75,16 +75,25 @@ pub fn make_component(
       .fold(quote!{}, |accum, event_handling_info| {
         let path = path_to_tokens(event_handling_info.path);
         let callback = event_handling_info.callback;
-        let event = Ident::new(&event_handling_info.event, Span::call_site());
-        quote!{
-          #accum
-          (smithy_types::Event::#event(val), #path) => {
-            (#callback)(val);
-            smithy_types::PhaseResult::EventHandling(true)
+        match event_handling_info.event {
+          Some(event) => {
+            let event = Ident::new(&event, Span::call_site());
+            quote!{
+              #accum
+              (smithy_types::Event::#event(val), #path) => {
+                (#callback)(val);
+                smithy_types::PhaseResult::EventHandling(true)
+              },
+            }
+          },
+          None => quote!{
+            #accum
+            (evt, #path) => smithy_types::PhaseResult::EventHandling(#callback.handle_event(evt, &#path)),
           },
         }
       });
   quote!({
+    // use smithy_types::EventHandler;
     let component: smithy_types::Component = smithy_types::Component(Box::new(move |phase| {
       match phase {
         smithy_types::Phase::Rendering => smithy_types::PhaseResult::Rendering(#token),

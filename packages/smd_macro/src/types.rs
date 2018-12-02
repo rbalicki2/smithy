@@ -5,7 +5,8 @@ pub use proc_macro2::{
 
 pub struct EventHandlingInfo {
   pub path: Box<smithy_types::Path>,
-  pub event: String,
+  /// None implies we're matching on all events
+  pub event: Option<String>,
   pub callback: TokenStream,
 }
 
@@ -13,7 +14,7 @@ impl EventHandlingInfo {
   pub fn from_string_token_stream_pair((event, callback): StringTokenStreamPair) -> Self {
     EventHandlingInfo {
       path: Box::new([]),
-      event,
+      event: Some(event),
       callback,
     }
   }
@@ -49,7 +50,7 @@ impl SplitByType<Vec<StringTokenStreamPair>, Vec<StringTokenStreamPair>>
           AttributeOrEventHandler::Attribute(attr) => attributes.push(attr),
           AttributeOrEventHandler::EventHandler(event_handler) => {
             event_handlers.push(event_handler)
-          }
+          },
         };
         (attributes, event_handlers)
       },

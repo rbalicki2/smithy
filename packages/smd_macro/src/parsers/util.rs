@@ -41,7 +41,7 @@ pub fn match_punct(
         } else {
           Ok((rest, format!("{}{}", punct.as_char(), filler_spaces)))
         }
-      }
+      },
       _ => get_err(),
     },
     None => get_err(),
@@ -76,10 +76,10 @@ pub fn match_ident(
             } else {
               get_err()
             }
-          }
+          },
           None => get_success(),
         }
-      }
+      },
       _ => get_err(),
     },
     None => get_err(),
@@ -107,10 +107,10 @@ pub fn match_group(input: TokenTreeSlice, delimiter_opt: Option<Delimiter>) -> G
             } else {
               get_err()
             }
-          }
+          },
           None => get_success(),
         }
-      }
+      },
       _ => get_err(),
     },
     None => get_err(),
@@ -151,7 +151,7 @@ pub fn get_filler_spaces(input: TokenTreeSlice) -> String {
           .take(second.column - first.column)
           .collect::<String>()
       }
-    }
+    },
     _ => "".into(),
   }
 }
@@ -167,8 +167,4 @@ pub fn reduce_vec_to_tokens(v: &Vec<proc_macro2::TokenStream>) -> proc_macro2::T
 
 pub fn enquote<T: ToTokens>(t: T) -> TokenStream {
   quote!(#t)
-}
-
-pub fn enquote_into<T: ToTokens>(t: T) -> TokenStream {
-  quote!(#t.into())
 }
