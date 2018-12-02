@@ -18,17 +18,6 @@ use proc_macro2::{
   TokenStream,
 };
 
-// macro_rules! match_event {
-//   ($key:ident, $val:ident, $attr_opt:ident, $event_opt:ident, $handler_name:ident, $handler_name_string:expr) => {
-//     if $key == $handler_name_string {
-//       return ($attr_opt, Some(quote!{
-//         #$event_opt
-//         event_handlers.$handler_name = Some(#$val);
-//       }));
-//     }
-//   };
-// }
-
 named!(
   pub match_attribute <TokenTreeSlice, AttributeOrEventHandler>,
   alt!(

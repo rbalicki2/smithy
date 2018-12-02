@@ -1,6 +1,7 @@
 use crate::types::{
   AttributeOrEventHandler,
   EventHandlingInfo,
+  SplitByType,
   TokenStreamEventHandlingInfoPair,
   TokenTreeSlice,
 };
@@ -42,7 +43,10 @@ named!(
         apply!(util::match_punct, Some('>'), None, vec![])
       )
     ),
-    |(name, attributes)| make_html_tokens(name, attributes, vec![])
+    |(name, attributes_and_event_handlers)| {
+      let (attributes, event_handlers) = attributes_and_event_handlers.split_by_type();
+      make_html_tokens(name, attributes, vec![])
+    }
   )
 );
 
@@ -78,8 +82,9 @@ named!(
       many_0_custom!(match_node),
       match_closing_tag
     ),
-    |((name, attributes), children, closing_tag_name)| {
+    |((name, attributes_and_event_handlers), children, closing_tag_name)| {
       assert_eq!(name, closing_tag_name);
+      let (attributes, event_handlers) = attributes_and_event_handlers.split_by_type();
       make_html_tokens(name, attributes, children.into_iter().map(|x| x.0).collect())
     }
   )
