@@ -20,8 +20,11 @@ use quote::quote;
 use super::make_smithy_tokens::{
   make_html_tokens,
   make_text_node,
+  EventHandlingInfo,
 };
 use super::util;
+
+type TokenStreamEventHandlingInfoPair = (TokenStream, Vec<EventHandlingInfo>);
 
 named!(
   match_self_closing_token <TokenTreeSlice, TokenStream>,
@@ -75,16 +78,19 @@ named!(
     ),
     |((name, attributes), children, closing_tag_name)| {
       assert_eq!(name, closing_tag_name);
-      make_html_tokens(name, attributes, children)
+      make_html_tokens(name, attributes, children.into_iter().map(|x| x.0).collect())
     }
   )
 );
 
 named!(
-  match_html_token <TokenTreeSlice, TokenStream>,
-  alt!(
-    match_self_closing_token
-      | match_regular_token
+  match_html_token <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
+  map!(
+    alt!(
+      match_self_closing_token
+        | match_regular_token
+    ),
+    |x| (x, vec![])
   )
 );
 
@@ -100,26 +106,30 @@ named!(
 );
 
 named!(
-  match_string_as_node <TokenTreeSlice, TokenStream>,
+  match_string_as_node <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
   map!(
     many_1_custom!(match_ident_2),
     |vec| {
       let joined = vec.iter().map(|ident| ident.to_string()).collect::<Vec<String>>().join("");
-      make_text_node(joined)
+      (make_text_node(joined), vec![])
     }
   )
 );
 
 named!(
-  match_group <TokenTreeSlice, TokenStream>,
+  match_group <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
   map!(
-    apply!(util::match_group, Some(Delimiter::Brace)),
-    util::enquote_into
+    map!(
+      apply!(util::match_group, Some(Delimiter::Brace)),
+      util::enquote_into
+    ),
+    // TODO what do we do here?
+    |x| (x, vec![])
   )
 );
 
 named!(
-  match_node <TokenTreeSlice, TokenStream>,
+  match_node <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
   alt!(
     match_html_token
       | match_string_as_node
@@ -131,12 +141,6 @@ named!(
   pub match_html_component <TokenTreeSlice, TokenStream>,
   map!(
     match_node,
-    |token| super::make_smithy_tokens::make_component(token, vec![
-      super::make_smithy_tokens::EventHandlingInfo {
-        path: Box::new([]),
-        event: "OnTest".into(),
-        callback: quote!{ |_| println!("foo") }
-      }
-    ])
+    |(token, event_handling_infos)| super::make_smithy_tokens::make_component(token, event_handling_infos)
   )
 );
