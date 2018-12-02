@@ -120,26 +120,23 @@ impl PhaseResult {
 /// can, if you want.
 pub struct SmithyComponent(pub Box<FnMut(Phase) -> PhaseResult>);
 
-// TODO figure out best practices for blanket impls and such
-
-pub trait EventHandler {
+pub trait Component {
   fn handle_event(&mut self, event: &crate::Event, path: &Path) -> EventHandled;
+  fn render(&mut self) -> Node;
 }
 
-impl SmithyComponent {
-  pub fn render(&mut self) -> Node {
-    self.0(Phase::Rendering).unwrap_node()
-  }
-}
-
-impl EventHandler for SmithyComponent {
+impl Component for SmithyComponent {
   fn handle_event(&mut self, event: &crate::Event, path: &Path) -> EventHandled {
     println!("handling event {:?}", path);
     self.0(Phase::EventHandling((event, path))).unwrap_event_handled()
   }
+
+  fn render(&mut self) -> Node {
+    self.0(Phase::Rendering).unwrap_node()
+  }
 }
 
-impl EventHandler for Vec<SmithyComponent> {
+impl Component for Vec<SmithyComponent> {
   fn handle_event(&mut self, event: &crate::Event, path: &Path) -> EventHandled {
     println!("handle event for vec {:?}", path);
     match path.split_first() {
@@ -149,5 +146,10 @@ impl EventHandler for Vec<SmithyComponent> {
       },
       None => false,
     }
+  }
+
+  fn render(&mut self) -> Node {
+    let nodes = self.iter_mut().map(SmithyComponent::render).collect();
+    Node::Vec(nodes)
   }
 }
