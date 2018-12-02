@@ -69,7 +69,7 @@ impl SplitByType<Vec<TokenStream>, Vec<EventHandlingInfo>>
       |(mut child_token_streams, mut child_event_handling_infos), item| {
         child_token_streams.push(item.0);
         for mut current_event_handling_info in item.1.into_iter() {
-          current_event_handling_info.path = Box::new([1, 2, 3]);
+          current_event_handling_info.path = Box::new([7]);
           child_event_handling_infos.push(current_event_handling_info);
         }
         (child_token_streams, child_event_handling_infos)
