@@ -121,7 +121,9 @@ impl PhaseResult {
 pub struct SmithyComponent(pub Box<FnMut(Phase) -> PhaseResult>);
 
 pub trait Component {
-  fn handle_event(&mut self, event: &crate::Event, path: &Path) -> EventHandled;
+  fn handle_event(&mut self, event: &crate::Event, path: &Path) -> EventHandled {
+    false
+  }
   fn render(&mut self) -> Node;
 }
 
