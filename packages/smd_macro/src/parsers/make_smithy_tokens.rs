@@ -55,6 +55,7 @@ pub fn make_html_tokens(
   }))
 }
 
+/// N.B. this also reverses the path
 fn path_to_tokens(path: Vec<usize>) -> TokenStream {
   let inner = path.into_iter().rev().fold(quote!{}, |accum, path_item| {
     quote!{ #accum #path_item, }

@@ -149,7 +149,7 @@ named!(
 );
 
 named!(
-  match_node <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
+  pub match_node <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
   alt!(
     match_html_token
       | match_string_as_node
@@ -157,11 +157,11 @@ named!(
   )
 );
 
-named!(
-  pub match_html_component <TokenTreeSlice, TokenStream>,
-  map!(
-    match_node,
-    |(token, event_handling_infos)|
-      super::make_smithy_tokens::make_component(token, event_handling_infos)
-  )
-);
+// named!(
+//   pub match_html_component <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
+//   map!(
+//     match_node,
+//     |(token, event_handling_infos)|
+//       super::make_smithy_tokens::make_component(token, event_handling_infos)
+//   )
+// );
