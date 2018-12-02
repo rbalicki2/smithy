@@ -13,6 +13,7 @@ use web_sys::{
 };
 
 // TODO custom_derive iter_variant_names
+// or https://github.com/Lolirofle/enum_traits
 
 /// An enum of all Events a dom node can handle
 pub enum Event {
