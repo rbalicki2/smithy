@@ -15,9 +15,9 @@ custom_derive! {
   }
 }
 
-impl From<&mut Vec<Component>> for Node {
-  fn from(v: &mut Vec<Component>) -> Node {
-    Node::Vec(v.iter_mut().map(Component::render).collect())
+impl From<&mut Vec<SmithyComponent>> for Node {
+  fn from(v: &mut Vec<SmithyComponent>) -> Node {
+    Node::Vec(v.iter_mut().map(SmithyComponent::render).collect())
   }
 }
 
@@ -118,7 +118,7 @@ impl PhaseResult {
 ///
 /// I would not recommend writing these yourself, although you absolutely
 /// can, if you want.
-pub struct Component(pub Box<FnMut(Phase) -> PhaseResult>);
+pub struct SmithyComponent(pub Box<FnMut(Phase) -> PhaseResult>);
 
 // TODO figure out best practices for blanket impls and such
 
@@ -126,20 +126,20 @@ pub trait EventHandler {
   fn handle_event(&mut self, event: &crate::Event, path: &Path) -> EventHandled;
 }
 
-impl Component {
+impl SmithyComponent {
   pub fn render(&mut self) -> Node {
     self.0(Phase::Rendering).unwrap_node()
   }
 }
 
-impl EventHandler for Component {
+impl EventHandler for SmithyComponent {
   fn handle_event(&mut self, event: &crate::Event, path: &Path) -> EventHandled {
     println!("handling event {:?}", path);
     self.0(Phase::EventHandling((event, path))).unwrap_event_handled()
   }
 }
 
-impl EventHandler for Vec<Component> {
+impl EventHandler for Vec<SmithyComponent> {
   fn handle_event(&mut self, event: &crate::Event, path: &Path) -> EventHandled {
     println!("handle event for vec {:?}", path);
     match path.split_first() {
