@@ -6,7 +6,7 @@ extern crate smd_macro;
 mod tests {
   #[test]
   fn it_works() {
-    let mut inner = smd!(<inner />);
+    let mut inner = smd!(<inner on_test={|_| println!("inner")} />);
     let attr = "attr";
     let mut a = smd!(<outer foo bar="baz" qux={attr} on_test={|b| println!("this is being handled {}", b) }>{ &mut inner } akka { "next" }</outer>);
     for x in &mut a {

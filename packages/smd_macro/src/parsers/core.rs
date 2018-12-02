@@ -82,11 +82,12 @@ named!(
       many_0_custom!(match_node),
       match_closing_tag
     ),
-    |((name, attributes_and_event_handlers), children, closing_tag_name)| {
+    |((name, attributes_and_event_handlers), children_and_events, closing_tag_name)| {
       // TODO add a descriptive error message
       assert_eq!(name, closing_tag_name);
       let (attributes, event_handlers) = attributes_and_event_handlers.split_by_type();
-      let token_stream = make_html_tokens(name, attributes, children.into_iter().map(|x| x.0).collect());
+      let (children, child_event_info) = children_and_events.split_by_type();
+      let token_stream = make_html_tokens(name, attributes, children);
       (token_stream, event_handlers.into_iter().map(EventHandlingInfo::from_string_token_stream_pair).collect())
     }
   )

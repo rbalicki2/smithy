@@ -30,11 +30,14 @@ pub enum AttributeOrEventHandler {
   EventHandler(StringTokenStreamPair),
 }
 
-pub trait SplitByType {
-  fn split_by_type(self) -> (Vec<StringTokenStreamPair>, Vec<StringTokenStreamPair>);
+// TODO convert into Into/From
+pub trait SplitByType<T1, T2> {
+  fn split_by_type(self) -> (T1, T2);
 }
 
-impl SplitByType for Vec<AttributeOrEventHandler> {
+impl SplitByType<Vec<StringTokenStreamPair>, Vec<StringTokenStreamPair>>
+  for Vec<AttributeOrEventHandler>
+{
   fn split_by_type(self) -> (Vec<StringTokenStreamPair>, Vec<StringTokenStreamPair>) {
     let len = self.len();
     let attributes = Vec::with_capacity(len);
@@ -49,6 +52,26 @@ impl SplitByType for Vec<AttributeOrEventHandler> {
           }
         };
         (attributes, event_handlers)
+      },
+    )
+  }
+}
+
+impl SplitByType<Vec<TokenStream>, Vec<EventHandlingInfo>>
+  for Vec<TokenStreamEventHandlingInfoPair>
+{
+  fn split_by_type(self) -> (Vec<TokenStream>, Vec<EventHandlingInfo>) {
+    let child_token_streams = Vec::with_capacity(self.len());
+    let child_event_handling_infos = vec![];
+    self.into_iter().fold(
+      (child_token_streams, child_event_handling_infos),
+      |(mut child_token_streams, mut child_event_handling_infos), item| {
+        child_token_streams.push(item.0);
+        for mut current_event_handling_info in item.1.into_iter() {
+          current_event_handling_info.path = Box::new([1, 2, 3]);
+          child_event_handling_infos.push(current_event_handling_info);
+        }
+        (child_token_streams, child_event_handling_infos)
       },
     )
   }
