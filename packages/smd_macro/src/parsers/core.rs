@@ -15,6 +15,7 @@ use proc_macro2::{
   Spacing,
   TokenStream,
 };
+use quote::quote;
 
 use super::make_smithy_tokens::{
   make_html_tokens,
@@ -130,6 +131,12 @@ named!(
   pub match_html_component <TokenTreeSlice, TokenStream>,
   map!(
     match_node,
-    |token| super::make_smithy_tokens::make_component(token, vec![])
+    |token| super::make_smithy_tokens::make_component(token, vec![
+      super::make_smithy_tokens::EventHandlingInfo {
+        path: Box::new([]),
+        event: "OnTest".into(),
+        callback: quote!{ |_| println!("foo") }
+      }
+    ])
   )
 );
