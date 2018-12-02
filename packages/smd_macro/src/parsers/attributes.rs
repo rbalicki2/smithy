@@ -1,5 +1,8 @@
 use super::util;
-use crate::types::TokenTreeSlice;
+use crate::types::{
+  AttributeOrEventHandler,
+  TokenTreeSlice,
+};
 use nom::{
   alt,
   apply,
@@ -15,24 +18,41 @@ use proc_macro2::{
   TokenStream,
 };
 
-// TODO handle event-handling attributes
+// macro_rules! match_event {
+//   ($key:ident, $val:ident, $attr_opt:ident, $event_opt:ident, $handler_name:ident, $handler_name_string:expr) => {
+//     if $key == $handler_name_string {
+//       return ($attr_opt, Some(quote!{
+//         #$event_opt
+//         event_handlers.$handler_name = Some(#$val);
+//       }));
+//     }
+//   };
+// }
+
 named!(
-  pub match_attribute <TokenTreeSlice, (String, TokenStream)>,
+  pub match_attribute <TokenTreeSlice, AttributeOrEventHandler>,
   alt!(
-    map!(
-      tuple!(
-        apply!(util::match_ident, None, false),
-        apply!(util::match_punct, Some('='), None, vec![]),
-        alt!(
+    alt!(
+      map!(
+        tuple!(
+          apply!(util::match_ident, None, false),
+          apply!(util::match_punct, Some('='), None, vec![]),
           map!(apply!(util::match_group, Some(Delimiter::Brace)), super::util::enquote)
-            | map!(
-              call!(util::match_literal),
-              super::util::enquote
-            )
+        ),
+        |val| AttributeOrEventHandler::Attribute((val.0, val.2))
+      )
+        | map!(
+          tuple!(
+            apply!(util::match_ident, None, false),
+            apply!(util::match_punct, Some('='), None, vec![]),
+            map!(call!(util::match_literal), super::util::enquote)
+          ),
+          |val| AttributeOrEventHandler::Attribute((val.0, val.2))
         )
-      ),
-      |val| (val.0, val.2)
+        | map!(
+          apply!(util::match_ident, None, false),
+          |attr_name| AttributeOrEventHandler::Attribute((attr_name, quote::quote!("")))
+        )
     )
-    | map!(apply!(util::match_ident, None, false), |s| (s, quote::quote!("")))
   )
 );

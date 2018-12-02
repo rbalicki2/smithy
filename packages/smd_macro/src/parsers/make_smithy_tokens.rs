@@ -1,3 +1,4 @@
+use crate::types::EventHandlingInfo;
 use proc_macro2::{
   Ident,
   Span,
@@ -5,14 +6,6 @@ use proc_macro2::{
 };
 use quote::quote;
 
-pub struct EventHandlingInfo {
-  pub path: Box<smithy_types::Path>,
-  // TODO
-  pub event: String,
-  pub callback: TokenStream,
-}
-
-// TODO handle children and event handling attributes
 pub fn make_html_tokens(
   name: String,
   attributes: Vec<(String, TokenStream)>,

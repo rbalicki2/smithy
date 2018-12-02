@@ -1,4 +1,9 @@
-use crate::types::TokenTreeSlice;
+use crate::types::{
+  AttributeOrEventHandler,
+  EventHandlingInfo,
+  TokenStreamEventHandlingInfoPair,
+  TokenTreeSlice,
+};
 use nom::{
   alt,
   apply,
@@ -20,11 +25,8 @@ use quote::quote;
 use super::make_smithy_tokens::{
   make_html_tokens,
   make_text_node,
-  EventHandlingInfo,
 };
 use super::util;
-
-type TokenStreamEventHandlingInfoPair = (TokenStream, Vec<EventHandlingInfo>);
 
 named!(
   match_self_closing_token <TokenTreeSlice, TokenStream>,
@@ -45,7 +47,7 @@ named!(
 );
 
 named!(
-  match_opening_tag <TokenTreeSlice, (String, Vec<(String, TokenStream)>)>,
+  match_opening_tag <TokenTreeSlice, (String, Vec<AttributeOrEventHandler>)>,
   delimited!(
     apply!(util::match_punct, Some('<'), Some(Spacing::Alone), vec![]),
     tuple!(
