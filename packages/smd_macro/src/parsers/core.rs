@@ -21,6 +21,7 @@ use proc_macro2::{
   Spacing,
   TokenStream,
 };
+use std::iter::Extend;
 
 use super::make_smithy_tokens::{
   make_html_tokens,
@@ -45,7 +46,10 @@ named!(
     |(name, attributes_and_event_handlers)| {
       let (attributes, event_handlers) = attributes_and_event_handlers.split_by_type();
       let component = make_html_tokens(name, attributes, vec![]);
-      (component, event_handlers.into_iter().map(EventHandlingInfo::from_string_token_stream_pair).collect())
+      (component, event_handlers
+        .into_iter()
+        .map(EventHandlingInfo::from_string_token_stream_pair)
+        .collect())
     }
   )
 );
@@ -86,9 +90,14 @@ named!(
       // TODO add a descriptive error message
       assert_eq!(name, closing_tag_name);
       let (attributes, event_handlers) = attributes_and_event_handlers.split_by_type();
-      let (children, child_event_info) = children_and_events.split_by_type();
+      let (children, child_event_infos) = children_and_events.split_by_type();
       let token_stream = make_html_tokens(name, attributes, children);
-      (token_stream, event_handlers.into_iter().map(EventHandlingInfo::from_string_token_stream_pair).collect())
+      let mut event_infos: Vec<EventHandlingInfo> = event_handlers
+        .into_iter()
+        .map(EventHandlingInfo::from_string_token_stream_pair)
+        .collect();
+      event_infos.extend(child_event_infos.into_iter());
+      (token_stream, event_infos)
     }
   )
 );
