@@ -10,3 +10,5 @@
 * tests
 * derive eq etc on Nodes
 * rational naming
+* does having Node::Vec(Vec<Node>) make sense?
+* use many_0_custom in the outer smd! macro

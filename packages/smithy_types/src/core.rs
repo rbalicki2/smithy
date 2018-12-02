@@ -7,7 +7,7 @@ use enum_derive::{
 pub type Attributes = std::collections::HashMap<String, String>;
 
 custom_derive! {
-  #[derive(Debug, Clone, EnumFromInner)]
+  #[derive(Debug, Clone, EnumFromInner, Eq, PartialEq)]
   pub enum Node {
     Dom(HtmlToken),
     Text(String),
@@ -33,7 +33,7 @@ impl From<&String> for Node {
   }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct HtmlToken {
   pub node_type: String,
   pub children: Vec<Node>,
@@ -114,14 +114,14 @@ impl PhaseResult {
   }
 }
 
-/// results of smd! macro
+/// The results of calling the smd! macro is a vector of SmithyComponents.
 ///
 /// I would not recommend writing these yourself, although you absolutely
 /// can, if you want.
 pub struct SmithyComponent(pub Box<FnMut(Phase) -> PhaseResult>);
 
 pub trait Component {
-  fn handle_event(&mut self, event: &crate::Event, path: &Path) -> EventHandled {
+  fn handle_event(&mut self, _event: &crate::Event, _path: &Path) -> EventHandled {
     false
   }
   fn render(&mut self) -> Node;
@@ -129,7 +129,6 @@ pub trait Component {
 
 impl Component for SmithyComponent {
   fn handle_event(&mut self, event: &crate::Event, path: &Path) -> EventHandled {
-    println!("handling event {:?}", path);
     self.0(Phase::EventHandling((event, path))).unwrap_event_handled()
   }
 
@@ -140,7 +139,6 @@ impl Component for SmithyComponent {
 
 impl Component for Vec<SmithyComponent> {
   fn handle_event(&mut self, event: &crate::Event, path: &Path) -> EventHandled {
-    println!("handle event for vec {:?}", path);
     match path.split_first() {
       Some((first, rest)) => match self.get_mut(*first) {
         Some(component) => component.handle_event(event, rest),
