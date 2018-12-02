@@ -1,6 +1,5 @@
 use crate::types::{
   AttributeOrEventHandler,
-  EventHandlingInfo,
   SplitByType,
   TokenStreamEventHandlingInfoPair,
   TokenTreeSlice,
@@ -21,7 +20,6 @@ use proc_macro2::{
   Spacing,
   TokenStream,
 };
-use quote::quote;
 
 use super::make_smithy_tokens::{
   make_html_tokens,

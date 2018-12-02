@@ -12,6 +12,8 @@ use web_sys::{
   UiEvent,
 };
 
+// TODO custom_derive iter_variant_names
+
 /// An enum of all Events a dom node can handle
 pub enum Event {
   // TODO make sure this gets deleted or goes behind a #[cfg(test)]

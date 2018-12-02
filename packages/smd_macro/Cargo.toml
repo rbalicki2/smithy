@@ -11,6 +11,7 @@ smithy_types = { path = "../smithy_types" }
 quote = "0.6.10"
 proc-macro2 = { version = "0.4.24", features = ["nightly"] }
 nom = "4.1.1"
+lazy_static = "1.2.0"
 
 [lib]
 proc-macro = true

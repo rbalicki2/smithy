@@ -1,4 +1,7 @@
-use crate::types::EventHandlingInfo;
+use crate::types::{
+  EventHandlingInfo,
+  StringTokenStreamPair,
+};
 use proc_macro2::{
   Ident,
   Span,
@@ -8,7 +11,7 @@ use quote::quote;
 
 pub fn make_html_tokens(
   name: String,
-  attributes: Vec<(String, TokenStream)>,
+  attributes: Vec<StringTokenStreamPair>,
   children: Vec<TokenStream>,
 ) -> TokenStream {
   let attribute_initialization = if attributes.len() > 0 {
