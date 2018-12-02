@@ -3,7 +3,6 @@ use enum_derive::{
   enum_derive_util,
   EnumFromInner,
 };
-use std::iter::Extend;
 
 pub type Attributes = std::collections::HashMap<String, String>;
 
@@ -73,7 +72,7 @@ pub type Path = [usize];
 /// of the match statement, causing them not to conflict.
 pub enum Phase<'a> {
   Rendering,
-  EventHandling((crate::Event, &'a Path)),
+  EventHandling((&'a crate::Event, &'a Path)),
 }
 
 pub type EventHandled = bool;
@@ -124,7 +123,7 @@ pub struct Component(pub Box<FnMut(Phase) -> PhaseResult>);
 // TODO figure out best practices for blanket impls and such
 
 pub trait EventHandler {
-  fn handle_event(&mut self, event: crate::Event, path: &Path) -> EventHandled;
+  fn handle_event(&mut self, event: &crate::Event, path: &Path) -> EventHandled;
 }
 
 impl Component {
@@ -134,13 +133,15 @@ impl Component {
 }
 
 impl EventHandler for Component {
-  fn handle_event(&mut self, event: crate::Event, path: &Path) -> EventHandled {
+  fn handle_event(&mut self, event: &crate::Event, path: &Path) -> EventHandled {
+    println!("handling event {:?}", path);
     self.0(Phase::EventHandling((event, path))).unwrap_event_handled()
   }
 }
 
 impl EventHandler for Vec<Component> {
-  fn handle_event(&mut self, event: crate::Event, path: &Path) -> EventHandled {
+  fn handle_event(&mut self, event: &crate::Event, path: &Path) -> EventHandled {
+    println!("handle event for vec {:?}", path);
     match path.split_first() {
       Some((first, rest)) => match self.get_mut(*first) {
         Some(component) => component.handle_event(event, rest),

@@ -1,4 +1,4 @@
-#![feature(proc_macro_span, proc_macro_raw_ident)]
+#![feature(proc_macro_span, proc_macro_raw_ident, slice_patterns)]
 #![recursion_limit = "128"]
 
 extern crate proc_macro;
@@ -16,7 +16,7 @@ pub fn smd(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   // println!("\nin smd parsed - {:?}", parsed);
 
   let unwrapped = parsed.unwrap();
-  println!("\nsmd - {}", unwrapped.1);
+  println!("\nlet mut a = {};\n", unwrapped.1);
   let remaining = unwrapped.0;
 
   // TODO handle this at the nom level

@@ -55,16 +55,6 @@ pub fn make_html_tokens(
   }))
 }
 
-/// N.B. this also reverses the path
-fn path_to_tokens(path: Vec<usize>) -> TokenStream {
-  let inner = path.into_iter().rev().fold(quote!{}, |accum, path_item| {
-    quote!{ #accum #path_item, }
-  });
-  quote!{
-    [ #inner ]
-  }
-}
-
 pub fn make_component(
   token: TokenStream,
   event_handling_infos: Vec<EventHandlingInfo>,
@@ -74,7 +64,7 @@ pub fn make_component(
     event_handling_infos
       .into_iter()
       .fold(quote!{}, |accum, event_handling_info| {
-        let path = path_to_tokens(event_handling_info.reversed_path);
+        let path = event_handling_info.get_path_match();
         let callback = event_handling_info.callback;
         match event_handling_info.event {
           Some(event) => {
@@ -89,7 +79,9 @@ pub fn make_component(
           },
           None => quote!{
             #accum
-            (evt, #path) => smithy_types::PhaseResult::EventHandling(#callback.handle_event(evt, &#path)),
+            // N.B. path (aka get_path_match) matches the rest of the path as the variable rest
+            // which we pass onto the child
+            (evt, #path) => smithy_types::PhaseResult::EventHandling(#callback.handle_event(evt, rest)),
           },
         }
       });

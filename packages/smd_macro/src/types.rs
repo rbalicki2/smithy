@@ -2,6 +2,7 @@ pub use proc_macro2::{
   TokenStream,
   TokenTree,
 };
+use quote::quote;
 
 #[derive(Debug)]
 pub struct EventHandlingInfo {
@@ -9,6 +10,7 @@ pub struct EventHandlingInfo {
   /// None implies we're matching on all events
   pub event: Option<String>,
   pub callback: TokenStream,
+  pub is_group: bool,
 }
 
 impl EventHandlingInfo {
@@ -17,19 +19,28 @@ impl EventHandlingInfo {
       reversed_path: vec![],
       event: Some(event),
       callback,
+      is_group: false,
     }
   }
 
-  // TODO implement this once Path is a vec...
-  // pub fn prepend_to_path(&mut self, u: usize) {
-  //   self.path = {
-  //     let new_path = vec![u];
-  //     new_path.extend(self.path.iter());
-  //     // new_path.prepend(u);
-  //     // new_path.into()
-  //     Box::new(*&new_path[..])
-  //   };
-  // }
+  /// N.B. this also reverses the path
+  pub fn get_path_match(&self) -> TokenStream {
+    let inner = self
+      .reversed_path
+      .iter()
+      .rev()
+      .fold(quote!{}, |accum, path_item| {
+        quote!{ #accum #path_item, }
+      });
+    let additional_dot_dot = if self.is_group {
+      quote!{ rest.. }
+    } else {
+      quote!{}
+    };
+    quote!{
+      [ #inner #additional_dot_dot ]
+    }
+  }
 }
 
 pub type TokenTreeSlice<'a> = &'a [TokenTree];

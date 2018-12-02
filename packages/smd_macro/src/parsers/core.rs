@@ -19,6 +19,7 @@ use nom::{
 use proc_macro2::{
   Delimiter,
   Spacing,
+  TokenStream,
 };
 use quote::quote;
 use std::iter::Extend;
@@ -139,14 +140,16 @@ named!(
     apply!(util::match_group, Some(Delimiter::Brace)),
     |x| (quote!(#x.into()), vec![
       EventHandlingInfo {
-        reversed_path: vec![6,5,4],
+        reversed_path: vec![],
         event: None,
         callback: quote!(#x),
+        is_group: true,
       }
     ])
   )
 );
 
+// TODO remove match_html_component or make this not private
 named!(
   pub match_node <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
   alt!(
@@ -156,11 +159,11 @@ named!(
   )
 );
 
-// named!(
-//   pub match_html_component <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
-//   map!(
-//     match_node,
-//     |(token, event_handling_infos)|
-//       super::make_smithy_tokens::make_component(token, event_handling_infos)
-//   )
-// );
+named!(
+  pub match_html_component <TokenTreeSlice, TokenStream>,
+  map!(
+    match_node,
+    |(token, event_handling_infos)|
+      super::make_smithy_tokens::make_component(token, event_handling_infos)
+  )
+);
