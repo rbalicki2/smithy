@@ -8,7 +8,7 @@ lazy_static! {
     let mut event_names = HashMap::with_capacity(54);
 
     // TODO make sure this gets deleted or goes behind a #[cfg(test)]
-    event_names.insert("OnTest".into(), "OnTest".into());
+    event_names.insert("on_test".into(), "OnTest".into());
     // --Clipboard
     event_names.insert("on_copy".into(), "OnCopy".into());
     event_names.insert("on_cut".into(), "OnCut".into());

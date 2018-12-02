@@ -9,6 +9,16 @@ pub struct EventHandlingInfo {
   pub callback: TokenStream,
 }
 
+impl EventHandlingInfo {
+  pub fn from_string_token_stream_pair((event, callback): StringTokenStreamPair) -> Self {
+    EventHandlingInfo {
+      path: Box::new([]),
+      event,
+      callback,
+    }
+  }
+}
+
 pub type TokenTreeSlice<'a> = &'a [TokenTree];
 
 pub type TokenStreamEventHandlingInfoPair = (TokenStream, Vec<EventHandlingInfo>);

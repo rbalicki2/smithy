@@ -1,5 +1,6 @@
 use crate::types::{
   AttributeOrEventHandler,
+  EventHandlingInfo,
   SplitByType,
   TokenStreamEventHandlingInfoPair,
   TokenTreeSlice,
@@ -28,7 +29,7 @@ use super::make_smithy_tokens::{
 use super::util;
 
 named!(
-  match_self_closing_token <TokenTreeSlice, TokenStream>,
+  match_self_closing_token <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
   map!(
     delimited!(
       apply!(util::match_punct, Some('<'), Some(Spacing::Alone), vec![]),
@@ -43,7 +44,8 @@ named!(
     ),
     |(name, attributes_and_event_handlers)| {
       let (attributes, event_handlers) = attributes_and_event_handlers.split_by_type();
-      make_html_tokens(name, attributes, vec![])
+      let component = make_html_tokens(name, attributes, vec![]);
+      (component, event_handlers.into_iter().map(EventHandlingInfo::from_string_token_stream_pair).collect())
     }
   )
 );
@@ -73,7 +75,7 @@ named!(
 );
 
 named!(
-  match_regular_token <TokenTreeSlice, TokenStream>,
+  match_regular_token <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
   map!(
     tuple!(
       match_opening_tag,
@@ -81,21 +83,20 @@ named!(
       match_closing_tag
     ),
     |((name, attributes_and_event_handlers), children, closing_tag_name)| {
+      // TODO add a descriptive error message
       assert_eq!(name, closing_tag_name);
       let (attributes, event_handlers) = attributes_and_event_handlers.split_by_type();
-      make_html_tokens(name, attributes, children.into_iter().map(|x| x.0).collect())
+      let token_stream = make_html_tokens(name, attributes, children.into_iter().map(|x| x.0).collect());
+      (token_stream, event_handlers.into_iter().map(EventHandlingInfo::from_string_token_stream_pair).collect())
     }
   )
 );
 
 named!(
   match_html_token <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
-  map!(
-    alt!(
-      match_self_closing_token
-        | match_regular_token
-    ),
-    |x| (x, vec![])
+  alt!(
+    match_self_closing_token
+      | match_regular_token
   )
 );
 
