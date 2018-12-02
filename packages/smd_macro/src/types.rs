@@ -2,9 +2,10 @@ pub use proc_macro2::{
   TokenStream,
   TokenTree,
 };
+use std::iter::Extend;
 
 pub struct EventHandlingInfo {
-  pub path: Box<smithy_types::Path>,
+  pub reversed_path: Vec<usize>,
   /// None implies we're matching on all events
   pub event: Option<String>,
   pub callback: TokenStream,
@@ -13,11 +14,22 @@ pub struct EventHandlingInfo {
 impl EventHandlingInfo {
   pub fn from_string_token_stream_pair((event, callback): StringTokenStreamPair) -> Self {
     EventHandlingInfo {
-      path: Box::new([]),
+      reversed_path: vec![],
       event: Some(event),
       callback,
     }
   }
+
+  // TODO implement this once Path is a vec...
+  // pub fn prepend_to_path(&mut self, u: usize) {
+  //   self.path = {
+  //     let new_path = vec![u];
+  //     new_path.extend(self.path.iter());
+  //     // new_path.prepend(u);
+  //     // new_path.into()
+  //     Box::new(*&new_path[..])
+  //   };
+  // }
 }
 
 pub type TokenTreeSlice<'a> = &'a [TokenTree];
@@ -69,7 +81,7 @@ impl SplitByType<Vec<TokenStream>, Vec<EventHandlingInfo>>
       |(mut child_token_streams, mut child_event_handling_infos), item| {
         child_token_streams.push(item.0);
         for mut current_event_handling_info in item.1.into_iter() {
-          current_event_handling_info.path = Box::new([7]);
+          // TODO maybe append or prepend to current_event_handling_info.path
           child_event_handling_infos.push(current_event_handling_info);
         }
         (child_token_streams, child_event_handling_infos)

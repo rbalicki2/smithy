@@ -55,8 +55,8 @@ pub fn make_html_tokens(
   }))
 }
 
-fn path_to_tokens(path: Box<[usize]>) -> TokenStream {
-  let inner = path.into_iter().fold(quote!{}, |accum, path_item| {
+fn path_to_tokens(path: Vec<usize>) -> TokenStream {
+  let inner = path.into_iter().rev().fold(quote!{}, |accum, path_item| {
     quote!{ #accum #path_item, }
   });
   quote!{
@@ -73,7 +73,7 @@ pub fn make_component(
     event_handling_infos
       .into_iter()
       .fold(quote!{}, |accum, event_handling_info| {
-        let path = path_to_tokens(event_handling_info.path);
+        let path = path_to_tokens(event_handling_info.reversed_path);
         let callback = event_handling_info.callback;
         match event_handling_info.event {
           Some(event) => {

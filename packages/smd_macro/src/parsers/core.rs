@@ -47,10 +47,11 @@ named!(
     |(name, attributes_and_event_handlers)| {
       let (attributes, event_handlers) = attributes_and_event_handlers.split_by_type();
       let component = make_html_tokens(name, attributes, vec![]);
-      (component, event_handlers
+      let event_handlers = event_handlers
         .into_iter()
         .map(EventHandlingInfo::from_string_token_stream_pair)
-        .collect())
+        .collect();
+      (component, event_handlers)
     }
   )
 );
@@ -137,10 +138,9 @@ named!(
   match_group <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
   map!(
     apply!(util::match_group, Some(Delimiter::Brace)),
-    // TODO what do we do here?
     |x| (quote!(#x.into()), vec![
       EventHandlingInfo {
-        path: Box::new([4,5,6]),
+        reversed_path: vec![6,5,4],
         event: None,
         callback: quote!(#x),
       }
