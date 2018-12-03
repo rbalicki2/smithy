@@ -7,3 +7,4 @@ edition = "2018"
 [dependencies]
 smd_macro = { path = "../smd_macro" }
 smithy_types = { path = "../smithy_types" }
+smithy = { path = "../smithy" }

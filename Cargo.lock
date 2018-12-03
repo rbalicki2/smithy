@@ -229,6 +229,7 @@ name = "smd_tests"
 version = "0.1.0"
 dependencies = [
  "smd_macro 0.1.0",
+ "smithy 0.1.0",
  "smithy_types 0.1.0",
 ]
 

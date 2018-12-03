@@ -1,9 +1,8 @@
 #[cfg(test)]
 mod tests {
-  use smithy_types::{
-    Component,
-    HtmlToken,
-    Node,
+  use smithy::{
+    self,
+    types::*,
   };
   use std::collections::HashMap;
 
