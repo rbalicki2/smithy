@@ -1,0 +1,48 @@
+[package]
+name = "proc-macro2"
+version = "0.4.24" # remember to update html_root_url
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+license = "MIT/Apache-2.0"
+readme = "README.md"
+keywords = ["macros"]
+repository = "https://github.com/alexcrichton/proc-macro2"
+homepage = "https://github.com/alexcrichton/proc-macro2"
+documentation = "https://docs.rs/proc-macro2"
+build = "build.rs"
+description = """
+A stable implementation of the upcoming new `proc_macro` API. Comes with an
+option, off by default, to also reimplement itself in terms of the upstream
+unstable API.
+"""
+
+[package.metadata.docs.rs]
+rustc-args = ["--cfg", "procmacro2_semver_exempt"]
+rustdoc-args = ["--cfg", "procmacro2_semver_exempt"]
+
+[dependencies]
+unicode-xid = "0.1"
+
+[dev-dependencies]
+quote = "0.6"
+
+[features]
+# When enabled: act as a shim around the nightly compiler's proc_macro crate.
+# This requires a nightly compiler.
+#
+# When disabled: emulate the same API as the nightly compiler's proc_macro crate
+# but in a way that works on all stable compilers 1.15+.
+nightly = ["proc-macro"]
+
+proc-macro = []
+default = ["proc-macro"]
+
+[badges]
+travis-ci = { repository = "alexcrichton/proc-macro2" }
+
+[patch.crates-io]
+# Our doc tests depend on quote which depends on proc-macro2. Without this line,
+# the proc-macro2 dependency of quote would be the released version of
+# proc-macro2. Quote would implement its traits for types from that proc-macro2,
+# meaning impls would be missing when tested against types from the local
+# proc-macro2.
+proc-macro2 = { path = "." }
