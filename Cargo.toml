@@ -5,3 +5,6 @@ members = [
   "packages/smithy_types",
   "packages/smd_tests"
 ]
+
+[replace]
+"proc-macro2:0.4.24" = { path = "./packages/proc-macro2" }
