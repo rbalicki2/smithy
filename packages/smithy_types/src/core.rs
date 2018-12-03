@@ -15,6 +15,26 @@ custom_derive! {
   }
 }
 
+pub trait AsInnerHtml {
+  fn as_inner_html(&self) -> String;
+}
+
+impl AsInnerHtml for Node {
+  fn as_inner_html(&self) -> String {
+    match self {
+      Node::Dom(token) => token.as_inner_html(),
+      Node::Text(s) => s.to_string(),
+      Node::Vec(vec) => vec
+        .iter()
+        .map(Node::as_inner_html)
+        .collect::<Vec<String>>()
+        .join(""),
+    }
+  }
+}
+
+// These power <div>{ t: T }</div> where T: Vec<SmithyComponent> etc
+
 impl From<&mut Vec<SmithyComponent>> for Node {
   fn from(v: &mut Vec<SmithyComponent>) -> Node {
     Node::Vec(v.iter_mut().map(SmithyComponent::render).collect())
@@ -38,6 +58,46 @@ pub struct HtmlToken {
   pub node_type: String,
   pub children: Vec<Node>,
   pub attributes: Attributes,
+}
+
+impl AsInnerHtml for HtmlToken {
+  fn as_inner_html(&self) -> String {
+    let attributes_string = if self.attributes.len() > 0 {
+      format!(" {}", self.attributes.as_inner_html())
+    } else {
+      "".to_string()
+    };
+    if self.children.len() > 0 {
+      let child_html = self
+        .children
+        .iter()
+        .map(Node::as_inner_html)
+        .collect::<Vec<String>>()
+        .join("");
+      format!(
+        "<{}{}>{}</{}>",
+        self.node_type, attributes_string, child_html, self.node_type
+      )
+    } else {
+      format!("<{}{} />", self.node_type, attributes_string)
+    }
+  }
+}
+
+impl AsInnerHtml for Attributes {
+  fn as_inner_html(&self) -> String {
+    self
+      .iter()
+      .map(|(key, val)| {
+        if val != "" {
+          format!("{}={}", key, val)
+        } else {
+          key.to_string()
+        }
+      })
+      .collect::<Vec<String>>()
+      .join(" ")
+  }
 }
 
 pub type Path = [usize];
