@@ -1,17 +1,59 @@
 use smithy_types::{
   AsInnerHtml,
   Component,
+  Event,
+  Node,
   SmithyComponent,
 };
-use wasm_bindgen::JsValue;
+use std::cell::RefCell;
 use web_sys::{
-  console,
   Element,
+  MouseEvent,
 };
+mod with_inner_value;
+use self::with_inner_value::*;
+use std::mem::transmute;
+use wasm_bindgen::closure::Closure;
 
-pub fn mount(mut app: Vec<SmithyComponent>, el: Element) {
-  let html: String = app.render().as_inner_html();
-  console::log_1(&JsValue::from_str(&html));
+mod js_fns;
 
-  el.set_inner_html(&html);
+thread_local! {
+  static ROOT_ELEMENT: RefCell<Option<Element>> = RefCell::new(None);
+  static LAST_RENDERED_NODE: RefCell<Option<Node>> = RefCell::new(None);
+  static ROOT_COMPONENT: RefCell<Option<Vec<SmithyComponent>>> = RefCell::new(None);
+}
+
+fn mount_to_element(mut component: Vec<SmithyComponent>, el: &Element) {
+  {
+    let node = component.render();
+    el.set_inner_html(&node.as_inner_html());
+    LAST_RENDERED_NODE.store(node);
+  }
+  ROOT_COMPONENT.store(component);
+}
+
+fn attach_listeners(el: &Element) {
+  let html_el = unsafe { transmute::<&Element, &js_fns::HTMLElement>(el) };
+  let cb = Closure::new(move |evt: MouseEvent| {
+    js_fns::log("mouse event");
+
+    let event_wrapped = Event::OnClick(evt);
+    ROOT_COMPONENT.with_inner_value(|root_component| {
+      root_component.handle_event(&event_wrapped, &[0]);
+      let node = root_component.render();
+
+      ROOT_ELEMENT.with_inner_value(|el| {
+        el.set_inner_html(&node.as_inner_html());
+      });
+      LAST_RENDERED_NODE.store(node);
+    });
+  });
+  html_el.add_mouse_event_listener("click", &cb, false);
+  cb.forget();
+}
+
+pub fn mount(mut component: Vec<SmithyComponent>, el: Element) {
+  mount_to_element(component, &el);
+  attach_listeners(&el);
+  ROOT_ELEMENT.store(el);
 }
