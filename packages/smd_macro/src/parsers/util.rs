@@ -158,13 +158,20 @@ pub fn get_filler_spaces(input: TokenTreeSlice) -> String {
   }
 }
 
-pub fn reduce_vec_to_tokens(v: &Vec<proc_macro2::TokenStream>) -> proc_macro2::TokenStream {
+fn reduce_vec_to_tokens(v: &Vec<proc_macro2::TokenStream>) -> proc_macro2::TokenStream {
   let vec_contents = v
     .iter()
     .fold(quote!(), |existing, token| quote!(#existing #token,));
   quote!(vec![
     #vec_contents
   ])
+}
+
+pub fn reduce_vec_to_node(v: &Vec<proc_macro2::TokenStream>) -> proc_macro2::TokenStream {
+  let inner = reduce_vec_to_tokens(v);
+  quote!{
+    smithy::types::Node::Vec(#inner)
+  }
 }
 
 pub fn enquote<T: ToTokens>(t: T) -> TokenStream {

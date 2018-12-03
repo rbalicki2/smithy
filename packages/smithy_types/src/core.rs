@@ -35,9 +35,9 @@ impl AsInnerHtml for Node {
 
 // These power <div>{ t: T }</div> where T: Vec<SmithyComponent> etc
 
-impl From<&mut Vec<SmithyComponent>> for Node {
-  fn from(v: &mut Vec<SmithyComponent>) -> Node {
-    Node::Vec(v.iter_mut().map(SmithyComponent::render).collect())
+impl From<&mut SmithyComponent> for Node {
+  fn from(v: &mut SmithyComponent) -> Node {
+    v.render()
   }
 }
 
@@ -194,22 +194,5 @@ impl Component for SmithyComponent {
 
   fn render(&mut self) -> Node {
     self.0(Phase::Rendering).unwrap_node()
-  }
-}
-
-impl Component for Vec<SmithyComponent> {
-  fn handle_event(&mut self, event: &crate::Event, path: &Path) -> EventHandled {
-    match path.split_first() {
-      Some((first, rest)) => match self.get_mut(*first) {
-        Some(component) => component.handle_event(event, rest),
-        None => false,
-      },
-      None => false,
-    }
-  }
-
-  fn render(&mut self) -> Node {
-    let nodes = self.iter_mut().map(SmithyComponent::render).collect();
-    Node::Vec(nodes)
   }
 }

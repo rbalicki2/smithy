@@ -164,8 +164,26 @@ named!(
 named!(
   pub match_html_component <TokenTreeSlice, TokenStream>,
   map!(
-    match_node,
-    |(token, event_handling_infos)|
+    many_1_custom!(match_node),
+    |vec| {
+      let (vec_of_node_tokens, event_handling_infos) = vec.into_iter().enumerate()
+        .fold(
+          (vec![], vec![]),
+          |(mut vec_of_node_tokens, mut event_handling_infos), (i, (mut token, mut current_event_handling_infos))| {
+            vec_of_node_tokens.push(token);
+
+            let mut vec = current_event_handling_infos.into_iter().map(|mut info| {
+              info.reversed_path.push(i);
+              info
+            }).collect::<Vec<EventHandlingInfo>>();
+            event_handling_infos.append(&mut vec);
+            (vec_of_node_tokens, event_handling_infos)
+          }
+        );
+      // println!("ehi {:?}", event_handling_infos);
+      // println!("token {}", token);
+      let token = util::reduce_vec_to_node(&vec_of_node_tokens);
       super::make_smithy_tokens::make_component(token, event_handling_infos)
+    }
   )
 );

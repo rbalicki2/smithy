@@ -4,15 +4,15 @@
 
 ## TODO
 
-* Change Vec<SmithyComponent> to a struct with a private field,
+x Change Vec<SmithyComponent> to a struct with a private field,
   since we never actually want to iterate over all of the values
-  * false. remove Vec<SmithyComponents> entirely, preferring a single
+  x false. remove Vec<SmithyComponents> entirely, preferring a single
     one
+  x does having Node::Vec(Vec<Node>) make sense?
 * impl Component for &str, Option, etc
-* tests
-* derive eq etc on Nodes
+  * consider implementing Component instead of Into<Node>...?
+x tests
+x derive eq etc on Nodes
 * rational naming
-* does having Node::Vec(Vec<Node>) make sense?
 * use many_0_custom in the outer smd! macro
 * derive variants for the events enum
-
