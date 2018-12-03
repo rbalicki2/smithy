@@ -1,5 +1,7 @@
-use super::event_names::EVENT_NAMES;
-use super::util;
+use super::{
+  event_names::EVENT_NAMES,
+  util,
+};
 use crate::types::{
   AttributeOrEventHandler,
   TokenTreeSlice,

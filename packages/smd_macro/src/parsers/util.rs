@@ -6,8 +6,10 @@ use proc_macro2::{
   Spacing,
   TokenStream,
 };
-use quote::quote;
-use quote::ToTokens;
+use quote::{
+  quote,
+  ToTokens,
+};
 use std::iter;
 
 pub type TtsIResult<'a, T> = nom::IResult<TokenTreeSlice<'a>, T>;

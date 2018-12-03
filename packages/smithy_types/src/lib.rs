@@ -7,5 +7,7 @@ mod component_impls;
 mod core;
 mod events;
 
-pub use self::core::*;
-pub use self::events::*;
+pub use self::{
+  core::*,
+  events::*,
+};

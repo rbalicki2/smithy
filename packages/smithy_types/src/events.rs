@@ -17,7 +17,7 @@ use web_sys::{
 
 /// An enum of all Events a dom node can handle
 pub enum Event {
-  // TODO make sure this gets deleted or goes behind a #[cfg(test)]
+  // TODO figure out why cfg(test) does not work here
   OnTest(bool),
   // --Clipboard
   OnCopy(ClipboardEvent),

@@ -24,11 +24,13 @@ use proc_macro2::{
 use quote::quote;
 use std::iter::Extend;
 
-use super::make_smithy_tokens::{
-  make_html_tokens,
-  make_text_node,
+use super::{
+  make_smithy_tokens::{
+    make_html_tokens,
+    make_text_node,
+  },
+  util,
 };
-use super::util;
 
 named!(
   match_self_closing_token <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
