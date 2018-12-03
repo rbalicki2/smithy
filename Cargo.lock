@@ -233,6 +233,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "smithy"
+version = "0.1.0"
+
+[[package]]
+name = "smithy_core"
+version = "0.1.0"
+dependencies = [
+ "smd_macro 0.1.0",
+ "smithy_types 0.1.0",
+]
+
+[[package]]
 name = "smithy_types"
 version = "0.1.0"
 dependencies = [

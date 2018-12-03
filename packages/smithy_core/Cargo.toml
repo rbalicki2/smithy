@@ -1,0 +1,14 @@
+[package]
+name = "smithy_core"
+version = "0.1.0"
+authors = ["Robert Balicki <robert.balicki@gmail.com>"]
+description = "A Rust framework for front-end web development"
+edition = "2018"
+keywords = ["web", "asmjs", "webasm", "javascript", "webassembly", "wasm"]
+categories = ["gui", "web-programming"]
+repository = "https://github.com/rbalicki2/smithy"
+homepage = "https://github.com/rbalicki2/smithy"
+
+[dependencies]
+smd_macro = { path = "../smd_macro" }
+smithy_types = { path = "../smithy_types" }

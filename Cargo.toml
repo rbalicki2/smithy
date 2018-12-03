@@ -3,7 +3,9 @@
 members = [
   "packages/smd_macro",
   "packages/smithy_types",
-  "packages/smd_tests"
+  "packages/smd_tests",
+  "packages/smithy_core",
+  "packages/smithy"
 ]
 
 [replace]

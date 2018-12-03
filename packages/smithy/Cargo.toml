@@ -1,0 +1,10 @@
+[package]
+name = "smithy"
+version = "0.1.0"
+authors = ["Robert Balicki <robert.balicki@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+smd_macro = { path = "../smd_macro" }
+smithy_core = { path = "../smithy_core" }
+smithy_types = { path = "../smithy_types" }

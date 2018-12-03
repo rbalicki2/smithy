@@ -86,6 +86,7 @@ pub fn make_component(
         }
       });
   quote!({
+    use smithy::types as smithy_types;
     // use smithy_types::EventHandler;
     let component: smithy_types::SmithyComponent = smithy_types::SmithyComponent(Box::new(move |phase| {
       match phase {
