@@ -20,10 +20,10 @@ mod js_fns;
 thread_local! {
   static ROOT_ELEMENT: RefCell<Option<Element>> = RefCell::new(None);
   static LAST_RENDERED_NODE: RefCell<Option<Node>> = RefCell::new(None);
-  static ROOT_COMPONENT: RefCell<Option<SmithyComponent>> = RefCell::new(None);
+  static ROOT_COMPONENT: RefCell<Option<Box<Component>>> = RefCell::new(None);
 }
 
-fn mount_to_element(mut component: SmithyComponent, el: &Element) {
+fn mount_to_element(mut component: Box<Component>, el: &Element) {
   {
     let node = component.render();
     el.set_inner_html(&node.as_inner_html());
@@ -52,7 +52,7 @@ fn attach_listeners(el: &Element) {
   cb.forget();
 }
 
-pub fn mount(mut component: SmithyComponent, el: Element) {
+pub fn mount(mut component: Box<Component>, el: Element) {
   mount_to_element(component, &el);
   attach_listeners(&el);
   ROOT_ELEMENT.store(el);

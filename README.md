@@ -105,7 +105,7 @@ let mut a = {
 
 * That whole "props" thing smells.
 
-## Think about how to handle props, the right way
+## This is how to handle props, the right way
 
 ```rs
 fn foo(any_props: u32, more_props: u32) -> SmithyComponent {
@@ -114,6 +114,11 @@ fn foo(any_props: u32, more_props: u32) -> SmithyComponent {
   )
 }
 ```
+* now lifetimes... :(
 
-* Simple, done, already implemented, no need for extra shit.
+* Simple, done, already implemented, no need for extra stuff
 
+## Smithy core should not know about SmithyComponent
+
+* Improve the naming
+* CoreComponent? Maybe smithy could be the name of the macro + types, and Core or something could be the name of the engine?
