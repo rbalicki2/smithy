@@ -3,7 +3,6 @@ use smithy_types::{
   Component,
   Event,
   Node,
-  SmithyComponent,
 };
 use std::cell::RefCell;
 use web_sys::{
@@ -52,7 +51,7 @@ fn attach_listeners(el: &Element) {
   cb.forget();
 }
 
-pub fn mount(mut component: Box<Component>, el: Element) {
+pub fn mount(component: Box<Component>, el: Element) {
   mount_to_element(component, &el);
   attach_listeners(&el);
   ROOT_ELEMENT.store(el);

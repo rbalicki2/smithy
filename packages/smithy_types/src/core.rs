@@ -35,8 +35,8 @@ impl AsInnerHtml for Node {
 
 // These power <div>{ t: T }</div> where T: Vec<SmithyComponent> etc
 
-impl From<&mut SmithyComponent> for Node {
-  fn from(v: &mut SmithyComponent) -> Node {
+impl<'a> From<&mut SmithyComponent<'a>> for Node {
+  fn from(v: &mut SmithyComponent<'a>) -> Node {
     v.render()
   }
 }
@@ -178,7 +178,7 @@ impl PhaseResult {
 ///
 /// I would not recommend writing these yourself, although you absolutely
 /// can, if you want.
-pub struct SmithyComponent(pub Box<FnMut(Phase) -> PhaseResult>);
+pub struct SmithyComponent<'a>(pub Box<FnMut(Phase) -> PhaseResult + 'a>);
 
 pub trait Component {
   fn handle_event(&mut self, _event: &crate::Event, _path: &Path) -> EventHandled {
@@ -187,7 +187,7 @@ pub trait Component {
   fn render(&mut self) -> Node;
 }
 
-impl Component for SmithyComponent {
+impl<'a> Component for SmithyComponent<'a> {
   fn handle_event(&mut self, event: &crate::Event, path: &Path) -> EventHandled {
     self.0(Phase::EventHandling((event, path))).unwrap_event_handled()
   }

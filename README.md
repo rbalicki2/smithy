@@ -18,6 +18,7 @@ x derive eq etc on Nodes
 * derive variants for the events enum
 * organize types/core
 * figure out why smd!(<div />) does not compile
+* EVENTS <- figure out how to take a DOM event and turn it (statically) into a regular event
 
 ## Think about how to re-render on hash change
 * An individual event should be handled only once and by one thing, so hashchange etc. *cannot* happen through the regular event handling mechanism.
