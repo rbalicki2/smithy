@@ -92,6 +92,7 @@ let mut a = {
             node_type: "div".into(),
             attributes: std::collections::HashMap::new(),
             children: vec![],
+            path: vec![],
           }),
         ]))
       },
@@ -128,3 +129,17 @@ fn foo(any_props: u32, more_props: u32) -> SmithyComponent {
 * CoreComponent? Maybe smithy could be the name of the macro + types, and Core or something could be the name of the engine?
 
 ## Events
+
+### Strategy
+
+* `group.render_with_path` needs to be called with the sub-path
+  * i.e. `{ let mut sub_path = outer_path.clone(); sub_path.append(&[0, 1]); group.render_with_path(sub_path) }`
+* The path needs to be included in `HtmlToken`s as a separate field, and turn into something like `data-smithy-path="1,2,3"`.
+  * This is not ideal and should be revisited. Perhaps React's internal handling of <Fragment> can provide some inspiration.
+  * Perhaps `data-smithy-id="..."` would work, but I think we'd have trouble generating the IDs in a repeatable fashion without keeping track of the path anyway
+* So, we need to keep track of the path as we go (perhaps using `EventHandlingInfo.reversed_path`)
+* Also, inlined `HtmlToken`s in the render phase need to have the path included.
+
+### Or maybe not
+
+* Maybe we need a `(Vec<usize>, HtmlToken)` tuple
