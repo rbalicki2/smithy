@@ -123,3 +123,5 @@ fn foo(any_props: u32, more_props: u32) -> SmithyComponent {
 
 * Improve the naming
 * CoreComponent? Maybe smithy could be the name of the macro + types, and Core or something could be the name of the engine?
+
+## Events

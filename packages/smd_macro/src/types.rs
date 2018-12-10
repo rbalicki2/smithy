@@ -87,12 +87,11 @@ impl SplitByType<Vec<TokenStream>, Vec<EventHandlingInfo>>
   fn split_by_type(self) -> (Vec<TokenStream>, Vec<EventHandlingInfo>) {
     let child_token_streams = Vec::with_capacity(self.len());
     let child_event_handling_infos = vec![];
-    self.into_iter().fold(
+    self.into_iter().enumerate().fold(
       (child_token_streams, child_event_handling_infos),
-      |(mut child_token_streams, mut child_event_handling_infos), item| {
+      |(mut child_token_streams, mut child_event_handling_infos), (i, item)| {
         child_token_streams.push(item.0);
-        for (i, mut current_event_handling_info) in item.1.into_iter().enumerate() {
-          // TODO maybe append or prepend to current_event_handling_info.path
+        for mut current_event_handling_info in item.1.into_iter() {
           current_event_handling_info.reversed_path.push(i);
           child_event_handling_infos.push(current_event_handling_info);
         }

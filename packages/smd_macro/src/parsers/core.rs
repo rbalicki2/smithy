@@ -151,9 +151,8 @@ named!(
   )
 );
 
-// TODO remove match_html_component or make this not private
 named!(
-  pub match_node <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
+  match_node <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
   alt!(
     match_html_token
       | match_string_as_node
@@ -169,7 +168,7 @@ named!(
       let (vec_of_node_tokens, event_handling_infos) = vec.into_iter().enumerate()
         .fold(
           (vec![], vec![]),
-          |(mut vec_of_node_tokens, mut event_handling_infos), (i, (mut token, mut current_event_handling_infos))| {
+          |(mut vec_of_node_tokens, mut event_handling_infos), (i, (token, current_event_handling_infos))| {
             vec_of_node_tokens.push(token);
 
             let mut vec = current_event_handling_infos.into_iter().map(|mut info| {
