@@ -111,7 +111,7 @@ pub type Path = [usize];
 /// Thus, the mutable and immutable references end up in different branches
 /// of the match statement, causing them not to conflict.
 pub enum Phase<'a> {
-  Rendering,
+  Rendering(&'a Path),
   EventHandling((&'a crate::Event, &'a Path)),
 }
 
@@ -165,6 +165,13 @@ pub trait Component {
     false
   }
   fn render(&mut self) -> Node;
+
+  // This method may not belong here. It may belong on a separate ComponentWithPath
+  // trait, or something, because paths are something smithy_core does not need to
+  // know about, and this is a core type.
+  fn render_with_path(&mut self, path: &Path) -> Node {
+    self.render()
+  }
 }
 
 impl<'a> Component for SmithyComponent<'a> {
@@ -173,6 +180,10 @@ impl<'a> Component for SmithyComponent<'a> {
   }
 
   fn render(&mut self) -> Node {
-    self.0(Phase::Rendering).unwrap_node()
+    self.0(Phase::Rendering(&[])).unwrap_node()
+  }
+
+  fn render_with_path(&mut self, path: &Path) -> Node {
+    self.0(Phase::Rendering(path)).unwrap_node()
   }
 }

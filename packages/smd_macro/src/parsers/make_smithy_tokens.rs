@@ -85,12 +85,13 @@ pub fn make_component(
           },
         }
       });
+
+  // N.B. outer_path here is used in match_group. Be careful about renaming it.
   quote!({
     use smithy::types as smithy_types;
-    // use smithy_types::EventHandler;
     let component: smithy_types::SmithyComponent = smithy_types::SmithyComponent(Box::new(move |phase| {
       match phase {
-        smithy_types::Phase::Rendering => smithy_types::PhaseResult::Rendering(#token),
+        smithy_types::Phase::Rendering(outer_path) => smithy_types::PhaseResult::Rendering(#token),
         smithy_types::Phase::EventHandling(event_handling) => {
           match event_handling {
             #inner_event_handling
