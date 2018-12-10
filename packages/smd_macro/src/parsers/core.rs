@@ -140,7 +140,7 @@ named!(
   match_group <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
   map!(
     apply!(util::match_group, Some(Delimiter::Brace)),
-    |x| (quote!(#x.into()), vec![
+    |x| (quote!(#x.render()), vec![
       EventHandlingInfo {
         reversed_path: vec![],
         event: None,
@@ -179,8 +179,6 @@ named!(
             (vec_of_node_tokens, event_handling_infos)
           }
         );
-      // println!("ehi {:?}", event_handling_infos);
-      // println!("token {}", token);
       let token = util::reduce_vec_to_node(&vec_of_node_tokens);
       super::make_smithy_tokens::make_component(token, event_handling_infos)
     }

@@ -33,26 +33,6 @@ impl AsInnerHtml for Node {
   }
 }
 
-// These power <div>{ t: T }</div> where T: Vec<SmithyComponent> etc
-
-impl<'a> From<&mut SmithyComponent<'a>> for Node {
-  fn from(v: &mut SmithyComponent<'a>) -> Node {
-    v.render()
-  }
-}
-
-impl From<&str> for Node {
-  fn from(s: &str) -> Self {
-    Node::Text(s.to_string())
-  }
-}
-
-impl From<&String> for Node {
-  fn from(s: &String) -> Self {
-    Node::Text(s.to_string())
-  }
-}
-
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct HtmlToken {
   pub node_type: String,
