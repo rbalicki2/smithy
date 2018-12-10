@@ -17,17 +17,5 @@ mod util;
 
 named!(
   pub match_smd <TokenTreeSlice, TokenStream>,
-  map!(
-    // TODO
-    // * figure out why many_0_custom does not consume the remaining vector
-    // * consider using many_0_custom here
-    // many_1_custom!(self::core::match_html_component),
-    self::core::match_html_component,
-    |as_token| {
-      // let as_token = util::reduce_vec_to_tokens(&vec);
-      // let quoted = quote!(#as_token);
-      // quoted
-      as_token
-    }
-  )
+  call!(self::core::match_html_component)
 );
