@@ -33,16 +33,15 @@ let inner = smd!(<div on_click={...} />);
 // will inner need to be inlined here? ... probably not
 let outer = on_hash_change!(inner, |_| app_state.hash = get_hash())
 
-let inner = |p| { match p { Phase::Rendering => ..., Phase::EventHandling => ... }}
+let inner = |p| { match p { Phase::Rendering => ..., Phase::UiEventHandling => ... }}
 let outer = HashChangeEventHandler(|p| {
   match p {
-    Phase::WindowEventHandling(evt) => {
+    Phase::WindowUiEventHandling(evt) => {
       match evt {
         WindowEvent::HashChange(e) => {
           (|_| app_state.hash = get_hash())(e);
           inner.handle_event(evt);
-          PhaseResult::WindowEventHandling
-        }
+          PhaseResult::WindowUiEventHandling$1        }
       }
     },
     x => inner(x)

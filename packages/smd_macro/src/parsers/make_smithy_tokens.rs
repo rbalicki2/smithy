@@ -73,7 +73,7 @@ pub fn make_component(
               #accum
               (smithy_types::UiEvent::#event(val), #path) => {
                 (#callback)(val);
-                smithy_types::PhaseResult::EventHandling(true)
+                smithy_types::PhaseResult::UiEventHandling(true)
               },
             }
           },
@@ -81,7 +81,7 @@ pub fn make_component(
             #accum
             // N.B. path (aka get_path_match) matches the rest of the path as the variable rest
             // which we pass onto the child
-            (evt, #path) => smithy_types::PhaseResult::EventHandling(#callback.handle_event(evt, rest)),
+            (evt, #path) => smithy_types::PhaseResult::UiEventHandling(#callback.handle_event(evt, rest)),
           },
         }
       });
@@ -91,10 +91,10 @@ pub fn make_component(
     let component: smithy_types::SmithyComponent = smithy_types::SmithyComponent(Box::new(move |phase| {
       match phase {
         smithy_types::Phase::Rendering => smithy_types::PhaseResult::Rendering(#token),
-        smithy_types::Phase::EventHandling(event_handling) => {
+        smithy_types::Phase::UiEventHandling(event_handling) => {
           match event_handling {
             #inner_event_handling
-            _ => smithy_types::PhaseResult::EventHandling(false)
+            _ => smithy_types::PhaseResult::UiEventHandling(false)
           }
         }
       }

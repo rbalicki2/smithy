@@ -98,7 +98,7 @@ impl AsInnerHtml for HtmlToken {
 
 pub type Path = [usize];
 
-/// A Component is invoked in one of two phases: Rendering and EventHandling.
+/// A Component is invoked in one of two phases: Rendering and UiEventHandling.
 ///
 /// Internally, this is represented as a match statement, allowing us to handle
 /// situations like:
@@ -115,12 +115,12 @@ pub type Path = [usize];
 ///     children: vec![app_state.count.into()], // immutable reference
 ///     attributes: HashMap::new(),
 ///   }),
-///   Phase::EventHandling((event, path)) => {
+///   Phase::UiEventHandling((event, path)) => {
 ///     match (&event, &path) => {
 ///       (|_| app_state.count = app_state.count + 1)(); // mutable reference
-///       PhaseResult::EventHandling(true)
+///       PhaseResult::UiEventHandling(true)
 ///     },
-///     _ => PhaseResult::EventHandling(false),
+///     _ => PhaseResult::UiEventHandling(false),
 ///   }
 /// }
 ///
@@ -128,7 +128,7 @@ pub type Path = [usize];
 /// of the match statement, causing them not to conflict.
 pub enum Phase<'a> {
   Rendering,
-  EventHandling((&'a crate::UiEvent, &'a Path)),
+  UiEventHandling((&'a crate::UiEvent, &'a Path)),
 }
 
 pub type EventHandled = bool;
@@ -137,8 +137,8 @@ pub type EventHandled = bool;
 ///
 /// This is the worst part of smithy at the moment, because a Component
 /// passed Phase::Rendering *must* return a PhaseResult::Rendering, and likewise
-/// a Component passed a Phase::EventHandling *must* return a
-/// PhaseResult::EventHandling.
+/// a Component passed a Phase::UiEventHandling *must* return a
+/// PhaseResult::UiEventHandling.
 ///
 /// This *should* be done through the type system, but currently, that is not
 /// possible.
@@ -149,7 +149,7 @@ pub type EventHandled = bool;
 pub enum PhaseResult {
   // TODO make this an Option<Node>
   Rendering(Node),
-  EventHandling(EventHandled),
+  UiEventHandling(EventHandled),
 }
 
 impl PhaseResult {
@@ -162,9 +162,9 @@ impl PhaseResult {
 
   pub fn unwrap_event_handled(self) -> EventHandled {
     match self {
-      PhaseResult::EventHandling(event_handled) => event_handled,
+      PhaseResult::UiEventHandling(event_handled) => event_handled,
       _ => {
-        panic!("unwrap_event_handled called on PhaseResult that was not of variant EventHandling")
+        panic!("unwrap_event_handled called on PhaseResult that was not of variant UiEventHandling")
       },
     }
   }
@@ -185,7 +185,7 @@ pub trait Component {
 
 impl<'a> Component for SmithyComponent<'a> {
   fn handle_event(&mut self, event: &crate::UiEvent, path: &Path) -> EventHandled {
-    self.0(Phase::EventHandling((event, path))).unwrap_event_handled()
+    self.0(Phase::UiEventHandling((event, path))).unwrap_event_handled()
   }
 
   fn render(&mut self) -> Node {
