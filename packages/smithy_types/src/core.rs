@@ -129,6 +129,7 @@ pub type Path = [usize];
 pub enum Phase<'a> {
   Rendering,
   UiEventHandling((&'a crate::UiEvent, &'a Path)),
+  WindowEventHandling,
 }
 
 pub type EventHandled = bool;
@@ -150,6 +151,7 @@ pub enum PhaseResult {
   // TODO make this an Option<Node>
   Rendering(Node),
   UiEventHandling(EventHandled),
+  WindowEventHandling(EventHandled),
 }
 
 impl PhaseResult {
@@ -163,8 +165,9 @@ impl PhaseResult {
   pub fn unwrap_event_handled(self) -> EventHandled {
     match self {
       PhaseResult::UiEventHandling(event_handled) => event_handled,
+      PhaseResult::WindowEventHandling(event_handled) => event_handled,
       _ => {
-        panic!("unwrap_event_handled called on PhaseResult that was not of variant UiEventHandling")
+        panic!("unwrap_event_handled called on PhaseResult that was not of variant UiEventHandling or WindowEventHandling")
       },
     }
   }
@@ -177,15 +180,22 @@ impl PhaseResult {
 pub struct SmithyComponent<'a>(pub Box<FnMut(Phase) -> PhaseResult + 'a>);
 
 pub trait Component {
-  fn handle_event(&mut self, _event: &crate::UiEvent, _path: &Path) -> EventHandled {
+  fn handle_ui_event(&mut self, _event: &crate::UiEvent, _path: &Path) -> EventHandled {
+    false
+  }
+  fn handle_window_event(&mut self, _event: &crate::WindowEvent) -> EventHandled {
     false
   }
   fn render(&mut self) -> Node;
 }
 
 impl<'a> Component for SmithyComponent<'a> {
-  fn handle_event(&mut self, event: &crate::UiEvent, path: &Path) -> EventHandled {
+  fn handle_ui_event(&mut self, event: &crate::UiEvent, path: &Path) -> EventHandled {
     self.0(Phase::UiEventHandling((event, path))).unwrap_event_handled()
+  }
+
+  fn handle_window_event(&mut self, _event: &crate::WindowEvent) -> EventHandled {
+    self.0(Phase::WindowEventHandling).unwrap_event_handled()
   }
 
   fn render(&mut self) -> Node {

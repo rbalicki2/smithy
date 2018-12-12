@@ -81,7 +81,7 @@ pub fn make_component(
             #accum
             // N.B. path (aka get_path_match) matches the rest of the path as the variable rest
             // which we pass onto the child
-            (evt, #path) => smithy_types::PhaseResult::UiEventHandling(#callback.handle_event(evt, rest)),
+            (evt, #path) => smithy_types::PhaseResult::UiEventHandling(#callback.handle_ui_event(evt, rest)),
           },
         }
       });
@@ -96,7 +96,8 @@ pub fn make_component(
             #inner_event_handling
             _ => smithy_types::PhaseResult::UiEventHandling(false)
           }
-        }
+        },
+        _ => smithy_types::PhaseResult::WindowEventHandling(false)
       }
     }));
     component

@@ -40,7 +40,7 @@ let outer = HashChangeEventHandler(|p| {
       match evt {
         WindowEvent::HashChange(e) => {
           (|_| app_state.hash = get_hash())(e);
-          inner.handle_event(evt);
+          inner.handle_ui_event(evt);
           PhaseResult::WindowUiEventHandling$1        }
       }
     },
