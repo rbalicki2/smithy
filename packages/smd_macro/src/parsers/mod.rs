@@ -12,6 +12,7 @@ mod core;
 mod event_names;
 mod make_smithy_tokens;
 mod util;
+mod window_event_handlers;
 
 named!(
   pub match_smd <TokenTreeSlice, TokenStream>,

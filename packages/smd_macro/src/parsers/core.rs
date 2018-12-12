@@ -30,6 +30,7 @@ use super::{
     make_text_node,
   },
   util,
+  window_event_handlers::match_window_event_handlers,
 };
 
 named!(
@@ -163,8 +164,11 @@ named!(
 named!(
   pub match_html_component <TokenTreeSlice, TokenStream>,
   map!(
-    many_1_custom!(match_node),
-    |vec| {
+    tuple!(
+      many_0_custom!(match_window_event_handlers),
+      many_1_custom!(match_node)
+    ),
+    |(_, vec)| {
       let (vec_of_node_tokens, event_handling_infos) = vec.into_iter().enumerate()
         .fold(
           (vec![], vec![]),
