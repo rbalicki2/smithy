@@ -1,7 +1,11 @@
 extern crate wasm_bindgen;
 use wasm_bindgen::prelude::*;
 
-use web_sys::MouseEvent;
+use web_sys::{
+  HashChangeEvent,
+  MouseEvent,
+  Window,
+};
 
 #[wasm_bindgen]
 extern "C" {
@@ -67,76 +71,84 @@ extern "C" {
     cb: &Closure<FnMut(MouseEvent)>,
     should_bubble: bool,
   );
-// // --Pointer
-// #[wasm_bindgen(method, js_name=addEventListener)]
-// pub fn add_pointer_event_listener(
-//   this: &HTMLElement,
-//   event_name: &str,
-//   cb: &Closure<FnMut(PointerEvent)>,
-//   should_bubble: bool
-// );
-// // --Selection
-// // uses add_ui_event_listener
-// // --Touch
-// #[wasm_bindgen(method, js_name=addEventListener)]
-// pub fn add_touch_event_listener(
-//   this: &HTMLElement,
-//   event_name: &str,
-//   cb: &Closure<FnMut(TouchEvent)>,
-//   should_bubble: bool
-// );
-// // --Scroll
-// #[wasm_bindgen(method, js_name=addEventListener)]
-// pub fn add_scroll_area_event_listener(
-//   this: &HTMLElement,
-//   event_name: &str,
-//   cb: &Closure<FnMut(ScrollAreaEvent)>,
-//   should_bubble: bool
-// );
-// // --Wheel
-// // onWheel
-// // --Media
-// // onAbort
-// // onCanPlay
-// // onCanPlayThrough
-// // onDurationChange
-// // onEmptied
-// // onEncrypted
-// // onEnded
-// // onError
-// // onLoadedData
-// // onLoadedMetadata
-// // onLoadStart
-// // onPause
-// // onPlay
-// // onPlaying
-// // onProgress
-// // onRateChange
-// // onSeeked
-// // onSeeking
-// // onStalled
-// // onSuspend
-// // onTimeUpdate
-// // onVolumeChange
-// // onWaiting
-// // --Image
-// // onLoad, onError both use add_ui_event_listener
-// // --Animation
-// #[wasm_bindgen(method, js_name=addEventListener)]
-// pub fn add_animation_event_listener(
-//   this: &HTMLElement,
-//   event_name: &str,
-//   cb: &Closure<FnMut(AnimationEvent)>,
-//   should_bubble: bool
-// );
-// // --Transition
-// #[wasm_bindgen(method, js_name=addEventListener)]
-// pub fn add_transition_event_listener(
-//   this: &HTMLElement,
-//   event_name: &str,
-//   cb: &Closure<FnMut(TransitionEvent)>,
-//   should_bubble: bool
-// );
-// // --Other
-// // onToggle uses add_ui_event_listener
+  // // --Pointer
+  // #[wasm_bindgen(method, js_name=addEventListener)]
+  // pub fn add_pointer_event_listener(
+  //   this: &HTMLElement,
+  //   event_name: &str,
+  //   cb: &Closure<FnMut(PointerEvent)>,
+  //   should_bubble: bool
+  // );
+  // // --Selection
+  // // uses add_ui_event_listener
+  // // --Touch
+  // #[wasm_bindgen(method, js_name=addEventListener)]
+  // pub fn add_touch_event_listener(
+  //   this: &HTMLElement,
+  //   event_name: &str,
+  //   cb: &Closure<FnMut(TouchEvent)>,
+  //   should_bubble: bool
+  // );
+  // // --Scroll
+  // #[wasm_bindgen(method, js_name=addEventListener)]
+  // pub fn add_scroll_area_event_listener(
+  //   this: &HTMLElement,
+  //   event_name: &str,
+  //   cb: &Closure<FnMut(ScrollAreaEvent)>,
+  //   should_bubble: bool
+  // );
+  // // --Wheel
+  // // onWheel
+  // // --Media
+  // // onAbort
+  // // onCanPlay
+  // // onCanPlayThrough
+  // // onDurationChange
+  // // onEmptied
+  // // onEncrypted
+  // // onEnded
+  // // onError
+  // // onLoadedData
+  // // onLoadedMetadata
+  // // onLoadStart
+  // // onPause
+  // // onPlay
+  // // onPlaying
+  // // onProgress
+  // // onRateChange
+  // // onSeeked
+  // // onSeeking
+  // // onStalled
+  // // onSuspend
+  // // onTimeUpdate
+  // // onVolumeChange
+  // // onWaiting
+  // // --Image
+  // // onLoad, onError both use add_ui_event_listener
+  // // --Animation
+  // #[wasm_bindgen(method, js_name=addEventListener)]
+  // pub fn add_animation_event_listener(
+  //   this: &HTMLElement,
+  //   event_name: &str,
+  //   cb: &Closure<FnMut(AnimationEvent)>,
+  //   should_bubble: bool
+  // );
+  // // --Transition
+  // #[wasm_bindgen(method, js_name=addEventListener)]
+  // pub fn add_transition_event_listener(
+  //   this: &HTMLElement,
+  //   event_name: &str,
+  //   cb: &Closure<FnMut(TransitionEvent)>,
+  //   should_bubble: bool
+  // );
+  // // --Other
+  // // onToggle uses add_ui_event_listener
+  pub type WINDOW;
+
+  #[wasm_bindgen(method, js_name=addEventListener)]
+  pub fn add_hash_change_event_listener(
+    this: &WINDOW,
+    event_name: &str,
+    cb: &Closure<FnMut(HashChangeEvent)>,
+  );
 }
