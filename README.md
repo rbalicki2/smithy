@@ -52,7 +52,20 @@ let outer = HashChangeEventHandler(|p| {
 * this will be hard
 * Think about what the best API is on the outside, whether it needs to be macro, etc.
 
+### Where we are now
+
+* if we wrap it, we will have multiple mutable references. SAD FACE.
+* thus, it needs to be part of the jsx syntax.
+
+```rs
+smd!(
+  on_hash_change={...};
+  <div />
+)
+```
+
 ## Smithy core should not know about SmithyComponent
 
 * Improve the naming
 * CoreComponent? Maybe smithy could be the name of the macro + types, and Core or something could be the name of the engine?
+
