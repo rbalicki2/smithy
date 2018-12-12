@@ -128,7 +128,7 @@ pub type Path = [usize];
 /// of the match statement, causing them not to conflict.
 pub enum Phase<'a> {
   Rendering(&'a Path),
-  EventHandling((&'a crate::Event, &'a Path)),
+  EventHandling((&'a crate::UiEvent, &'a Path)),
 }
 
 pub type EventHandled = bool;
@@ -177,7 +177,7 @@ impl PhaseResult {
 pub struct SmithyComponent<'a>(pub Box<FnMut(Phase) -> PhaseResult + 'a>);
 
 pub trait Component {
-  fn handle_event(&mut self, _event: &crate::Event, _path: &Path) -> EventHandled {
+  fn handle_event(&mut self, _event: &crate::UiEvent, _path: &Path) -> EventHandled {
     false
   }
   fn render(&mut self) -> Node;
@@ -191,7 +191,7 @@ pub trait Component {
 }
 
 impl<'a> Component for SmithyComponent<'a> {
-  fn handle_event(&mut self, event: &crate::Event, path: &Path) -> EventHandled {
+  fn handle_event(&mut self, event: &crate::UiEvent, path: &Path) -> EventHandled {
     self.0(Phase::EventHandling((event, path))).unwrap_event_handled()
   }
 

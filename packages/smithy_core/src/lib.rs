@@ -1,8 +1,8 @@
 use smithy_types::{
   AsInnerHtml,
   Component,
-  Event,
   Node,
+  UiEvent,
 };
 use std::cell::RefCell;
 use web_sys::{
@@ -62,7 +62,7 @@ fn attach_listeners(el: &Element) {
       .and_then(|el| el.get_attribute("data-smithy-path"))
       .and_then(|attr| derive_path(attr).ok())
     {
-      let event_wrapped = Event::OnClick(evt);
+      let event_wrapped = UiEvent::OnClick(evt);
       ROOT_COMPONENT.with_inner_value(|root_component| {
         root_component.handle_event(&event_wrapped, &path);
         let node = root_component.render();

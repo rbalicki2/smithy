@@ -9,14 +9,14 @@ use web_sys::{
   ScrollAreaEvent,
   TouchEvent,
   TransitionEvent,
-  UiEvent,
+  UiEvent as WebSysUiEvent,
 };
 
 // TODO custom_derive iter_variant_names
 // or https://github.com/Lolirofle/enum_traits
 
 /// An enum of all Events a dom node can handle
-pub enum Event {
+pub enum UiEvent {
   // TODO figure out why cfg(test) does not work here
   OnTest(bool),
   // --Clipboard
@@ -72,7 +72,7 @@ pub enum Event {
   OnPointerOver(PointerEvent),
   OnPointerOut(PointerEvent),
   // --Selection
-  OnSelect(UiEvent),
+  OnSelect(WebSysUiEvent),
   // --Touch
   OnTouchCancel(TouchEvent),
   OnTouchEnd(TouchEvent),
@@ -106,8 +106,8 @@ pub enum Event {
   // onVolumeChange
   // onWaiting
   // --Image
-  OnLoad(UiEvent),
-  OnError(UiEvent),
+  OnLoad(WebSysUiEvent),
+  OnError(WebSysUiEvent),
   // --Animation
   OnAnimationStart(AnimationEvent),
   OnAnimationEnd(AnimationEvent),
@@ -115,5 +115,5 @@ pub enum Event {
   // --Transition
   OnTransitionEnd(TransitionEvent),
   // --Other
-  OnToggle(UiEvent),
+  OnToggle(WebSysUiEvent),
 }

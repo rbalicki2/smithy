@@ -71,7 +71,7 @@ pub fn make_component(
             let event = Ident::new(&event, Span::call_site());
             quote!{
               #accum
-              (smithy_types::Event::#event(val), #path) => {
+              (smithy_types::UiEvent::#event(val), #path) => {
                 (#callback)(val);
                 smithy_types::PhaseResult::EventHandling(true)
               },

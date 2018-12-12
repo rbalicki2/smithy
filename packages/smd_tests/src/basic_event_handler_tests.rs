@@ -2,9 +2,9 @@
 mod tests {
   use smithy_types::{
     Component,
-    Event,
     HtmlToken,
     Node,
+    UiEvent,
   };
   use std::collections::HashMap;
 
@@ -29,7 +29,7 @@ mod tests {
     })]);
     assert_eq!(div.render(), render_result);
 
-    let event_handled = div.handle_event(&Event::OnTest(true), &[0]);
+    let event_handled = div.handle_event(&UiEvent::OnTest(true), &[0]);
     assert_eq!(event_handled, true);
 
     let render_result = Node::Vec(vec![Node::Dom(HtmlToken {
@@ -67,7 +67,7 @@ mod tests {
     />);
 
     // an event called with path: [] should not affect anything
-    let handled = div.handle_event(&Event::OnTest(true), &[]);
+    let handled = div.handle_event(&UiEvent::OnTest(true), &[]);
     assert_eq!(handled, false);
     {
       let app_state_2 = app_state_2.borrow();
@@ -76,7 +76,7 @@ mod tests {
     }
 
     // an event called with [0, 0] should not affect anything
-    let handled = div.handle_event(&Event::OnTest(true), &[0, 0]);
+    let handled = div.handle_event(&UiEvent::OnTest(true), &[0, 0]);
     assert_eq!(handled, false);
     {
       let app_state_2 = app_state_2.borrow();
@@ -85,7 +85,7 @@ mod tests {
     }
 
     // // an event called with [1] should not affect anything
-    let handled = div.handle_event(&Event::OnTest(true), &[1]);
+    let handled = div.handle_event(&UiEvent::OnTest(true), &[1]);
     assert_eq!(handled, false);
     {
       let app_state_2 = app_state_2.borrow();
@@ -94,7 +94,7 @@ mod tests {
     }
 
     // However, [0] will work!
-    let handled = div.handle_event(&Event::OnTest(true), &[0]);
+    let handled = div.handle_event(&UiEvent::OnTest(true), &[0]);
     assert_eq!(handled, true);
     {
       let app_state_2 = app_state_2.borrow();
@@ -127,7 +127,7 @@ mod tests {
     </div>);
 
     // an event called with path: [] should not affect anything
-    let handled = div.handle_event(&Event::OnTest(true), &[]);
+    let handled = div.handle_event(&UiEvent::OnTest(true), &[]);
     assert_eq!(handled, false);
     {
       let app_state_2 = app_state_2.borrow();
@@ -136,7 +136,7 @@ mod tests {
     }
 
     // an event called with [0] should not affect anything
-    let handled = div.handle_event(&Event::OnTest(true), &[0]);
+    let handled = div.handle_event(&UiEvent::OnTest(true), &[0]);
     assert_eq!(handled, false);
     {
       let app_state_2 = app_state_2.borrow();
@@ -145,7 +145,7 @@ mod tests {
     }
 
     // // an event called with [1] should not affect anything
-    let handled = div.handle_event(&Event::OnTest(true), &[1]);
+    let handled = div.handle_event(&UiEvent::OnTest(true), &[1]);
     assert_eq!(handled, false);
     {
       let app_state_2 = app_state_2.borrow();
@@ -154,7 +154,7 @@ mod tests {
     }
 
     // However, [0, 0] will work!
-    let handled = div.handle_event(&Event::OnTest(true), &[0, 0]);
+    let handled = div.handle_event(&UiEvent::OnTest(true), &[0, 0]);
     assert_eq!(handled, true);
     {
       let app_state_2 = app_state_2.borrow();
@@ -186,7 +186,7 @@ mod tests {
     let mut div = smd!(<div>{ &mut inner }</div>);
 
     // an event called with path: [] should not affect anything
-    let handled = div.handle_event(&Event::OnTest(true), &[]);
+    let handled = div.handle_event(&UiEvent::OnTest(true), &[]);
     assert_eq!(handled, false);
     {
       let app_state_2 = app_state_2.borrow();
@@ -195,7 +195,7 @@ mod tests {
     }
 
     // an event called with [0] should not affect anything
-    let handled = div.handle_event(&Event::OnTest(true), &[0]);
+    let handled = div.handle_event(&UiEvent::OnTest(true), &[0]);
     assert_eq!(handled, false);
     {
       let app_state_2 = app_state_2.borrow();
@@ -204,7 +204,7 @@ mod tests {
     }
 
     // // an event called with [0, 0] should not affect anything
-    let handled = div.handle_event(&Event::OnTest(true), &[0, 0]);
+    let handled = div.handle_event(&UiEvent::OnTest(true), &[0, 0]);
     assert_eq!(handled, false);
     {
       let app_state_2 = app_state_2.borrow();
@@ -223,7 +223,7 @@ mod tests {
     // because otherwise <div>{ first }{ second }</div> would need to know
     // the length of { first } at compile time, in order to properly dispatch
     // events to { second }. Of course, this info is not available.
-    let handled = div.handle_event(&Event::OnTest(true), &[0, 0, 0]);
+    let handled = div.handle_event(&UiEvent::OnTest(true), &[0, 0, 0]);
     assert_eq!(handled, true);
     {
       let app_state_2 = app_state_2.borrow();
@@ -236,12 +236,12 @@ mod tests {
   fn strings_do_not_handle_events() {
     let inner = "inner";
     let mut div = smd!(<div>{ inner }</div>);
-    assert_eq!(div.handle_event(&Event::OnTest(false), &[0, 0]), false);
+    assert_eq!(div.handle_event(&UiEvent::OnTest(false), &[0, 0]), false);
   }
 
   #[test]
   fn text_nodes_do_not_handle_events() {
     let mut div = smd!(<div>inner</div>);
-    assert_eq!(div.handle_event(&Event::OnTest(false), &[0, 0]), false);
+    assert_eq!(div.handle_event(&UiEvent::OnTest(false), &[0, 0]), false);
   }
 }
