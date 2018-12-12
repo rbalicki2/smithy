@@ -57,9 +57,16 @@ fn format_attributes(attr: &Attributes) -> String {
 }
 
 fn format_path(path: &Path) -> String {
-  path.iter().fold("".to_string(), |accum, path_segment| {
-    format!("{}{},", accum, path_segment)
-  })
+  // the take() function takes a usize, which cannot be negative, thus this might
+  // panic if not for this check.
+  if path.len() > 0 {
+    let path_str = path.iter().fold("".to_string(), |accum, path_segment| {
+      format!("{}{},", accum, path_segment)
+    });
+    path_str.chars().take(path_str.len() - 1).collect()
+  } else {
+    "".to_string()
+  }
 }
 
 impl AsInnerHtml for HtmlToken {

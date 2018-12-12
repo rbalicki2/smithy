@@ -7,12 +7,16 @@ use smithy_types::{
 use std::cell::RefCell;
 use web_sys::{
   Element,
+  HtmlElement,
   MouseEvent,
 };
 mod with_inner_value;
 use self::with_inner_value::*;
 use std::mem::transmute;
-use wasm_bindgen::closure::Closure;
+use wasm_bindgen::{
+  closure::Closure,
+  JsCast,
+};
 
 mod js_fns;
 
@@ -31,21 +35,32 @@ fn mount_to_element(mut component: Box<Component>, el: &Element) {
   ROOT_COMPONENT.store(component);
 }
 
+fn derive_path(s: String) -> Result<Vec<usize>, std::num::ParseIntError> {
+  s.split(",").map(|s| s.parse::<usize>()).collect()
+}
+
 fn attach_listeners(el: &Element) {
   let html_el = unsafe { transmute::<&Element, &js_fns::HTMLElement>(el) };
   let cb = Closure::new(move |evt: MouseEvent| {
     js_fns::log("mouse event");
 
-    let event_wrapped = Event::OnClick(evt);
-    ROOT_COMPONENT.with_inner_value(|root_component| {
-      root_component.handle_event(&event_wrapped, &[0]);
-      let node = root_component.render();
+    if let Some(path) = evt
+      .target()
+      .and_then(|target| target.dyn_into::<HtmlElement>().ok())
+      .and_then(|el| el.get_attribute("data-smithy-path"))
+      .and_then(|attr| derive_path(attr).ok())
+    {
+      let event_wrapped = Event::OnClick(evt);
+      ROOT_COMPONENT.with_inner_value(|root_component| {
+        root_component.handle_event(&event_wrapped, &path);
+        let node = root_component.render();
 
-      ROOT_ELEMENT.with_inner_value(|el| {
-        el.set_inner_html(&node.as_inner_html(&[]));
+        ROOT_ELEMENT.with_inner_value(|el| {
+          el.set_inner_html(&node.as_inner_html(&[]));
+        });
+        LAST_RENDERED_NODE.store(node);
       });
-      LAST_RENDERED_NODE.store(node);
-    });
+    }
   });
   html_el.add_mouse_event_listener("click", &cb, false);
   cb.forget();
