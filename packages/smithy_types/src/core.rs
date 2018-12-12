@@ -20,9 +20,8 @@ pub trait AsInnerHtml {
 }
 
 fn concat(path: &Path, new_item: usize) -> Vec<usize> {
-  let mut new_vec = path.to_vec();
-  new_vec.push(new_item);
-  new_vec
+  let new_path = path.clone();
+  [new_path, &[new_item]].concat()
 }
 
 impl AsInnerHtml for Node {
