@@ -140,7 +140,7 @@ named!(
   match_group <TokenTreeSlice, TokenStreamEventHandlingInfoPair>,
   map!(
     apply!(util::match_group, Some(Delimiter::Brace)),
-    |x| (quote!(#x.render_with_path(outer_path)), vec![
+    |x| (quote!(#x.render()), vec![
       EventHandlingInfo {
         reversed_path: vec![],
         event: None,
