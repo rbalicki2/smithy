@@ -16,17 +16,24 @@ custom_derive! {
 }
 
 pub trait AsInnerHtml {
-  fn as_inner_html(&self) -> String;
+  fn as_inner_html(&self, base_path: &Path) -> String;
+}
+
+fn concat(path: &Path, new_item: usize) -> Vec<usize> {
+  let mut new_vec = path.to_vec();
+  new_vec.push(new_item);
+  new_vec
 }
 
 impl AsInnerHtml for Node {
-  fn as_inner_html(&self) -> String {
+  fn as_inner_html(&self, base_path: &Path) -> String {
     match self {
-      Node::Dom(token) => token.as_inner_html(),
+      Node::Dom(token) => token.as_inner_html(base_path),
       Node::Text(s) => s.to_string(),
       Node::Vec(vec) => vec
         .iter()
-        .map(Node::as_inner_html)
+        .enumerate()
+        .map(|(i, node)| node.as_inner_html(&concat(base_path, i)))
         .collect::<Vec<String>>()
         .join(""),
     }
@@ -40,43 +47,46 @@ pub struct HtmlToken {
   pub attributes: Attributes,
 }
 
+fn format_attributes(attr: &Attributes) -> String {
+  attr.iter().fold("".to_string(), |accum, (key, val)| {
+    if (val != "") {
+      format!("{} {}={}", accum, key, val)
+    } else {
+      format!("{} {}", accum, key)
+    }
+  })
+}
+
+fn format_path(path: &Path) -> String {
+  path.iter().fold("".to_string(), |accum, path_segment| {
+    format!("{}{},", accum, path_segment)
+  })
+}
+
 impl AsInnerHtml for HtmlToken {
-  fn as_inner_html(&self) -> String {
+  fn as_inner_html(&self, base_path: &Path) -> String {
+    let path_string = format!(" data-smithy-path=\"{}\"", format_path(base_path));
     let attributes_string = if self.attributes.len() > 0 {
-      format!(" {}", self.attributes.as_inner_html())
+      format!(" {}", format_attributes(&self.attributes),)
     } else {
       "".to_string()
     };
+
     if self.children.len() > 0 {
       let child_html = self
         .children
         .iter()
-        .map(Node::as_inner_html)
+        .enumerate()
+        .map(|(i, node)| node.as_inner_html(&concat(base_path, i)))
         .collect::<Vec<String>>()
         .join("");
       format!(
-        "<{}{}>{}</{}>",
-        self.node_type, attributes_string, child_html, self.node_type
+        "<{}{}{}>{}</{}>",
+        self.node_type, attributes_string, path_string, child_html, self.node_type
       )
     } else {
-      format!("<{}{} />", self.node_type, attributes_string)
+      format!("<{}{}{} />", self.node_type, attributes_string, path_string)
     }
-  }
-}
-
-impl AsInnerHtml for Attributes {
-  fn as_inner_html(&self) -> String {
-    self
-      .iter()
-      .map(|(key, val)| {
-        if val != "" {
-          format!("{}={}", key, val)
-        } else {
-          key.to_string()
-        }
-      })
-      .collect::<Vec<String>>()
-      .join(" ")
   }
 }
 

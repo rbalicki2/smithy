@@ -25,7 +25,7 @@ thread_local! {
 fn mount_to_element(mut component: Box<Component>, el: &Element) {
   {
     let node = component.render();
-    el.set_inner_html(&node.as_inner_html());
+    el.set_inner_html(&node.as_inner_html(&[]));
     LAST_RENDERED_NODE.store(node);
   }
   ROOT_COMPONENT.store(component);
@@ -42,7 +42,7 @@ fn attach_listeners(el: &Element) {
       let node = root_component.render();
 
       ROOT_ELEMENT.with_inner_value(|el| {
-        el.set_inner_html(&node.as_inner_html());
+        el.set_inner_html(&node.as_inner_html(&[]));
       });
       LAST_RENDERED_NODE.store(node);
     });
