@@ -3,7 +3,7 @@ use std::collections::HashMap;
 // see attributes.rs for an explanation
 
 lazy_static! {
-  pub static ref EVENT_NAMES: HashMap<String, String> = {
+  pub static ref UI_EVENT_NAMES: HashMap<String, String> = {
     // Remember to update this as you add more!
     let mut event_names = HashMap::with_capacity(54);
 

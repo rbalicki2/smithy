@@ -1,5 +1,5 @@
 use super::{
-  event_names::EVENT_NAMES,
+  event_names::UI_EVENT_NAMES,
   util,
 };
 use crate::types::{
@@ -32,7 +32,7 @@ use proc_macro2::{
 
 fn assert_is_not_event_handler(string: &String) {
   assert!(
-    !EVENT_NAMES.contains_key(string),
+    !UI_EVENT_NAMES.contains_key(string),
     format!(
       "attribute {} is an event name, but was not followed by curly braces",
       string
@@ -42,7 +42,7 @@ fn assert_is_not_event_handler(string: &String) {
 
 impl AttributeOrEventHandler {
   fn create_from_string(string: String, t: TokenStream) -> AttributeOrEventHandler {
-    match EVENT_NAMES.get(&string) {
+    match UI_EVENT_NAMES.get(&string) {
       Some(event_name) => AttributeOrEventHandler::EventHandler((event_name.to_string(), t)),
       None => AttributeOrEventHandler::Attribute((string, t)),
     }
