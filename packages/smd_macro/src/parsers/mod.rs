@@ -1,11 +1,9 @@
 use crate::types::TokenTreeSlice;
 use nom::{
   call,
-  map,
   named,
 };
 use proc_macro2::TokenStream;
-use quote::quote;
 
 #[macro_use]
 mod many_custom;

@@ -48,7 +48,7 @@ pub struct HtmlToken {
 
 fn format_attributes(attr: &Attributes) -> String {
   attr.iter().fold("".to_string(), |accum, (key, val)| {
-    if (val != "") {
+    if val != "" {
       format!("{} {}={}", accum, key, val)
     } else {
       format!("{} {}", accum, key)

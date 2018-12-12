@@ -2,6 +2,7 @@ use web_sys::{
   AnimationEvent,
   ClipboardEvent,
   FocusEvent,
+  HashChangeEvent,
   InputEvent,
   KeyboardEvent,
   MouseEvent,
@@ -116,4 +117,8 @@ pub enum UiEvent {
   OnTransitionEnd(TransitionEvent),
   // --Other
   OnToggle(WebSysUiEvent),
+}
+
+pub enum WindowEvent {
+  OnHashChange(HashChangeEvent),
 }
