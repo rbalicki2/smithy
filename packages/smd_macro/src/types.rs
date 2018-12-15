@@ -11,6 +11,7 @@ pub struct UIEventHandlingInfo {
   /// Which is used only when is_group is true
   /// TODO: get rid of the is_group param
   pub event: Option<String>,
+  /// callback is actually the TokenStream group... it's a really bad name :(
   pub callback: TokenStream,
   pub is_group: bool,
 }

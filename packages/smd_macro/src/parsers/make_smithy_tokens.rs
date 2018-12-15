@@ -58,11 +58,22 @@ pub fn make_html_tokens(
 
 pub fn make_component(
   token: TokenStream,
-  event_handling_infos: Vec<UIEventHandlingInfo>,
+  ui_event_handling_infos: Vec<UIEventHandlingInfo>,
   window_event_handling_infos: Vec<WindowEventHandlingInfo>,
 ) -> TokenStream {
+  let group_window_event_handling = ui_event_handling_infos
+    .iter()
+    .filter(|info| info.is_group)
+    .map(|info| info.callback.clone())
+    .fold(quote!{}, |accum, group| {
+      quote!{
+        #accum
+        event_handled = event_handled || (#group).handle_window_event(window_event);
+      }
+    });
+
   let inner_ui_event_handling =
-    event_handling_infos
+    ui_event_handling_infos
       .into_iter()
       .fold(quote!{}, |accum, ui_event_handling_info| {
         let path = ui_event_handling_info.get_path_match();
@@ -114,9 +125,11 @@ pub fn make_component(
           }
         },
         smithy_types::Phase::WindowEventHandling(window_event) => {
+          let mut event_handled = false;
+          #group_window_event_handling
           match window_event {
             #inner_window_event_handling
-            _ => smithy_types::PhaseResult::WindowEventHandling(false),
+            _ => smithy_types::PhaseResult::WindowEventHandling(event_handled),
           }
         },
       }
