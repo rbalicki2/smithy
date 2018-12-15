@@ -129,7 +129,7 @@ pub type Path = [usize];
 pub enum Phase<'a> {
   Rendering,
   UiEventHandling((&'a crate::UiEvent, &'a Path)),
-  WindowEventHandling,
+  WindowEventHandling(&'a crate::WindowEvent),
 }
 
 pub type EventHandled = bool;
@@ -194,8 +194,8 @@ impl<'a> Component for SmithyComponent<'a> {
     self.0(Phase::UiEventHandling((event, path))).unwrap_event_handled()
   }
 
-  fn handle_window_event(&mut self, _event: &crate::WindowEvent) -> EventHandled {
-    self.0(Phase::WindowEventHandling).unwrap_event_handled()
+  fn handle_window_event(&mut self, event: &crate::WindowEvent) -> EventHandled {
+    self.0(Phase::WindowEventHandling(event)).unwrap_event_handled()
   }
 
   fn render(&mut self) -> Node {
