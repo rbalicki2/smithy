@@ -18,54 +18,19 @@ x derive eq etc on Nodes
 * derive variants for the events enum
 * organize types/core
 * figure out why smd!(<div />) does not compile
-* EVENTS <- figure out how to take a DOM event and turn it (statically) into a regular event
 * Consider splitting core types (like Component) from smd-related types (like SmithyComponent, Path ?, etc)
 * Add everything behind a feature flag for minimal file size
 * Parametrize smithy wrt types of events, etc.
+x on_hash_change and the like
 
-## Think about how to re-render on hash change
-* An individual event should be handled only once and by one thing, so hashchange etc. *cannot* happen through the regular event handling mechanism.
-* OTOH, the results of an smd! macro have a mutable reference to state, so you probably need to wrap your state in an Rc<RefCell<T>> to do this.
-* But maybe not...?
+## Blockers to alpha
+* macros for event types
+* `impl Component` for a bunch of things
+* compilation bugs, like `smd!()` `smd!(<div />` etc
+* setTimeout, etc.
+* better compilation error messages
 
-```rs
-let inner = smd!(<div on_click={...} />);
-// will inner need to be inlined here? ... probably not
-let outer = on_hash_change!(inner, |_| app_state.hash = get_hash())
-
-let inner = |p| { match p { Phase::Rendering => ..., Phase::UiEventHandling => ... }}
-let outer = HashChangeEventHandler(|p| {
-  match p {
-    Phase::WindowUiEventHandling(evt) => {
-      match evt {
-        WindowEvent::HashChange(e) => {
-          (|_| app_state.hash = get_hash())(e);
-          inner.handle_ui_event(evt);
-          PhaseResult::WindowUiEventHandling$1        }
-      }
-    },
-    x => inner(x)
-  },
-})
-```
-
-* this will be hard
-* Think about what the best API is on the outside, whether it needs to be macro, etc.
-
-### Where we are now
-
-* if we wrap it, we will have multiple mutable references. SAD FACE.
-* thus, it needs to be part of the jsx syntax.
-
-```rs
-smd!(
-  on_hash_change={...};
-  <div />
-)
-```
-
-## Smithy core should not know about SmithyComponent
-
-* Improve the naming
-* CoreComponent? Maybe smithy could be the name of the macro + types, and Core or something could be the name of the engine?
+## Non-blockers
+* more tests
+* organize types and separate true core from SmithyComponent implementation
 

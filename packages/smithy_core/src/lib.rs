@@ -55,8 +55,6 @@ fn attach_listeners(el: &Element) {
 
   // click
   let cb = Closure::new(move |evt: MouseEvent| {
-    js_fns::log("mouse event");
-
     if let Some(path) = evt
       .target()
       .and_then(|target| target.dyn_into::<HtmlElement>().ok())
