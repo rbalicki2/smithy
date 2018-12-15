@@ -7,7 +7,9 @@ use quote::quote;
 #[derive(Debug)]
 pub struct EventHandlingInfo {
   pub reversed_path: Vec<usize>,
-  /// None implies we're matching on all events
+  /// None implies we're matching on all events,
+  /// Which is used only when is_group is true
+  /// TODO: get rid of the is_group param
   pub event: Option<String>,
   pub callback: TokenStream,
   pub is_group: bool,
@@ -99,4 +101,9 @@ impl SplitByType<Vec<TokenStream>, Vec<EventHandlingInfo>>
       },
     )
   }
+}
+
+pub struct WindowEventHandlingInfo {
+  pub event: String,
+  pub callback: TokenStream,
 }

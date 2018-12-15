@@ -120,10 +120,10 @@ lazy_static! {
 }
 
 lazy_static! {
-  pub static ref UI_EVENT_NAMES: HashMap<String, String> = {
+  pub static ref WINDOW_EVENT_NAMES: HashMap<String, String> = {
     // Remember to update this as you add more!
     let mut event_names = HashMap::with_capacity(54);
     event_names.insert("on_hash_change".into(), "OnHashChange".into());
     event_names
-  }
+  };
 }
