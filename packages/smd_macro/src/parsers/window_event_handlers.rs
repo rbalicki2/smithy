@@ -23,7 +23,7 @@ named!(
   pub match_window_event_handlers <TokenTreeSlice, WindowEventHandlingInfo>,
   map!(
     tuple!(
-      apply!(util::match_string_from_vec, WINDOW_EVENT_NAMES.keys().into_iter().collect::<Vec<&String>>()),
+      apply!(util::match_string_from_hashmap, &WINDOW_EVENT_NAMES),
       apply!(util::match_punct, Some('='), Some(Spacing::Alone), vec![]),
       apply!(util::match_group, Some(Delimiter::Brace)),
       apply!(util::match_punct, Some(';'), Some(Spacing::Alone), vec![])

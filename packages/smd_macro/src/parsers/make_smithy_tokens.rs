@@ -61,14 +61,13 @@ pub fn make_component(
   event_handling_infos: Vec<UIEventHandlingInfo>,
   window_event_handling_infos: Vec<WindowEventHandlingInfo>,
 ) -> TokenStream {
-  // TODO possibly sort event_handling_infos
-  let inner_event_handling =
+  let inner_ui_event_handling =
     event_handling_infos
       .into_iter()
-      .fold(quote!{}, |accum, event_handling_info| {
-        let path = event_handling_info.get_path_match();
-        let callback = event_handling_info.callback;
-        match event_handling_info.event {
+      .fold(quote!{}, |accum, ui_event_handling_info| {
+        let path = ui_event_handling_info.get_path_match();
+        let callback = ui_event_handling_info.callback;
+        match ui_event_handling_info.event {
           Some(event) => {
             let event = Ident::new(&event, Span::call_site());
             quote!{
@@ -88,19 +87,38 @@ pub fn make_component(
         }
       });
 
+  let inner_window_event_handling =
+    window_event_handling_infos
+      .into_iter()
+      .fold(quote!{}, |accum, window_event_handling_info| {
+        let WindowEventHandlingInfo { event, callback } = window_event_handling_info;
+        let event = Ident::new(&event, Span::call_site());
+        quote!{
+          #accum
+          smithy_types::WindowEvent::#event(val) => {
+            (#callback)(val);
+            smithy_types::PhaseResult::WindowEventHandling(true)
+          }
+        }
+      });
+
   quote!({
     use smithy::types as smithy_types;
     let component: smithy_types::SmithyComponent = smithy_types::SmithyComponent(Box::new(move |phase| {
       match phase {
         smithy_types::Phase::Rendering => smithy_types::PhaseResult::Rendering(#token),
-        smithy_types::Phase::UiEventHandling(event_handling) => {
-          match event_handling {
-            #inner_event_handling
+        smithy_types::Phase::UiEventHandling(ui_event_handling) => {
+          match ui_event_handling {
+            #inner_ui_event_handling
             _ => smithy_types::PhaseResult::UiEventHandling(false)
           }
         },
-        // smithy_types::Phase::WindowEventHandling()
-        _ => smithy_types::PhaseResult::WindowEventHandling(false)
+        smithy_types::Phase::WindowEventHandling(window_event) => {
+          match window_event {
+            #inner_window_event_handling
+            _ => smithy_types::PhaseResult::WindowEventHandling(false),
+          }
+        },
       }
     }));
     component

@@ -15,9 +15,9 @@ use std::iter;
 pub type TtsIResult<'a, T> = nom::IResult<TokenTreeSlice<'a>, T>;
 pub type StringResult<'a> = TtsIResult<'a, String>;
 
-pub fn match_string_from_vec<'a>(
+pub fn match_string_from_hashmap<'a>(
   input: TokenTreeSlice<'a>,
-  possible_values: Vec<&String>,
+  map: &std::collections::HashMap<String, String>,
 ) -> TtsIResult<'a, String> {
   let get_err = || {
     Err(nom::Err::Error(nom::error_position!(
@@ -28,12 +28,12 @@ pub fn match_string_from_vec<'a>(
 
   match input.split_first() {
     Some((first, rest)) => match first {
-      TokenTree::Ident(ident) => {
+      TokenTree::Ident(ref ident) => {
         let s = ident.to_string();
-        if possible_values.contains(&&s) {
-          Ok((rest, s))
-        } else {
-          get_err()
+        let val_opt = map.get(&s);
+        match val_opt {
+          Some(val) => Ok((rest, val.to_string())),
+          None => get_err(),
         }
       },
       _ => get_err(),

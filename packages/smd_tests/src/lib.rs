@@ -13,15 +13,17 @@ fn name() {
     AsInnerHtml,
     Component,
   };
-  let mut previous = smd!(<div on_click={|_| println!("previous") } /><h3 />);
+  struct State {
+    count: i32,
+  }
+  let mut state = State { count: 0 };
+  // let mut previous = smd!(<div on_click={|_| println!("previous") } /><h3 />);
   let mut a = smd!(
-    on_hash_change={|_| println!("hashchange!")};
-    <div
-      on_click={|_| println!("outer")}
-    >
-      <h1 on_click={|_| println!("inner")} />
-      <h2 on_click={|_| println!("inner2")} />
-      { &mut previous }
+    on_hash_change={|_| state.count = 0};
+    <div>
+      <h1 on_click={|_| state.count = state.count - 1}>-</h1>
+      <h2 on_click={|_| state.count = state.count + 1}>+</h2>
+      // { &mut previous }
     </div>
   );
   let b = a.render();
