@@ -168,7 +168,7 @@ named!(
       many_0_custom!(match_window_event_handlers),
       many_1_custom!(match_node)
     ),
-    |(_, dom_vec)| {
+    |(window_event_handler_infos, dom_vec)| {
       let (vec_of_node_tokens, event_handling_infos) = dom_vec.into_iter().enumerate()
         .fold(
           (vec![], vec![]),
@@ -184,7 +184,7 @@ named!(
           }
         );
       let token = util::reduce_vec_to_node(&vec_of_node_tokens);
-      super::make_smithy_tokens::make_component(token, event_handling_infos)
+      super::make_smithy_tokens::make_component(token, event_handling_infos, window_event_handler_infos)
     }
   )
 );

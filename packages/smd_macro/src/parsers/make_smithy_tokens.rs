@@ -1,6 +1,7 @@
 use crate::types::{
   EventHandlingInfo,
   StringTokenStreamPair,
+  WindowEventHandlingInfo,
 };
 use proc_macro2::{
   Ident,
@@ -58,6 +59,7 @@ pub fn make_html_tokens(
 pub fn make_component(
   token: TokenStream,
   event_handling_infos: Vec<EventHandlingInfo>,
+  window_event_handling_infos: Vec<WindowEventHandlingInfo>,
 ) -> TokenStream {
   // TODO possibly sort event_handling_infos
   let inner_event_handling =
@@ -97,6 +99,7 @@ pub fn make_component(
             _ => smithy_types::PhaseResult::UiEventHandling(false)
           }
         },
+        // smithy_types::Phase::WindowEventHandling()
         _ => smithy_types::PhaseResult::WindowEventHandling(false)
       }
     }));
