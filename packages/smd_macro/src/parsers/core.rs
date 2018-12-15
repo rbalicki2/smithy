@@ -168,8 +168,8 @@ named!(
       many_0_custom!(match_window_event_handlers),
       many_1_custom!(match_node)
     ),
-    |(_, vec)| {
-      let (vec_of_node_tokens, event_handling_infos) = vec.into_iter().enumerate()
+    |(_, dom_vec)| {
+      let (vec_of_node_tokens, event_handling_infos) = dom_vec.into_iter().enumerate()
         .fold(
           (vec![], vec![]),
           |(mut vec_of_node_tokens, mut event_handling_infos), (i, (token, current_event_handling_infos))| {

@@ -15,6 +15,33 @@ use std::iter;
 pub type TtsIResult<'a, T> = nom::IResult<TokenTreeSlice<'a>, T>;
 pub type StringResult<'a> = TtsIResult<'a, String>;
 
+pub fn match_string_from_vec<'a>(
+  input: TokenTreeSlice<'a>,
+  possible_values: Vec<&String>,
+) -> TtsIResult<'a, String> {
+  let get_err = || {
+    Err(nom::Err::Error(nom::error_position!(
+      input,
+      nom::ErrorKind::Custom(42)
+    )))
+  };
+
+  match input.split_first() {
+    Some((first, rest)) => match first {
+      TokenTree::Ident(ident) => {
+        let s = ident.to_string();
+        if possible_values.contains(&&s) {
+          Ok((rest, s))
+        } else {
+          get_err()
+        }
+      },
+      _ => get_err(),
+    },
+    None => get_err(),
+  }
+}
+
 pub fn match_punct(
   input: TokenTreeSlice,
   c_opt: Option<char>,
