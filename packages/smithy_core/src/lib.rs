@@ -3,6 +3,7 @@ use smithy_types::{
   Component,
   Node,
   UiEvent,
+  WindowEvent,
 };
 use std::cell::RefCell;
 use web_sys::{
@@ -64,13 +65,16 @@ fn attach_listeners(el: &Element) {
     {
       let event_wrapped = UiEvent::OnClick(evt);
       ROOT_COMPONENT.with_inner_value(|root_component| {
-        root_component.handle_ui_event(&event_wrapped, &path);
-        let node = root_component.render();
+        let handled = root_component.handle_ui_event(&event_wrapped, &path);
 
-        ROOT_ELEMENT.with_inner_value(|el| {
-          el.set_inner_html(&node.as_inner_html(&[]));
-        });
-        LAST_RENDERED_NODE.store(node);
+        if handled {
+          let node = root_component.render();
+
+          ROOT_ELEMENT.with_inner_value(|el| {
+            el.set_inner_html(&node.as_inner_html(&[]));
+          });
+          LAST_RENDERED_NODE.store(node);
+        }
       });
     }
   });
@@ -81,7 +85,18 @@ fn attach_listeners(el: &Element) {
   let window = unsafe { transmute::<Window, js_fns::WINDOW>(window) };
   // hashchange
   let cb = Closure::new(move |evt: HashChangeEvent| {
-    // let event_wrapped =
+    let event_wrapped = WindowEvent::OnHashChange(evt);
+    ROOT_COMPONENT.with_inner_value(|root_component| {
+      let handled = root_component.handle_window_event(&event_wrapped);
+      if handled {
+        let node = root_component.render();
+
+        ROOT_ELEMENT.with_inner_value(|el| {
+          el.set_inner_html(&node.as_inner_html(&[]));
+        });
+        LAST_RENDERED_NODE.store(node);
+      }
+    });
   });
   window.add_hash_change_event_listener("hashchange", &cb);
   cb.forget();

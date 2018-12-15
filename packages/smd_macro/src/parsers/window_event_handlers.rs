@@ -26,7 +26,7 @@ named!(
       apply!(util::match_string_from_hashmap, &WINDOW_EVENT_NAMES),
       apply!(util::match_punct, Some('='), Some(Spacing::Alone), vec![]),
       apply!(util::match_group, Some(Delimiter::Brace)),
-      apply!(util::match_punct, Some(';'), Some(Spacing::Alone), vec![])
+      apply!(util::match_punct, Some(';'), None, vec![])
     ),
     |(event, _, callback, _)| {
       WindowEventHandlingInfo {
