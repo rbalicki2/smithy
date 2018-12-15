@@ -1,9 +1,9 @@
 use crate::types::{
   AttributeOrEventHandler,
-  EventHandlingInfo,
   SplitByType,
   TokenStreamEventHandlingInfoPair,
   TokenTreeSlice,
+  UIEventHandlingInfo,
 };
 use nom::{
   alt,
@@ -52,7 +52,7 @@ named!(
       let component = make_html_tokens(name, attributes, vec![]);
       let event_handlers = event_handlers
         .into_iter()
-        .map(EventHandlingInfo::from_string_token_stream_pair)
+        .map(UIEventHandlingInfo::from_string_token_stream_pair)
         .collect();
       (component, event_handlers)
     }
@@ -97,9 +97,9 @@ named!(
       let (attributes, event_handlers) = attributes_and_event_handlers.split_by_type();
       let (children, child_event_infos) = children_and_events.split_by_type();
       let token_stream = make_html_tokens(name, attributes, children);
-      let mut event_infos: Vec<EventHandlingInfo> = event_handlers
+      let mut event_infos: Vec<UIEventHandlingInfo> = event_handlers
         .into_iter()
-        .map(EventHandlingInfo::from_string_token_stream_pair)
+        .map(UIEventHandlingInfo::from_string_token_stream_pair)
         .collect();
       event_infos.extend(child_event_infos.into_iter());
       (token_stream, event_infos)
@@ -142,7 +142,7 @@ named!(
   map!(
     apply!(util::match_group, Some(Delimiter::Brace)),
     |x| (quote!(#x.render()), vec![
-      EventHandlingInfo {
+      UIEventHandlingInfo {
         reversed_path: vec![],
         event: None,
         callback: quote!(#x),
@@ -178,7 +178,7 @@ named!(
             let mut vec = current_event_handling_infos.into_iter().map(|mut info| {
               info.reversed_path.push(i);
               info
-            }).collect::<Vec<EventHandlingInfo>>();
+            }).collect::<Vec<UIEventHandlingInfo>>();
             event_handling_infos.append(&mut vec);
             (vec_of_node_tokens, event_handling_infos)
           }

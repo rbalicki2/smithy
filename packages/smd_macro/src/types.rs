@@ -5,7 +5,7 @@ pub use proc_macro2::{
 use quote::quote;
 
 #[derive(Debug)]
-pub struct EventHandlingInfo {
+pub struct UIEventHandlingInfo {
   pub reversed_path: Vec<usize>,
   /// None implies we're matching on all events,
   /// Which is used only when is_group is true
@@ -15,9 +15,9 @@ pub struct EventHandlingInfo {
   pub is_group: bool,
 }
 
-impl EventHandlingInfo {
+impl UIEventHandlingInfo {
   pub fn from_string_token_stream_pair((event, callback): StringTokenStreamPair) -> Self {
-    EventHandlingInfo {
+    UIEventHandlingInfo {
       reversed_path: vec![],
       event: Some(event),
       callback,
@@ -47,7 +47,7 @@ impl EventHandlingInfo {
 
 pub type TokenTreeSlice<'a> = &'a [TokenTree];
 
-pub type TokenStreamEventHandlingInfoPair = (TokenStream, Vec<EventHandlingInfo>);
+pub type TokenStreamEventHandlingInfoPair = (TokenStream, Vec<UIEventHandlingInfo>);
 
 pub type StringTokenStreamPair = (String, TokenStream);
 
@@ -83,10 +83,10 @@ impl SplitByType<Vec<StringTokenStreamPair>, Vec<StringTokenStreamPair>>
   }
 }
 
-impl SplitByType<Vec<TokenStream>, Vec<EventHandlingInfo>>
+impl SplitByType<Vec<TokenStream>, Vec<UIEventHandlingInfo>>
   for Vec<TokenStreamEventHandlingInfoPair>
 {
-  fn split_by_type(self) -> (Vec<TokenStream>, Vec<EventHandlingInfo>) {
+  fn split_by_type(self) -> (Vec<TokenStream>, Vec<UIEventHandlingInfo>) {
     let child_token_streams = Vec::with_capacity(self.len());
     let child_event_handling_infos = vec![];
     self.into_iter().enumerate().fold(

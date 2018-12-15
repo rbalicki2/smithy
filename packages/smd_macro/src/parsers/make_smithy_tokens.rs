@@ -1,6 +1,6 @@
 use crate::types::{
-  EventHandlingInfo,
   StringTokenStreamPair,
+  UIEventHandlingInfo,
   WindowEventHandlingInfo,
 };
 use proc_macro2::{
@@ -58,7 +58,7 @@ pub fn make_html_tokens(
 
 pub fn make_component(
   token: TokenStream,
-  event_handling_infos: Vec<EventHandlingInfo>,
+  event_handling_infos: Vec<UIEventHandlingInfo>,
   window_event_handling_infos: Vec<WindowEventHandlingInfo>,
 ) -> TokenStream {
   // TODO possibly sort event_handling_infos
