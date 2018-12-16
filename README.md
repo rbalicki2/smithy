@@ -34,3 +34,6 @@ x on_hash_change and the like
 * more tests
 * organize types and separate true core from SmithyComponent implementation
 
+## Match statements
+
+* aka sub-components... ruh roh
