@@ -1,8 +1,0 @@
-[package]
-name = "smithy_forge"
-version = "0.1.0"
-authors = ["Robert Balicki <robert.balicki@gmail.com>"]
-edition = "2018"
-description = "A futures reactor for Smithy"
-
-[dependencies]

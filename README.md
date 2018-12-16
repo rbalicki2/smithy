@@ -29,6 +29,8 @@ x on_hash_change and the like
 * compilation bugs, like `smd!()` `smd!(<div />` etc
 * setTimeout, etc.
 * better compilation error messages
+* Do not use thread_local!, instantiate things in mount
+  * Maybe I need to call (reactor, mount) = initiaite_smithy();
 
 ## Non-blockers
 * more tests

@@ -25,7 +25,7 @@ use wasm_bindgen::{
   JsCast,
 };
 
-use smithy_forge::Forge;
+use smithy_reactor::Reactor;
 
 mod js_fns;
 
@@ -35,7 +35,7 @@ thread_local! {
   static ROOT_ELEMENT: RefCell<Option<Element>> = RefCell::new(None);
   static LAST_RENDERED_NODE: RefCell<Option<Node>> = RefCell::new(None);
   static ROOT_COMPONENT: RefCell<Option<Box<Component>>> = RefCell::new(None);
-  static FORGE: Forge = Forge::new();
+  static FORGE: Reactor = Reactor::new();
 }
 
 fn get_window() -> Window {
