@@ -8,3 +8,9 @@ edition = "2018"
 smd_macro = { path = "../smd_macro" }
 smithy_types = { path = "../smithy_types" }
 smithy = { path = "../smithy" }
+
+[workspace]
+members = ["."]
+
+[replace]
+"proc-macro2:0.4.24" = { path = "../proc-macro2" }
