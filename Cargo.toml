@@ -3,7 +3,6 @@
 members = [
   "crates/smd_macro",
   "crates/smithy_types",
-  "crates/smd_tests",
   "crates/smithy_core",
   "crates/smithy"
 ]
