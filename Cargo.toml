@@ -1,12 +1,12 @@
 [workspace]
 
 members = [
-  "packages/smd_macro",
-  "packages/smithy_types",
-  "packages/smd_tests",
-  "packages/smithy_core",
-  "packages/smithy"
+  "crates/smd_macro",
+  "crates/smithy_types",
+  "crates/smd_tests",
+  "crates/smithy_core",
+  "crates/smithy"
 ]
 
 [replace]
-"proc-macro2:0.4.24" = { path = "./packages/proc-macro2" }
+"proc-macro2:0.4.24" = { path = "./crates/proc-macro2" }
