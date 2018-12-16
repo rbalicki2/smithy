@@ -25,12 +25,17 @@ use wasm_bindgen::{
   JsCast,
 };
 
+use smithy_forge::Forge;
+
 mod js_fns;
 
+// TODO this should not be thread-local, but should be instantiated inside of
+// mount()
 thread_local! {
   static ROOT_ELEMENT: RefCell<Option<Element>> = RefCell::new(None);
   static LAST_RENDERED_NODE: RefCell<Option<Node>> = RefCell::new(None);
   static ROOT_COMPONENT: RefCell<Option<Box<Component>>> = RefCell::new(None);
+  static FORGE: Forge = Forge::new();
 }
 
 fn get_window() -> Window {
