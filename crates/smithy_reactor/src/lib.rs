@@ -2,11 +2,13 @@ pub fn foo() -> String {
   "foo!".to_string()
 }
 
-pub struct Reactor {}
+pub struct Reactor {
+  cb: Box<Fn()>,
+}
 
 impl Reactor {
-  pub fn new() -> Reactor {
-    Reactor {}
+  pub fn new(cb: Box<Fn()>) -> Reactor {
+    Reactor { cb }
   }
 }
 
