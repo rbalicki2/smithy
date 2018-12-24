@@ -1,59 +1,69 @@
-pub fn foo() -> String {
-  "foo!".to_string()
+use js_sys::Promise;
+use std::{
+  cell::RefCell,
+  rc::Rc,
+};
+use wasm_bindgen::{
+  prelude::*,
+  JsCast,
+};
+
+pub enum UnwrappedPromise<S, E> {
+  Pending,
+  Success(S),
+  Error(E),
 }
 
-pub struct Reactor {
+impl UnwrappedPromise<JsValue, JsValue> {
+  pub fn from_js_promise(p: &Promise) -> Rc<RefCell<Self>> {
+    let unwrapped = Rc::new(RefCell::new(UnwrappedPromise::Pending));
+    let unwrapped_ref_success = unwrapped.clone();
+    let unwrapped_ref_err = unwrapped.clone();
+    let c1 = Closure::new(move |v| {
+      let mut unwrapped = unwrapped_ref_success.borrow_mut();
+      *unwrapped = UnwrappedPromise::Success(v);
+    });
+    let c2 = Closure::new(move |e| {
+      let mut unwrapped = unwrapped_ref_err.borrow_mut();
+      *unwrapped = UnwrappedPromise::Error(e);
+    });
+    p.then2(&c1, &c2);
+    c1.forget();
+    c2.forget();
+    unwrapped
+  }
+}
+
+fn promise_timeout(duration: i32) -> Promise {
+  let mut promise_closure = move |resolve: js_sys::Function, reject| {
+    let timeout_closure = Closure::wrap(Box::new(move || {
+      let _ = resolve.call0(&JsValue::NULL);
+      web_sys::console::log_1(&"timeout elapsed!".into());
+    }) as Box<FnMut()>);
+    let window = web_sys::window().unwrap();
+
+    let _ = window.set_timeout_with_callback_and_timeout_and_arguments_0(
+      timeout_closure.as_ref().unchecked_ref(),
+      duration,
+    );
+    timeout_closure.forget();
+  };
+  let promise = Promise::new(&mut promise_closure);
+  promise
+}
+
+pub fn promise_from_timeout(
   cb: Box<Fn()>,
-}
+  duration: i32,
+) -> Rc<RefCell<UnwrappedPromise<JsValue, JsValue>>> {
+  web_sys::console::log_1(&JsValue::from_str("1"));
+  let promise = promise_timeout(duration);
 
-impl Reactor {
-  pub fn new(cb: Box<Fn()>) -> Reactor {
-    Reactor { cb }
-  }
-}
+  let unwrapped = UnwrappedPromise::from_js_promise(&promise);
+  let closure = Closure::new(move |_| cb());
+  promise.then2(&closure, &closure);
+  closure.forget();
 
-use futures::{
-  Async,
-  Future,
-  Poll,
-};
-use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::{
-  future_to_promise,
-  JsFuture,
-};
-
-/// A future that becomes ready after a tick of the micro task queue.
-pub struct NextTick {
-  inner: JsFuture,
-}
-
-impl NextTick {
-  /// Construct a new `NextTick` future.
-  pub fn new() -> NextTick {
-    // Create a resolved promise that will run its callbacks on the next
-    // tick of the micro task queue.
-    let promise = js_sys::Promise::resolve(&JsValue::NULL);
-    // Convert the promise into a `JsFuture`.
-    let inner = JsFuture::from(promise);
-    NextTick { inner }
-  }
-}
-
-impl Future for NextTick {
-  type Item = ();
-  type Error = ();
-
-  fn poll(&mut self) -> Poll<(), ()> {
-    // Polling a `NextTick` just forwards to polling if the inner promise is
-    // ready.
-    match self.inner.poll() {
-      Ok(Async::Ready(_)) => Ok(Async::Ready(())),
-      Ok(Async::NotReady) => Ok(Async::NotReady),
-      Err(_) => unreachable!(
-        "We only create NextTick with a resolved inner promise, never \
-         a rejected one, so we can't get an error here"
-      ),
-    }
-  }
+  web_sys::console::log_1(&JsValue::from_str("2"));
+  unwrapped
 }

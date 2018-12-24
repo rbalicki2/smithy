@@ -6,7 +6,6 @@ use smithy_types::{
   UiEvent,
   WindowEvent,
 };
-use std::cell::RefCell;
 use web_sys::{
   Element,
   HashChangeEvent,
@@ -20,13 +19,17 @@ use js_sys::{
   global,
   Object,
 };
-use std::mem::transmute;
+use std::{
+  cell::RefCell,
+  mem::transmute,
+  rc::Rc,
+};
 use wasm_bindgen::{
   closure::Closure,
   JsCast,
 };
 
-use smithy_reactor::Reactor;
+pub use smithy_reactor::UnwrappedPromise;
 
 mod js_fns;
 
@@ -36,7 +39,6 @@ thread_local! {
   static ROOT_ELEMENT: RefCell<Option<Element>> = RefCell::new(None);
   static LAST_RENDERED_NODE: RefCell<Option<Node>> = RefCell::new(None);
   static ROOT_COMPONENT: RefCell<Option<Box<Component>>> = RefCell::new(None);
-  static REACTOR: Reactor = Reactor::new(Box::new(rerender));
 }
 
 fn get_window() -> Window {
@@ -61,7 +63,7 @@ fn handle_window_event(w: &WindowEvent) -> bool {
 }
 
 fn handle_ui_event(ui_event: &UiEvent, path: &Path) -> bool {
-  ROOT_COMPONENT.with_inner_value(|root_component| root_component.handle_ui_event(ui_event, &[]))
+  ROOT_COMPONENT.with_inner_value(|root_component| root_component.handle_ui_event(ui_event, &path))
 }
 
 fn attach_listeners(el: &Element) {
@@ -114,4 +116,10 @@ pub fn mount(component: Box<Component>, el: Element) {
   mount_to_element(component, &el);
   attach_listeners(&el);
   ROOT_ELEMENT.store(el);
+}
+
+pub fn promise_from_timeout(
+  duration: i32,
+) -> Rc<RefCell<UnwrappedPromise<wasm_bindgen::JsValue, wasm_bindgen::JsValue>>> {
+  smithy_reactor::promise_from_timeout(Box::new(rerender), duration)
 }
