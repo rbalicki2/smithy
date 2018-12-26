@@ -7,6 +7,16 @@ use wasm_bindgen::{
   prelude::*,
   JsCast,
 };
+use futures::Future;
+use wasm_bindgen_futures::{
+  future_to_promise,
+  JsFuture,
+};
+use web_sys::console::log_1;
+
+thread_local! {
+  static RERENDER: RefCell<Option<Box<Fn() + 'static>>> = RefCell::new(None);
+}
 
 pub enum UnwrappedPromise<S, E> {
   Pending,
@@ -34,11 +44,42 @@ impl UnwrappedPromise<JsValue, JsValue> {
   }
 }
 
-fn promise_timeout(duration: i32) -> Promise {
+impl<S, E> UnwrappedPromise<S, E> {
+  pub fn from_future(future: impl Future<Item = S, Error = E>) -> Rc<RefCell<UnwrappedPromise<S, E>>> {
+    let data = Rc::new(RefCell::new(UnwrappedPromise::Pending));
+    let data_1 = data.clone();
+
+    let future = Box::new(
+      future
+        .map(move |s| {
+          log_1(&JsValue::from_str("future cb"));
+          *data_1.borrow_mut() = UnwrappedPromise::Success(s);
+          RERENDER.with(|rerender| {
+            let rerender = rerender.borrow();
+            if let Some(ref rerender) = *rerender {
+              log_1(&JsValue::from_str("rerendering"));
+              rerender();
+            } else {
+              log_1(&JsValue::from_str("rerender not found"));
+            }
+          });
+          JsValue::NULL
+        })
+        .map_err(|_| JsValue::NULL),
+    );
+    // N.B. this does not work!!!!
+    // let future = future_to_promise(future);
+    std::mem::forget(future);
+    data
+  }
+}
+
+pub fn promise_timeout(duration: i32) -> Promise {
   let mut promise_closure = move |resolve: js_sys::Function, reject| {
+    web_sys::console::log_1(&"outer promise closure".into());
     let timeout_closure = Closure::wrap(Box::new(move || {
       let _ = resolve.call0(&JsValue::NULL);
-      web_sys::console::log_1(&"timeout elapsed!".into());
+      web_sys::console::log_1(&"inner timeout closure".into());
     }) as Box<FnMut()>);
     let window = web_sys::window().unwrap();
 
@@ -56,6 +97,7 @@ pub fn promise_from_timeout(
   cb: Box<Fn()>,
   duration: i32,
 ) -> Rc<RefCell<UnwrappedPromise<JsValue, JsValue>>> {
+  
   web_sys::console::log_1(&JsValue::from_str("1"));
   let promise = promise_timeout(duration);
 

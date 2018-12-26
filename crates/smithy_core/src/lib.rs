@@ -28,6 +28,8 @@ use wasm_bindgen::{
   closure::Closure,
   JsCast,
 };
+use futures::Future;
+use wasm_bindgen_futures::JsFuture;
 
 pub use smithy_reactor::UnwrappedPromise;
 
@@ -122,4 +124,18 @@ pub fn promise_from_timeout(
   duration: i32,
 ) -> Rc<RefCell<UnwrappedPromise<wasm_bindgen::JsValue, wasm_bindgen::JsValue>>> {
   smithy_reactor::promise_from_timeout(Box::new(rerender), duration)
+}
+
+pub fn future_from_timeout(duration: i32) -> impl Future<Item = (), Error = ()> {
+  let promise = smithy_reactor::promise_timeout(duration);
+
+  let closure = Closure::new(move |_| rerender());
+  promise.then2(&closure, &closure);
+  closure.forget();
+
+  let fut = JsFuture::from(promise)
+    .map(|_| ())
+    .map_err(|_| ());
+  
+  fut
 }

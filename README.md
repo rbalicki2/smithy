@@ -39,3 +39,14 @@ x on_hash_change and the like
 ## Match statements
 
 * aka sub-components... ruh roh
+
+## futures etc
+
+* need to deal with futures in rust-landia e.g.
+```rs
+// my_future has associated type Item () or something regular and rusty
+// i.e. not only JsValue
+let my_future = some_future.map(|_| ...);
+// should maintain it's types, i.e. not turn into JsValue
+let my_unwrapped_promise = my_future.into();
+```
