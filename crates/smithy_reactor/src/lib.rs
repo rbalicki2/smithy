@@ -44,8 +44,9 @@ impl UnwrappedPromise<JsValue, JsValue> {
   }
 }
 
-impl<S, E> UnwrappedPromise<S, E> {
-  pub fn from_future(future: impl Future<Item = S, Error = E>) -> Rc<RefCell<UnwrappedPromise<S, E>>> {
+// N.B. 'static here smells, but is required by future_to_promise
+impl<S: 'static, E: 'static> UnwrappedPromise<S, E> {
+  pub fn from_future(future: impl Future<Item = S, Error = E> + 'static) -> Rc<RefCell<UnwrappedPromise<S, E>>> {
     let data = Rc::new(RefCell::new(UnwrappedPromise::Pending));
     let data_1 = data.clone();
 
@@ -67,8 +68,7 @@ impl<S, E> UnwrappedPromise<S, E> {
         })
         .map_err(|_| JsValue::NULL),
     );
-    // N.B. this does not work!!!!
-    // let future = future_to_promise(future);
+    let future = future_to_promise(future);
     std::mem::forget(future);
     data
   }
