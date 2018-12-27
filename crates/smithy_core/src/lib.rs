@@ -121,6 +121,7 @@ pub fn mount(component: Box<Component>, el: Element) {
   mount_to_element(component, &el);
   attach_listeners(&el);
   ROOT_ELEMENT.store(el);
+  RERENDER.store(Box::new(rerender));
 }
 
 pub fn promise_from_timeout(
@@ -132,11 +133,5 @@ pub fn promise_from_timeout(
 pub fn future_from_timeout(duration: i32) -> impl Future<Item = (), Error = ()> {
   let promise = smithy_reactor::promise_timeout(duration);
 
-  let closure = Closure::new(move |_| rerender());
-  promise.then2(&closure, &closure);
-  closure.forget();
-
-  let fut = JsFuture::from(promise).map(|_| ()).map_err(|_| ());
-
-  fut
+  JsFuture::from(promise).map(|_| ()).map_err(|_| ())
 }
