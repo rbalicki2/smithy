@@ -15,6 +15,7 @@ use web_sys::{
 };
 mod with_inner_value;
 use self::with_inner_value::*;
+use futures::Future;
 use js_sys::{
   global,
   Object,
@@ -28,10 +29,12 @@ use wasm_bindgen::{
   closure::Closure,
   JsCast,
 };
-use futures::Future;
 use wasm_bindgen_futures::JsFuture;
 
-pub use smithy_reactor::UnwrappedPromise;
+pub use smithy_reactor::{
+  UnwrappedPromise,
+  RERENDER,
+};
 
 mod js_fns;
 
@@ -133,9 +136,7 @@ pub fn future_from_timeout(duration: i32) -> impl Future<Item = (), Error = ()> 
   promise.then2(&closure, &closure);
   closure.forget();
 
-  let fut = JsFuture::from(promise)
-    .map(|_| ())
-    .map_err(|_| ());
-  
+  let fut = JsFuture::from(promise).map(|_| ()).map_err(|_| ());
+
   fut
 }

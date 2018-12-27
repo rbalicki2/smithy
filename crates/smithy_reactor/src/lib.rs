@@ -1,3 +1,4 @@
+use futures::Future;
 use js_sys::Promise;
 use std::{
   cell::RefCell,
@@ -7,7 +8,6 @@ use wasm_bindgen::{
   prelude::*,
   JsCast,
 };
-use futures::Future;
 use wasm_bindgen_futures::{
   future_to_promise,
   JsFuture,
@@ -15,7 +15,7 @@ use wasm_bindgen_futures::{
 use web_sys::console::log_1;
 
 thread_local! {
-  static RERENDER: RefCell<Option<Box<Fn() + 'static>>> = RefCell::new(None);
+  pub static RERENDER: RefCell<Option<Box<Fn() + 'static>>> = RefCell::new(None);
 }
 
 pub enum UnwrappedPromise<S, E> {
@@ -46,7 +46,9 @@ impl UnwrappedPromise<JsValue, JsValue> {
 
 // N.B. 'static here smells, but is required by future_to_promise
 impl<S: 'static, E: 'static> UnwrappedPromise<S, E> {
-  pub fn from_future(future: impl Future<Item = S, Error = E> + 'static) -> Rc<RefCell<UnwrappedPromise<S, E>>> {
+  pub fn from_future(
+    future: impl Future<Item = S, Error = E> + 'static,
+  ) -> Rc<RefCell<UnwrappedPromise<S, E>>> {
     let data = Rc::new(RefCell::new(UnwrappedPromise::Pending));
     let data_1 = data.clone();
 
@@ -97,7 +99,6 @@ pub fn promise_from_timeout(
   cb: Box<Fn()>,
   duration: i32,
 ) -> Rc<RefCell<UnwrappedPromise<JsValue, JsValue>>> {
-  
   web_sys::console::log_1(&JsValue::from_str("1"));
   let promise = promise_timeout(duration);
 
