@@ -28,13 +28,14 @@ use std::{
 use wasm_bindgen::{
   closure::Closure,
   JsCast,
+  JsValue,
 };
-use wasm_bindgen_futures::JsFuture;
+use wasm_bindgen_futures::{
+  future_to_promise,
+  JsFuture,
+};
 
-pub use smithy_reactor::{
-  UnwrappedPromise,
-  RERENDER,
-};
+pub use smithy_reactor::UnwrappedPromise;
 
 mod js_fns;
 
@@ -121,7 +122,6 @@ pub fn mount(component: Box<Component>, el: Element) {
   mount_to_element(component, &el);
   attach_listeners(&el);
   ROOT_ELEMENT.store(el);
-  RERENDER.store(Box::new(rerender));
 }
 
 pub fn promise_from_timeout(
@@ -134,4 +134,24 @@ pub fn future_from_timeout(duration: i32) -> impl Future<Item = (), Error = ()> 
   let promise = smithy_reactor::promise_timeout(duration);
 
   JsFuture::from(promise).map(|_| ()).map_err(|_| ())
+}
+
+pub fn unwrapped_promise_from_future<S: 'static, E: 'static>(
+  future: impl Future<Item = S, Error = E> + 'static,
+) -> Rc<RefCell<UnwrappedPromise<S, E>>> {
+  let data = Rc::new(RefCell::new(UnwrappedPromise::Pending));
+  let data_1 = data.clone();
+
+  let future = Box::new(
+    future
+      .map(move |s| {
+        *data_1.borrow_mut() = UnwrappedPromise::Success(s);
+        rerender();
+        JsValue::NULL
+      })
+      .map_err(|_| JsValue::NULL),
+  );
+  let future = future_to_promise(future);
+  std::mem::forget(future);
+  data
 }
