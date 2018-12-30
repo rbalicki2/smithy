@@ -141,6 +141,7 @@ pub fn unwrapped_promise_from_future<S: 'static, E: 'static>(
 ) -> Rc<RefCell<UnwrappedPromise<S, E>>> {
   let data = Rc::new(RefCell::new(UnwrappedPromise::Pending));
   let data_1 = data.clone();
+  let data_2 = data.clone();
 
   let future = Box::new(
     future
@@ -149,7 +150,11 @@ pub fn unwrapped_promise_from_future<S: 'static, E: 'static>(
         rerender();
         JsValue::NULL
       })
-      .map_err(|_| JsValue::NULL),
+      .map_err(move |e| {
+        *data_2.borrow_mut() = UnwrappedPromise::Error(e);
+        rerender();
+        JsValue::NULL
+      }),
   );
   let future = future_to_promise(future);
   std::mem::forget(future);
