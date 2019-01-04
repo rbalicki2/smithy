@@ -4,6 +4,7 @@ use smithy_types::{
   Node,
   Path,
   UiEvent,
+  UnwrappedPromise,
   WindowEvent,
 };
 use web_sys::{
@@ -16,26 +17,15 @@ use web_sys::{
 mod with_inner_value;
 use self::with_inner_value::*;
 use futures::Future;
-use js_sys::{
-  global,
-  Object,
-};
 use std::{
   cell::RefCell,
   mem::transmute,
-  rc::Rc,
 };
 use wasm_bindgen::{
   closure::Closure,
   JsCast,
-  JsValue,
 };
-use wasm_bindgen_futures::{
-  future_to_promise,
-  JsFuture,
-};
-
-pub use smithy_reactor::UnwrappedPromise;
+use wasm_bindgen_futures::JsFuture;
 
 mod js_fns;
 
@@ -48,7 +38,7 @@ thread_local! {
 }
 
 fn get_window() -> Window {
-  unsafe { transmute::<Object, Window>(global()) }
+  web_sys::window().unwrap()
 }
 
 fn mount_to_element(mut component: Box<Component>, el: &Element) {
@@ -118,16 +108,20 @@ pub fn rerender() {
   });
 }
 
+pub fn rerender_in_timeout() {
+  // TODO use Promise.resolve().then to make it faster...?
+  let timeout_closure = Closure::wrap(Box::new(rerender) as Box<FnMut()>);
+  let _ = get_window().set_timeout_with_callback_and_timeout_and_arguments_0(
+    timeout_closure.as_ref().unchecked_ref(),
+    0,
+  );
+  timeout_closure.forget();
+}
+
 pub fn mount(component: Box<Component>, el: Element) {
   mount_to_element(component, &el);
   attach_listeners(&el);
   ROOT_ELEMENT.store(el);
-}
-
-pub fn promise_from_timeout(
-  duration: i32,
-) -> Rc<RefCell<UnwrappedPromise<wasm_bindgen::JsValue, wasm_bindgen::JsValue>>> {
-  smithy_reactor::promise_from_timeout(Box::new(rerender), duration)
 }
 
 pub fn future_from_timeout(duration: i32) -> impl Future<Item = (), Error = ()> {
@@ -138,25 +132,16 @@ pub fn future_from_timeout(duration: i32) -> impl Future<Item = (), Error = ()> 
 
 pub fn unwrapped_promise_from_future<S: 'static, E: 'static>(
   future: impl Future<Item = S, Error = E> + 'static,
-) -> Rc<RefCell<UnwrappedPromise<S, E>>> {
-  let data = Rc::new(RefCell::new(UnwrappedPromise::Pending));
-  let data_1 = data.clone();
-  let data_2 = data.clone();
-
-  let future = Box::new(
+) -> UnwrappedPromise<S, E> {
+  UnwrappedPromise::new(
     future
-      .map(move |s| {
-        *data_1.borrow_mut() = UnwrappedPromise::Success(s);
-        rerender();
-        JsValue::NULL
+      .map(|s| {
+        rerender_in_timeout();
+        s
       })
-      .map_err(move |e| {
-        *data_2.borrow_mut() = UnwrappedPromise::Error(e);
-        rerender();
-        JsValue::NULL
+      .map_err(|e| {
+        rerender_in_timeout();
+        e
       }),
-  );
-  let future = future_to_promise(future);
-  std::mem::forget(future);
-  data
+  )
 }
