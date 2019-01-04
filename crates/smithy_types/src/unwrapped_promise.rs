@@ -16,23 +16,35 @@ use wasm_bindgen_futures::{
 
 pub struct UnwrappedPromise<S, E> {
   promise_state: Rc<RefCell<PromiseState<S, E>>>,
-  // future: Box<dyn Future<Item = S, Error = E>>,
-  future: Box<JsFuture>,
+  #[allow(dead_code)] // future must not be dropped before promise_state
+  future: Box<dyn Future<Item = JsValue, Error = JsValue>>,
 }
 
 impl<S: 'static, E: 'static> UnwrappedPromise<S, E> {
-  pub fn new(future: impl Future<Item = S, Error = E> + 'static) -> Self {
+  pub fn new(
+    future: impl Future<Item = S, Error = E> + 'static,
+    callback: Option<impl Fn() + 'static>,
+  ) -> Self {
     let data = Rc::new(RefCell::new(PromiseState::Pending));
     let data_1 = data.clone();
     let data_2 = data.clone();
 
+    let callback = Rc::new(RefCell::new(callback));
+    let callback_1 = callback.clone();
+
     let future = future
       .map(move |s| {
         *data_1.borrow_mut() = PromiseState::Success(s);
+        if let Some(ref cb) = *callback.borrow() {
+          cb();
+        };
         JsValue::NULL
       })
       .map_err(move |e| {
         *data_2.borrow_mut() = PromiseState::Error(e);
+        if let Some(ref cb) = *callback_1.borrow() {
+          cb();
+        };
         JsValue::NULL
       });
     // execute the future

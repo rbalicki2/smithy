@@ -129,14 +129,15 @@ pub fn unwrapped_promise_from_future<S: 'static, E: 'static>(
   future: impl Future<Item = S, Error = E> + 'static,
 ) -> UnwrappedPromise<S, E> {
   UnwrappedPromise::new(
-    future
-      .map(|s| {
-        rerender_in_timeout();
-        s
-      })
-      .map_err(|e| {
-        rerender_in_timeout();
-        e
-      }),
+    future,
+    Some(rerender)
+      // .map(|s| {
+      //   rerender_in_timeout();
+      //   s
+      // })
+      // .map_err(|e| {
+      //   rerender_in_timeout();
+      //   e
+      // }),
   )
 }
