@@ -29,12 +29,10 @@ impl<S: 'static, E: 'static> UnwrappedPromise<S, E> {
     let future = future
       .map(move |s| {
         *data_1.borrow_mut() = PromiseState::Success(s);
-        // rerender();
         JsValue::NULL
       })
       .map_err(move |e| {
         *data_2.borrow_mut() = PromiseState::Error(e);
-        // rerender();
         JsValue::NULL
       });
     // execute the future

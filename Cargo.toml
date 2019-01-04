@@ -5,7 +5,6 @@ members = [
   "crates/smithy_types",
   "crates/smithy_core",
   "crates/smithy",
-  "crates/smithy_reactor"
 ]
 
 [replace]

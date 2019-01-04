@@ -115,6 +115,7 @@ pub fn rerender_in_timeout() {
     timeout_closure.as_ref().unchecked_ref(),
     0,
   );
+  // TODO how do we avoid this memory leak?
   timeout_closure.forget();
 }
 
@@ -122,12 +123,6 @@ pub fn mount(component: Box<Component>, el: Element) {
   mount_to_element(component, &el);
   attach_listeners(&el);
   ROOT_ELEMENT.store(el);
-}
-
-pub fn future_from_timeout(duration: i32) -> impl Future<Item = (), Error = ()> {
-  let promise = smithy_reactor::promise_timeout(duration);
-
-  JsFuture::from(promise).map(|_| ()).map_err(|_| ())
 }
 
 pub fn unwrapped_promise_from_future<S: 'static, E: 'static>(
