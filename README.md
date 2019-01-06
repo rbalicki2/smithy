@@ -22,15 +22,16 @@ x derive eq etc on Nodes
 * Add everything behind a feature flag for minimal file size
 * Parametrize smithy wrt types of events, etc.
 x on_hash_change and the like
+* get rid of closure.forget() where it exists
 
 ## Blockers to alpha
 * macros for event types
 * `impl Component` for a bunch of things
 * compilation bugs, like `smd!()` `smd!(<div />` etc
-* setTimeout, etc.
 * better compilation error messages
 * Do not use thread_local!, instantiate things in mount
   * Maybe I need to call (reactor, mount) = initiaite_smithy();
+* reconciliation algorithm (sounds important!!)
 
 ## Non-blockers
 * more tests
@@ -42,6 +43,7 @@ x on_hash_change and the like
 
 ## futures etc
 
+x setTimeout, etc.
 * need to deal with futures in rust-landia e.g.
 ```rs
 // my_future has associated type Item () or something regular and rusty
@@ -50,3 +52,10 @@ let my_future = some_future.map(|_| ...);
 // should maintain it's types, i.e. not turn into JsValue
 let my_unwrapped_promise = my_future.into();
 ```
+
+## smithy test site
+
+x make an API request using fetch, turn it into a future, modify it,
+  and display the results
+* subcomponent and page nav
+

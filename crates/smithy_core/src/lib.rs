@@ -128,16 +128,5 @@ pub fn mount(component: Box<Component>, el: Element) {
 pub fn unwrapped_promise_from_future<S: 'static, E: 'static>(
   future: impl Future<Item = S, Error = E> + 'static,
 ) -> UnwrappedPromise<S, E> {
-  UnwrappedPromise::new(
-    future,
-    Some(rerender)
-      // .map(|s| {
-      //   rerender_in_timeout();
-      //   s
-      // })
-      // .map_err(|e| {
-      //   rerender_in_timeout();
-      //   e
-      // }),
-  )
+  UnwrappedPromise::new(future, Some(rerender))
 }
