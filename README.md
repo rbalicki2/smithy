@@ -27,11 +27,11 @@ x on_hash_change and the like
 ## Blockers to alpha
 * macros for event types
 * `impl Component` for a bunch of things
+* reconciliation algorithm (sounds important!!)
 * compilation bugs, like `smd!()` `smd!(<div />` etc
 * better compilation error messages
 * Do not use thread_local!, instantiate things in mount
   * Maybe I need to call (reactor, mount) = initiaite_smithy();
-* reconciliation algorithm (sounds important!!)
 
 ## Non-blockers
 * more tests
@@ -57,5 +57,5 @@ let my_unwrapped_promise = my_future.into();
 
 x make an API request using fetch, turn it into a future, modify it,
   and display the results
-* subcomponent and page nav
+x subcomponent and page nav
 
