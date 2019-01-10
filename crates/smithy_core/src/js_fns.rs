@@ -2,9 +2,18 @@ extern crate wasm_bindgen;
 use wasm_bindgen::prelude::*;
 
 use web_sys::{
+  AnimationEvent,
+  ClipboardEvent,
+  FocusEvent,
   HashChangeEvent,
+  InputEvent,
+  KeyboardEvent,
   MouseEvent,
-  Window,
+  PointerEvent,
+  ScrollAreaEvent,
+  TouchEvent,
+  TransitionEvent,
+  UiEvent,
 };
 
 #[wasm_bindgen]
@@ -19,50 +28,50 @@ extern "C" {
   pub type HTMLElement;
 
   // Selection
-  // #[wasm_bindgen(method, js_name=addEventListener)]
-  // pub fn add_ui_event_listener(
-  //   this: &HTMLElement,
-  //   event_name: &str,
-  //   cb: &Closure<FnMut(UiEvent)>,
-  //   should_bubble: bool
-  // );
+  #[wasm_bindgen(method, js_name=addEventListener)]
+  pub fn add_ui_event_listener(
+    this: &HTMLElement,
+    event_name: &str,
+    cb: &Closure<FnMut(UiEvent)>,
+    should_bubble: bool,
+  );
 
   // --Clipboard
-  // #[wasm_bindgen(method, js_name=addEventListener)]
-  // pub fn add_clipboard_event_listener(
-  //   this: &HTMLElement,
-  //   event_name: &str,
-  //   cb: &Closure<FnMut(ClipboardEvent)>,
-  //   should_bubble: bool
-  // );
+  #[wasm_bindgen(method, js_name=addEventListener)]
+  pub fn add_clipboard_event_listener(
+    this: &HTMLElement,
+    event_name: &str,
+    cb: &Closure<FnMut(ClipboardEvent)>,
+    should_bubble: bool,
+  );
   // --Composition
   // onCompositionEnd
   // onCompositionStart
   // onCompositionUpdate
   // --Keyboard
-  // #[wasm_bindgen(method, js_name=addEventListener)]
-  // pub fn add_keyboard_event_listener(
-  //   this: &HTMLElement,
-  //   event_name: &str,
-  //   cb: &Closure<FnMut(KeyboardEvent)>,
-  //   should_bubble: bool
-  // );
+  #[wasm_bindgen(method, js_name=addEventListener)]
+  pub fn add_keyboard_event_listener(
+    this: &HTMLElement,
+    event_name: &str,
+    cb: &Closure<FnMut(KeyboardEvent)>,
+    should_bubble: bool,
+  );
   // // --Focus
-  // #[wasm_bindgen(method, js_name=addEventListener)]
-  // pub fn add_focus_event_listener(
-  //   this: &HTMLElement,
-  //   event_name: &str,
-  //   cb: &Closure<FnMut(FocusEvent)>,
-  //   should_bubble: bool
-  // );
+  #[wasm_bindgen(method, js_name=addEventListener)]
+  pub fn add_focus_event_listener(
+    this: &HTMLElement,
+    event_name: &str,
+    cb: &Closure<FnMut(FocusEvent)>,
+    should_bubble: bool,
+  );
   // // --Form
-  // #[wasm_bindgen(method, js_name=addEventListener)]
-  // pub fn add_input_event_listener(
-  //   this: &HTMLElement,
-  //   event_name: &str,
-  //   cb: &Closure<FnMut(InputEvent)>,
-  //   should_bubble: bool
-  // );
+  #[wasm_bindgen(method, js_name=addEventListener)]
+  pub fn add_input_event_listener(
+    this: &HTMLElement,
+    event_name: &str,
+    cb: &Closure<FnMut(InputEvent)>,
+    should_bubble: bool,
+  );
   // --Mouse
   #[wasm_bindgen(method, js_name=addEventListener)]
   pub fn add_mouse_event_listener(
@@ -72,31 +81,31 @@ extern "C" {
     should_bubble: bool,
   );
   // // --Pointer
-  // #[wasm_bindgen(method, js_name=addEventListener)]
-  // pub fn add_pointer_event_listener(
-  //   this: &HTMLElement,
-  //   event_name: &str,
-  //   cb: &Closure<FnMut(PointerEvent)>,
-  //   should_bubble: bool
-  // );
+  #[wasm_bindgen(method, js_name=addEventListener)]
+  pub fn add_pointer_event_listener(
+    this: &HTMLElement,
+    event_name: &str,
+    cb: &Closure<FnMut(PointerEvent)>,
+    should_bubble: bool,
+  );
   // // --Selection
   // // uses add_ui_event_listener
   // // --Touch
-  // #[wasm_bindgen(method, js_name=addEventListener)]
-  // pub fn add_touch_event_listener(
-  //   this: &HTMLElement,
-  //   event_name: &str,
-  //   cb: &Closure<FnMut(TouchEvent)>,
-  //   should_bubble: bool
-  // );
+  #[wasm_bindgen(method, js_name=addEventListener)]
+  pub fn add_touch_event_listener(
+    this: &HTMLElement,
+    event_name: &str,
+    cb: &Closure<FnMut(TouchEvent)>,
+    should_bubble: bool,
+  );
   // // --Scroll
   // #[wasm_bindgen(method, js_name=addEventListener)]
-  // pub fn add_scroll_area_event_listener(
-  //   this: &HTMLElement,
-  //   event_name: &str,
-  //   cb: &Closure<FnMut(ScrollAreaEvent)>,
-  //   should_bubble: bool
-  // );
+  pub fn add_scroll_area_event_listener(
+    this: &HTMLElement,
+    event_name: &str,
+    cb: &Closure<FnMut(ScrollAreaEvent)>,
+    should_bubble: bool,
+  );
   // // --Wheel
   // // onWheel
   // // --Media
@@ -126,21 +135,21 @@ extern "C" {
   // // --Image
   // // onLoad, onError both use add_ui_event_listener
   // // --Animation
-  // #[wasm_bindgen(method, js_name=addEventListener)]
-  // pub fn add_animation_event_listener(
-  //   this: &HTMLElement,
-  //   event_name: &str,
-  //   cb: &Closure<FnMut(AnimationEvent)>,
-  //   should_bubble: bool
-  // );
+  #[wasm_bindgen(method, js_name=addEventListener)]
+  pub fn add_animation_event_listener(
+    this: &HTMLElement,
+    event_name: &str,
+    cb: &Closure<FnMut(AnimationEvent)>,
+    should_bubble: bool,
+  );
   // // --Transition
-  // #[wasm_bindgen(method, js_name=addEventListener)]
-  // pub fn add_transition_event_listener(
-  //   this: &HTMLElement,
-  //   event_name: &str,
-  //   cb: &Closure<FnMut(TransitionEvent)>,
-  //   should_bubble: bool
-  // );
+  #[wasm_bindgen(method, js_name=addEventListener)]
+  pub fn add_transition_event_listener(
+    this: &HTMLElement,
+    event_name: &str,
+    cb: &Closure<FnMut(TransitionEvent)>,
+    should_bubble: bool,
+  );
   // // --Other
   // // onToggle uses add_ui_event_listener
   pub type WINDOW;

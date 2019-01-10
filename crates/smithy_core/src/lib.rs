@@ -21,12 +21,9 @@ use std::{
   cell::RefCell,
   mem::transmute,
 };
-use wasm_bindgen::{
-  closure::Closure,
-  JsCast,
-};
-use wasm_bindgen_futures::JsFuture;
+use wasm_bindgen::closure::Closure;
 
+mod attach_ui_event_listeners;
 mod js_fns;
 
 // TODO this should not be thread-local, but should be instantiated inside of
@@ -65,23 +62,7 @@ fn handle_ui_event(ui_event: &UiEvent, path: &Path) -> bool {
 fn attach_listeners(el: &Element) {
   let html_el = unsafe { transmute::<&Element, &js_fns::HTMLElement>(el) };
 
-  // click
-  let cb = Closure::new(move |evt: MouseEvent| {
-    if let Some(path) = evt
-      .target()
-      .and_then(|target| target.dyn_into::<HtmlElement>().ok())
-      .and_then(|el| el.get_attribute("data-smithy-path"))
-      .and_then(|attr| derive_path(attr).ok())
-    {
-      let event_wrapped = UiEvent::OnClick(evt);
-      let handled = handle_ui_event(&event_wrapped, &path);
-      if handled {
-        rerender();
-      }
-    }
-  });
-  html_el.add_mouse_event_listener("click", &cb, false);
-  cb.forget();
+  attach_ui_event_listeners::attach_ui_event_listeners(&html_el);
 
   let window = get_window();
   let window = unsafe { transmute::<Window, js_fns::WINDOW>(window) };
@@ -106,17 +87,6 @@ pub fn rerender() {
     });
     LAST_RENDERED_NODE.store(node);
   });
-}
-
-pub fn rerender_in_timeout() {
-  // TODO use Promise.resolve().then to make it faster...?
-  let timeout_closure = Closure::wrap(Box::new(rerender) as Box<FnMut()>);
-  let _ = get_window().set_timeout_with_callback_and_timeout_and_arguments_0(
-    timeout_closure.as_ref().unchecked_ref(),
-    0,
-  );
-  // TODO how do we avoid this memory leak?
-  timeout_closure.forget();
 }
 
 pub fn mount(component: Box<Component>, el: Element) {
