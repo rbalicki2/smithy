@@ -10,8 +10,6 @@ use smithy_types::{
 use web_sys::{
   Element,
   HashChangeEvent,
-  HtmlElement,
-  MouseEvent,
   Window,
 };
 mod with_inner_value;
@@ -23,7 +21,7 @@ use std::{
 };
 use wasm_bindgen::closure::Closure;
 
-mod attach_ui_event_listeners;
+mod attach_event_listeners;
 mod js_fns;
 
 // TODO this should not be thread-local, but should be instantiated inside of
@@ -47,10 +45,6 @@ fn mount_to_element(mut component: Box<Component>, el: &Element) {
   ROOT_COMPONENT.store(component);
 }
 
-fn derive_path(s: String) -> Result<Vec<usize>, std::num::ParseIntError> {
-  s.split(",").map(|s| s.parse::<usize>()).collect()
-}
-
 fn handle_window_event(w: &WindowEvent) -> bool {
   ROOT_COMPONENT.with_inner_value(|root_component| root_component.handle_window_event(w))
 }
@@ -61,21 +55,11 @@ fn handle_ui_event(ui_event: &UiEvent, path: &Path) -> bool {
 
 fn attach_listeners(el: &Element) {
   let html_el = unsafe { transmute::<&Element, &js_fns::HTMLElement>(el) };
-
-  attach_ui_event_listeners::attach_ui_event_listeners(&html_el);
+  attach_event_listeners::attach_ui_event_listeners(&html_el);
 
   let window = get_window();
   let window = unsafe { transmute::<Window, js_fns::WINDOW>(window) };
-  // hashchange
-  let cb = Closure::new(move |evt: HashChangeEvent| {
-    let event_wrapped = WindowEvent::OnHashChange(evt);
-    let handled = handle_window_event(&event_wrapped);
-    if handled {
-      rerender();
-    }
-  });
-  window.add_hash_change_event_listener("hashchange", &cb);
-  cb.forget();
+  attach_event_listeners::attach_window_event_listeners(&window);
 }
 
 pub fn rerender() {

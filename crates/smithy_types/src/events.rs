@@ -1,5 +1,6 @@
 use web_sys::{
   AnimationEvent,
+  BeforeUnloadEvent,
   ClipboardEvent,
   FocusEvent,
   HashChangeEvent,
@@ -7,6 +8,8 @@ use web_sys::{
   KeyboardEvent,
   MouseEvent,
   PointerEvent,
+  PopStateEvent,
+  PromiseRejectionEvent,
   ScrollAreaEvent,
   TouchEvent,
   TransitionEvent,
@@ -79,6 +82,7 @@ pub enum UiEvent {
   OnTouchEnd(TouchEvent),
   OnTouchMove(TouchEvent),
   OnTouchStart(TouchEvent),
+  // --Scroll
   OnScroll(ScrollAreaEvent),
   // --Wheel
   // onWheel
@@ -120,5 +124,8 @@ pub enum UiEvent {
 }
 
 pub enum WindowEvent {
+  OnBeforeUnload(BeforeUnloadEvent),
   OnHashChange(HashChangeEvent),
+  OnPopState(PopStateEvent),
+  OnUnhandledRejection(PromiseRejectionEvent),
 }

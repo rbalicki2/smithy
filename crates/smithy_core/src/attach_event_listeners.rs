@@ -1,11 +1,15 @@
 use crate::js_fns;
-use smithy_types::UiEvent;
+use smithy_types::{
+  UiEvent,
+  WindowEvent,
+};
 use wasm_bindgen::{
   closure::Closure,
   JsCast,
 };
 use web_sys::{
   AnimationEvent,
+  BeforeUnloadEvent,
   ClipboardEvent,
   FocusEvent,
   HashChangeEvent,
@@ -14,6 +18,8 @@ use web_sys::{
   KeyboardEvent,
   MouseEvent,
   PointerEvent,
+  PopStateEvent,
+  PromiseRejectionEvent,
   ScrollAreaEvent,
   TouchEvent,
   TransitionEvent,
@@ -35,7 +41,6 @@ macro_rules! attach_ui_event_listener {
     $event_name:expr,
     $should_bubble:expr
   ) => {
-    // click
     let cb = Closure::new(move |evt: $web_sys_event_type| {
       if let Some(path) = evt
         .target()
@@ -55,8 +60,9 @@ macro_rules! attach_ui_event_listener {
   };
 }
 
+// TODO reuse closures
 pub fn attach_ui_event_listeners(html_el: &js_fns::HTMLElement) {
-  // Clipboard
+  // --Clipboard
   attach_ui_event_listener!(
     html_el,
     ClipboardEvent,
@@ -82,9 +88,9 @@ pub fn attach_ui_event_listeners(html_el: &js_fns::HTMLElement) {
     true
   );
 
-  // Composition
+  // --Composition
 
-  // Keyboard
+  // --Keyboard
   attach_ui_event_listener!(
     html_el,
     KeyboardEvent,
@@ -110,7 +116,7 @@ pub fn attach_ui_event_listeners(html_el: &js_fns::HTMLElement) {
     false
   );
 
-  // Focus
+  // --Focus
   attach_ui_event_listener!(
     html_el,
     FocusEvent,
@@ -128,7 +134,7 @@ pub fn attach_ui_event_listeners(html_el: &js_fns::HTMLElement) {
     false
   );
 
-  // Form
+  // --Form
   attach_ui_event_listener!(
     html_el,
     InputEvent,
@@ -162,7 +168,7 @@ pub fn attach_ui_event_listeners(html_el: &js_fns::HTMLElement) {
     false
   );
 
-  // Mouse
+  // --Mouse
   attach_ui_event_listener!(
     html_el,
     MouseEvent,
@@ -308,5 +314,256 @@ pub fn attach_ui_event_listeners(html_el: &js_fns::HTMLElement) {
     add_mouse_event_listener,
     "mouseup",
     false
+  );
+
+  // --Pointer
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnPointerDown,
+    add_pointer_event_listener,
+    "pointerdown",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnPointerMove,
+    add_pointer_event_listener,
+    "pointermove",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnPointerUp,
+    add_pointer_event_listener,
+    "pointerup",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnPointerCancel,
+    add_pointer_event_listener,
+    "pointercancel",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnGotPointerCapture,
+    add_pointer_event_listener,
+    "gotpointercapture",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnLostPointerCapture,
+    add_pointer_event_listener,
+    "lostpointercapture",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnPointerEnter,
+    add_pointer_event_listener,
+    "pointerenter",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnPointerLeave,
+    add_pointer_event_listener,
+    "pointerleave",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnPointerOver,
+    add_pointer_event_listener,
+    "pointerover",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnPointerOut,
+    add_pointer_event_listener,
+    "pointerout",
+    false
+  );
+
+  // --Selection
+  attach_ui_event_listener!(
+    html_el,
+    WebSysUiEvent,
+    OnSelect,
+    add_ui_event_listener,
+    "onselect",
+    false
+  );
+
+  // --Touch
+  attach_ui_event_listener!(
+    html_el,
+    TouchEvent,
+    OnTouchCancel,
+    add_touch_event_listener,
+    "touchcancel",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    TouchEvent,
+    OnTouchEnd,
+    add_touch_event_listener,
+    "touchend",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    TouchEvent,
+    OnTouchMove,
+    add_touch_event_listener,
+    "touchmove",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    TouchEvent,
+    OnTouchStart,
+    add_touch_event_listener,
+    "touchstart",
+    false
+  );
+
+  // --Scroll
+  attach_ui_event_listener!(
+    html_el,
+    ScrollAreaEvent,
+    OnScroll,
+    add_scroll_area_event_listener,
+    "scroll",
+    false
+  );
+
+  // --Image
+  attach_ui_event_listener!(
+    html_el,
+    WebSysUiEvent,
+    OnLoad,
+    add_ui_event_listener,
+    "load",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    WebSysUiEvent,
+    OnError,
+    add_ui_event_listener,
+    "error",
+    false
+  );
+
+  // --Animation
+  attach_ui_event_listener!(
+    html_el,
+    AnimationEvent,
+    OnAnimationStart,
+    add_animation_event_listener,
+    "animationstart",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    AnimationEvent,
+    OnAnimationEnd,
+    add_animation_event_listener,
+    "animationend",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    AnimationEvent,
+    OnAnimationIteration,
+    add_animation_event_listener,
+    "animationiteration",
+    false
+  );
+
+  // --Transition
+  attach_ui_event_listener!(
+    html_el,
+    TransitionEvent,
+    OnTransitionEnd,
+    add_transition_event_listener,
+    "transitionend",
+    false
+  );
+
+  // --Other
+  attach_ui_event_listener!(
+    html_el,
+    WebSysUiEvent,
+    OnToggle,
+    add_ui_event_listener,
+    "toggle",
+    false
+  );
+}
+
+macro_rules! attach_window_event_listener {
+  (
+    $window:expr,
+    $web_sys_event_type:ident,
+    $smithy_event_type:ident,
+    $window_method:ident,
+    $event_name:expr
+  ) => {
+    let cb = Closure::new(move |evt: $web_sys_event_type| {
+      let event_wrapped = WindowEvent::$smithy_event_type(evt);
+      let handled = crate::handle_window_event(&event_wrapped);
+      if handled {
+        crate::rerender();
+      }
+    });
+    $window.$window_method($event_name, &cb);
+    cb.forget();
+  };
+}
+
+pub fn attach_window_event_listeners(window: &js_fns::WINDOW) {
+  attach_window_event_listener!(
+    window,
+    BeforeUnloadEvent,
+    OnBeforeUnload,
+    add_before_unload_event_listener,
+    "beforeunload"
+  );
+  attach_window_event_listener!(
+    window,
+    HashChangeEvent,
+    OnHashChange,
+    add_hash_change_event_listener,
+    "hashchange"
+  );
+  attach_window_event_listener!(
+    window,
+    PopStateEvent,
+    OnPopState,
+    add_pop_state_event_listener,
+    "popstate"
+  );
+  attach_window_event_listener!(
+    window,
+    PromiseRejectionEvent,
+    OnUnhandledRejection,
+    add_promise_rejection_event_listener,
+    "unhandledrejection"
   );
 }

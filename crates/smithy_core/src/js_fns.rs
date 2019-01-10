@@ -3,6 +3,7 @@ use wasm_bindgen::prelude::*;
 
 use web_sys::{
   AnimationEvent,
+  BeforeUnloadEvent,
   ClipboardEvent,
   FocusEvent,
   HashChangeEvent,
@@ -10,6 +11,8 @@ use web_sys::{
   KeyboardEvent,
   MouseEvent,
   PointerEvent,
+  PopStateEvent,
+  PromiseRejectionEvent,
   ScrollAreaEvent,
   TouchEvent,
   TransitionEvent,
@@ -99,7 +102,7 @@ extern "C" {
     should_bubble: bool,
   );
   // // --Scroll
-  // #[wasm_bindgen(method, js_name=addEventListener)]
+  #[wasm_bindgen(method, js_name=addEventListener)]
   pub fn add_scroll_area_event_listener(
     this: &HTMLElement,
     event_name: &str,
@@ -152,6 +155,8 @@ extern "C" {
   );
   // // --Other
   // // onToggle uses add_ui_event_listener
+
+  // Window events
   pub type WINDOW;
 
   #[wasm_bindgen(method, js_name=addEventListener)]
@@ -159,5 +164,23 @@ extern "C" {
     this: &WINDOW,
     event_name: &str,
     cb: &Closure<FnMut(HashChangeEvent)>,
+  );
+  #[wasm_bindgen(method, js_name=addEventListener)]
+  pub fn add_before_unload_event_listener(
+    this: &WINDOW,
+    event_name: &str,
+    cb: &Closure<FnMut(BeforeUnloadEvent)>,
+  );
+  #[wasm_bindgen(method, js_name=addEventListener)]
+  pub fn add_pop_state_event_listener(
+    this: &WINDOW,
+    event_name: &str,
+    cb: &Closure<FnMut(PopStateEvent)>,
+  );
+  #[wasm_bindgen(method, js_name=addEventListener)]
+  pub fn add_promise_rejection_event_listener(
+    this: &WINDOW,
+    event_name: &str,
+    cb: &Closure<FnMut(PromiseRejectionEvent)>,
   );
 }
