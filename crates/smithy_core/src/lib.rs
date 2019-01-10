@@ -46,11 +46,24 @@ fn mount_to_element(mut component: Box<Component>, el: &Element) {
 }
 
 fn handle_window_event(w: &WindowEvent) -> bool {
-  ROOT_COMPONENT.with_inner_value(|root_component| root_component.handle_window_event(w))
+  js_fns::log("handle window outer");
+  ROOT_COMPONENT.with_inner_value(|root_component| {
+    js_fns::log("handle window start");
+    let res = root_component.handle_window_event(w);
+    js_fns::log("handle window end");
+
+    res
+  })
 }
 
 fn handle_ui_event(ui_event: &UiEvent, path: &Path) -> bool {
-  ROOT_COMPONENT.with_inner_value(|root_component| root_component.handle_ui_event(ui_event, &path))
+  js_fns::log("ui outer");
+  ROOT_COMPONENT.with_inner_value(|root_component| {
+    js_fns::log("ui before");
+    let res = root_component.handle_ui_event(ui_event, &path);
+    js_fns::log("ui after");
+    res
+  })
 }
 
 fn attach_listeners(el: &Element) {

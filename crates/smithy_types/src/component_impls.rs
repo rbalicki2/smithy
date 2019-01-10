@@ -6,11 +6,23 @@ use crate::{
   UiEvent,
 };
 
-impl Component for &str {
-  fn render(&mut self) -> Node {
-    Node::Text(self.to_string())
-  }
+/**
+ * N.B. this is subject to change! We want to be smart about how we
+ * impl Component for common types, especially related to container types
+ * (Vec, Option, Box, etc.)
+ */
+
+macro_rules! basic_impl_component {
+  ($type:ty) => {
+    impl Component for $type {
+      fn render(&mut self) -> Node {
+        Node::Text(self.to_string())
+      }
+    }
+  };
 }
+
+basic_impl_component!(&str);
 
 impl Component for String {
   fn render(&mut self) -> Node {
@@ -46,3 +58,37 @@ where
     }
   }
 }
+
+impl<T> Component for Option<T>
+where
+  T: Component,
+{
+  fn render(&mut self) -> Node {
+    match self {
+      Some(t) => t.render(),
+      None => Node::Comment(None),
+    }
+  }
+
+  fn handle_ui_event(&mut self, event: &UiEvent, path: &Path) -> EventHandled {
+    match self {
+      Some(t) => t.handle_ui_event(event, path),
+      None => false,
+    }
+  }
+}
+
+basic_impl_component!(bool);
+basic_impl_component!(char);
+basic_impl_component!(i8);
+basic_impl_component!(i16);
+basic_impl_component!(i32);
+basic_impl_component!(i64);
+basic_impl_component!(isize);
+basic_impl_component!(u8);
+basic_impl_component!(u16);
+basic_impl_component!(u32);
+basic_impl_component!(u64);
+basic_impl_component!(usize);
+basic_impl_component!(f32);
+basic_impl_component!(f64);

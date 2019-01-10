@@ -68,7 +68,7 @@ pub fn make_component(
     .fold(quote!{}, |accum, group| {
       quote!{
         #accum
-        event_handled = event_handled || (#group).handle_window_event(window_event);
+        event_handled = (#group).handle_window_event(window_event) || event_handled;
       }
     });
 

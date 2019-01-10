@@ -12,6 +12,7 @@ custom_derive! {
     Dom(HtmlToken),
     Text(String),
     Vec(Vec<Node>),
+    Comment(Option<String>),
   }
 }
 
@@ -35,6 +36,10 @@ impl AsInnerHtml for Node {
         .map(|(i, node)| node.as_inner_html(&concat(base_path, i)))
         .collect::<Vec<String>>()
         .join(""),
+      Node::Comment(str_opt) => match str_opt {
+        Some(s) => format!("<!-- {} -->", s),
+        None => "<!-- -->".into(),
+      },
     }
   }
 }

@@ -20,7 +20,7 @@ x derive eq etc on Nodes
 * get rid of closure.forget() where it exists
 
 ## Blockers to pre-alpha/blog post
-* macros for event types
+x macros for event types
 * `impl Component` for a bunch of things
 * reconciliation algorithm (sounds important!!)
 * file size
