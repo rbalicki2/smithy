@@ -4,11 +4,7 @@ use std::{
   ops::Deref,
   rc::Rc,
 };
-use wasm_bindgen::{
-  closure::Closure,
-  JsCast,
-  JsValue,
-};
+use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::{
   future_to_promise,
   JsFuture,
