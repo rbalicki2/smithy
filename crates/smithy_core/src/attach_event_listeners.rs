@@ -49,16 +49,23 @@ macro_rules! attach_ui_event_listener {
         .and_then(|attr| derive_path(attr).ok())
       {
         let event_wrapped = UiEvent::$smithy_event_type(evt);
-        // let request_animation_frame_cb = Closure::wrap(Box::new(move || {
+        let handle_event = move || {
           let handled = crate::handle_ui_event(&event_wrapped, &path);
           if handled {
             crate::rerender();
           }
-        // }) as Box<FnMut()>);
-        // let window = web_sys::window().unwrap();
+        };
 
-        // let _ = window.request_animation_frame(request_animation_frame_cb.as_ref().unchecked_ref());
-        // request_animation_frame_cb.forget();
+        if crate::event_handling_phase_is_ongoing() {
+          let request_animation_frame_cb = Closure::wrap(Box::new(handle_event) as Box<FnMut()>);
+          let window = web_sys::window().unwrap();
+
+          let _ =
+            window.request_animation_frame(request_animation_frame_cb.as_ref().unchecked_ref());
+          request_animation_frame_cb.forget();
+        } else {
+          handle_event();
+        }
       }
     });
     $html_el.$window_method($event_name, &event_handler_cb, $should_bubble);
@@ -533,16 +540,20 @@ macro_rules! attach_window_event_listener {
   ) => {
     let handle_event_cb = Closure::new(move |evt: $web_sys_event_type| {
       let event_wrapped = WindowEvent::$smithy_event_type(evt);
-      let request_animation_frame_cb = Closure::wrap(Box::new(move || {
+      let handle_event = move || {
         let handled = crate::handle_window_event(&event_wrapped);
         if handled {
           crate::rerender();
         }
-      }) as Box<FnMut()>);
-      let window = web_sys::window().unwrap();
-
-      let _ = window.request_animation_frame(request_animation_frame_cb.as_ref().unchecked_ref());
-      request_animation_frame_cb.forget();
+      };
+      if crate::event_handling_phase_is_ongoing() {
+        let request_animation_frame_cb = Closure::wrap(Box::new(handle_event) as Box<FnMut()>);
+        let window = web_sys::window().unwrap();
+        let _ = window.request_animation_frame(request_animation_frame_cb.as_ref().unchecked_ref());
+        request_animation_frame_cb.forget();
+      } else {
+        handle_event();
+      }
     });
 
     $window.$window_method($event_name, &handle_event_cb);

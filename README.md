@@ -25,7 +25,7 @@ x macros for event types
 * reconciliation algorithm (sounds important!!)
 * file size
 * confirm <input> works reasonably
-* render-in-progress flag
+x render-in-progress flag
 
 ## Blockers to alpha
 * compilation bugs, like `smd!()` `smd!(<div />` etc

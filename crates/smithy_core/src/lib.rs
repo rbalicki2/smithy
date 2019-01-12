@@ -28,6 +28,7 @@ thread_local! {
   static ROOT_ELEMENT: RefCell<Option<Element>> = RefCell::new(None);
   static LAST_RENDERED_NODE: RefCell<Option<Node>> = RefCell::new(None);
   static ROOT_COMPONENT: RefCell<Option<Box<Component>>> = RefCell::new(None);
+  static EVENT_DEPTH: RefCell<u32> = RefCell::new(0);
 }
 
 fn get_window() -> Window {
@@ -43,12 +44,38 @@ fn mount_to_element(mut component: Box<Component>, el: &Element) {
   ROOT_COMPONENT.store(component);
 }
 
+fn with_increased_event_depth<T>(f: impl Fn() -> T) -> T {
+  EVENT_DEPTH.with(|depth| {
+    let existing_depth = *depth.borrow();
+    *depth.borrow_mut() = existing_depth + 1;
+  });
+  let ret = f();
+  EVENT_DEPTH.with(|depth| {
+    let existing_depth = *depth.borrow();
+    *depth.borrow_mut() = existing_depth - 1;
+  });
+  ret
+}
+
+fn get_event_depth() -> u32 {
+  EVENT_DEPTH.with(|depth| *depth.borrow())
+}
+
+fn event_handling_phase_is_ongoing() -> bool {
+  get_event_depth() > 0
+}
+
 fn handle_window_event(w: &WindowEvent) -> bool {
-  ROOT_COMPONENT.with_inner_value(|root_component| root_component.handle_window_event(w))
+  with_increased_event_depth(|| {
+    ROOT_COMPONENT.with_inner_value(|root_component| root_component.handle_window_event(w))
+  })
 }
 
 fn handle_ui_event(ui_event: &UiEvent, path: &Path) -> bool {
-  ROOT_COMPONENT.with_inner_value(|root_component| root_component.handle_ui_event(ui_event, &path))
+  with_increased_event_depth(|| {
+    ROOT_COMPONENT
+      .with_inner_value(|root_component| root_component.handle_ui_event(ui_event, &path))
+  })
 }
 
 fn attach_listeners(el: &Element) {
