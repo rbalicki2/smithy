@@ -21,10 +21,11 @@ x derive eq etc on Nodes
 
 ## Blockers to pre-alpha/blog post
 x macros for event types
-* `impl Component` for a bunch of things
+? `impl Component` for a bunch of things
 * reconciliation algorithm (sounds important!!)
 * file size
 * confirm <input> works reasonably
+* render-in-progress flag
 
 ## Blockers to alpha
 * compilation bugs, like `smd!()` `smd!(<div />` etc
