@@ -41,25 +41,28 @@ macro_rules! attach_ui_event_listener {
     $event_name:expr,
     $should_bubble:expr
   ) => {
-    let cb = Closure::new(move |evt: $web_sys_event_type| {
+    let event_handler_cb = Closure::new(move |evt: $web_sys_event_type| {
       if let Some(path) = evt
         .target()
         .and_then(|target| target.dyn_into::<HtmlElement>().ok())
         .and_then(|el| el.get_attribute(DATA_SMITHY_PATH))
         .and_then(|attr| derive_path(attr).ok())
       {
-        js_fns::log($event_name);
         let event_wrapped = UiEvent::$smithy_event_type(evt);
-        js_fns::log("bout to handle");
-        let handled = crate::handle_ui_event(&event_wrapped, &path);
-        js_fns::log("handled that shit");
-        if handled {
-          crate::rerender();
-        }
+        // let request_animation_frame_cb = Closure::wrap(Box::new(move || {
+          let handled = crate::handle_ui_event(&event_wrapped, &path);
+          if handled {
+            crate::rerender();
+          }
+        // }) as Box<FnMut()>);
+        // let window = web_sys::window().unwrap();
+
+        // let _ = window.request_animation_frame(request_animation_frame_cb.as_ref().unchecked_ref());
+        // request_animation_frame_cb.forget();
       }
     });
-    $html_el.$window_method($event_name, &cb, $should_bubble);
-    cb.forget();
+    $html_el.$window_method($event_name, &event_handler_cb, $should_bubble);
+    event_handler_cb.forget();
   };
 }
 
@@ -180,226 +183,226 @@ pub fn attach_ui_event_listeners(html_el: &js_fns::HTMLElement) {
     "click",
     false
   );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   MouseEvent,
-  //   OnContextMenu,
-  //   add_mouse_event_listener,
-  //   "contextmenu",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   MouseEvent,
-  //   OnDblClick,
-  //   add_mouse_event_listener,
-  //   "dblclick",
-  //   false
-  // );
+  attach_ui_event_listener!(
+    html_el,
+    MouseEvent,
+    OnContextMenu,
+    add_mouse_event_listener,
+    "contextmenu",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    MouseEvent,
+    OnDblClick,
+    add_mouse_event_listener,
+    "dblclick",
+    false
+  );
 
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   MouseEvent,
-  //   OnDrag,
-  //   add_mouse_event_listener,
-  //   "drag",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   MouseEvent,
-  //   OnDragEnd,
-  //   add_mouse_event_listener,
-  //   "dragend",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   MouseEvent,
-  //   OnDragEnter,
-  //   add_mouse_event_listener,
-  //   "dragenter",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   MouseEvent,
-  //   OnDragExit,
-  //   add_mouse_event_listener,
-  //   "dragexit",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   MouseEvent,
-  //   OnDragLeave,
-  //   add_mouse_event_listener,
-  //   "dragleave",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   MouseEvent,
-  //   OnDragOver,
-  //   add_mouse_event_listener,
-  //   "dragover",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   MouseEvent,
-  //   OnDragStart,
-  //   add_mouse_event_listener,
-  //   "dragstart",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   MouseEvent,
-  //   OnDrop,
-  //   add_mouse_event_listener,
-  //   "drop",
-  //   false
-  // );
+  attach_ui_event_listener!(
+    html_el,
+    MouseEvent,
+    OnDrag,
+    add_mouse_event_listener,
+    "drag",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    MouseEvent,
+    OnDragEnd,
+    add_mouse_event_listener,
+    "dragend",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    MouseEvent,
+    OnDragEnter,
+    add_mouse_event_listener,
+    "dragenter",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    MouseEvent,
+    OnDragExit,
+    add_mouse_event_listener,
+    "dragexit",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    MouseEvent,
+    OnDragLeave,
+    add_mouse_event_listener,
+    "dragleave",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    MouseEvent,
+    OnDragOver,
+    add_mouse_event_listener,
+    "dragover",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    MouseEvent,
+    OnDragStart,
+    add_mouse_event_listener,
+    "dragstart",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    MouseEvent,
+    OnDrop,
+    add_mouse_event_listener,
+    "drop",
+    false
+  );
 
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   MouseEvent,
-  //   OnMouseDown,
-  //   add_mouse_event_listener,
-  //   "mousedown",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   MouseEvent,
-  //   OnMouseEnter,
-  //   add_mouse_event_listener,
-  //   "mouseenter",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   MouseEvent,
-  //   OnMouseLeave,
-  //   add_mouse_event_listener,
-  //   "mouseleave",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   MouseEvent,
-  //   OnMouseMove,
-  //   add_mouse_event_listener,
-  //   "mousemove",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   MouseEvent,
-  //   OnMouseOver,
-  //   add_mouse_event_listener,
-  //   "mouseover",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   MouseEvent,
-  //   OnMouseOut,
-  //   add_mouse_event_listener,
-  //   "mouseout",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   MouseEvent,
-  //   OnMouseUp,
-  //   add_mouse_event_listener,
-  //   "mouseup",
-  //   false
-  // );
+  attach_ui_event_listener!(
+    html_el,
+    MouseEvent,
+    OnMouseDown,
+    add_mouse_event_listener,
+    "mousedown",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    MouseEvent,
+    OnMouseEnter,
+    add_mouse_event_listener,
+    "mouseenter",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    MouseEvent,
+    OnMouseLeave,
+    add_mouse_event_listener,
+    "mouseleave",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    MouseEvent,
+    OnMouseMove,
+    add_mouse_event_listener,
+    "mousemove",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    MouseEvent,
+    OnMouseOver,
+    add_mouse_event_listener,
+    "mouseover",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    MouseEvent,
+    OnMouseOut,
+    add_mouse_event_listener,
+    "mouseout",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    MouseEvent,
+    OnMouseUp,
+    add_mouse_event_listener,
+    "mouseup",
+    false
+  );
 
   // --Pointer
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   PointerEvent,
-  //   OnPointerDown,
-  //   add_pointer_event_listener,
-  //   "pointerdown",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   PointerEvent,
-  //   OnPointerMove,
-  //   add_pointer_event_listener,
-  //   "pointermove",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   PointerEvent,
-  //   OnPointerUp,
-  //   add_pointer_event_listener,
-  //   "pointerup",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   PointerEvent,
-  //   OnPointerCancel,
-  //   add_pointer_event_listener,
-  //   "pointercancel",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   PointerEvent,
-  //   OnGotPointerCapture,
-  //   add_pointer_event_listener,
-  //   "gotpointercapture",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   PointerEvent,
-  //   OnLostPointerCapture,
-  //   add_pointer_event_listener,
-  //   "lostpointercapture",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   PointerEvent,
-  //   OnPointerEnter,
-  //   add_pointer_event_listener,
-  //   "pointerenter",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   PointerEvent,
-  //   OnPointerLeave,
-  //   add_pointer_event_listener,
-  //   "pointerleave",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   PointerEvent,
-  //   OnPointerOver,
-  //   add_pointer_event_listener,
-  //   "pointerover",
-  //   false
-  // );
-  // attach_ui_event_listener!(
-  //   html_el,
-  //   PointerEvent,
-  //   OnPointerOut,
-  //   add_pointer_event_listener,
-  //   "pointerout",
-  //   false
-  // );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnPointerDown,
+    add_pointer_event_listener,
+    "pointerdown",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnPointerMove,
+    add_pointer_event_listener,
+    "pointermove",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnPointerUp,
+    add_pointer_event_listener,
+    "pointerup",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnPointerCancel,
+    add_pointer_event_listener,
+    "pointercancel",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnGotPointerCapture,
+    add_pointer_event_listener,
+    "gotpointercapture",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnLostPointerCapture,
+    add_pointer_event_listener,
+    "lostpointercapture",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnPointerEnter,
+    add_pointer_event_listener,
+    "pointerenter",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnPointerLeave,
+    add_pointer_event_listener,
+    "pointerleave",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnPointerOver,
+    add_pointer_event_listener,
+    "pointerover",
+    false
+  );
+  attach_ui_event_listener!(
+    html_el,
+    PointerEvent,
+    OnPointerOut,
+    add_pointer_event_listener,
+    "pointerout",
+    false
+  );
 
   // --Selection
   attach_ui_event_listener!(
@@ -528,16 +531,22 @@ macro_rules! attach_window_event_listener {
     $window_method:ident,
     $event_name:expr
   ) => {
-    let cb = Closure::new(move |evt: $web_sys_event_type| {
-      js_fns::log($event_name);
+    let handle_event_cb = Closure::new(move |evt: $web_sys_event_type| {
       let event_wrapped = WindowEvent::$smithy_event_type(evt);
-      let handled = crate::handle_window_event(&event_wrapped);
-      if handled {
-        crate::rerender();
-      }
+      let request_animation_frame_cb = Closure::wrap(Box::new(move || {
+        let handled = crate::handle_window_event(&event_wrapped);
+        if handled {
+          crate::rerender();
+        }
+      }) as Box<FnMut()>);
+      let window = web_sys::window().unwrap();
+
+      let _ = window.request_animation_frame(request_animation_frame_cb.as_ref().unchecked_ref());
+      request_animation_frame_cb.forget();
     });
-    $window.$window_method($event_name, &cb);
-    cb.forget();
+
+    $window.$window_method($event_name, &handle_event_cb);
+    handle_event_cb.forget();
   };
 }
 
