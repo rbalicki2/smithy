@@ -26,6 +26,8 @@ x macros for event types
 * file size
 * confirm <input> works reasonably
 x render-in-progress flag
+* convert existing comments to /// comments
+* prelude
 
 ## Blockers to alpha
 * compilation bugs, like `smd!()` `smd!(<div />` etc
@@ -34,6 +36,8 @@ x render-in-progress flag
   * Maybe I need to call (reactor, mount) = initiaite_smithy();
 * Spacing errors
 * Allow for multiple instances of smithy
+* Do not use format! in smithy
+* Do not define so many wasm_bindgen'ed methods, instead dynamically cast a JsValue
 
 ## Non-blockers
 * more tests

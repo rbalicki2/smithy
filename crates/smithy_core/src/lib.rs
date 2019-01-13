@@ -21,6 +21,9 @@ use std::{
 
 mod attach_event_listeners;
 mod js_fns;
+mod node_diff;
+
+use self::node_diff::Diffable;
 
 // TODO this should not be thread-local, but should be instantiated inside of
 // mount()
@@ -89,12 +92,27 @@ fn attach_listeners(el: &Element) {
 
 pub fn rerender() {
   ROOT_COMPONENT.with_inner_value(|root_component| {
-    let node = root_component.render();
+    let newly_rendered_node = root_component.render();
 
-    ROOT_ELEMENT.with_inner_value(|el| {
-      el.set_inner_html(&node.as_inner_html(&[]));
+    LAST_RENDERED_NODE.with_inner_value(|last_rendered_node| {
+      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+        "\n\n\nfrom {:#?}",
+        last_rendered_node
+      )));
+      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+        "to {:#?}",
+        newly_rendered_node
+      )));
+
+      let diff = last_rendered_node.get_diff_with(&newly_rendered_node);
+      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!("{:#?}", diff)));
+
+      ROOT_ELEMENT.with_inner_value(|el| {
+        el.set_inner_html(&newly_rendered_node.as_inner_html(&[]));
+      });
     });
-    LAST_RENDERED_NODE.store(node);
+
+    LAST_RENDERED_NODE.store(newly_rendered_node);
   });
 }
 

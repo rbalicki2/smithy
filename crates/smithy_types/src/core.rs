@@ -4,7 +4,7 @@ use enum_derive::{
   EnumFromInner,
 };
 
-type Attributes = std::collections::HashMap<String, String>;
+pub type Attributes = std::collections::HashMap<String, String>;
 
 custom_derive! {
   #[derive(Debug, Clone, EnumFromInner, Eq, PartialEq)]

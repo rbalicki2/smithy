@@ -11,7 +11,7 @@ pub trait WithInnerValue<T> {
 }
 
 impl<T> WithInnerValue<T> for LocalKey<RefCell<Option<T>>> {
-  fn with_inner_value<R>(&'static self, callback: impl Fn(&mut T) -> R) -> R {
+  fn with_inner_value<R>(&'static self, callback: impl FnOnce(&mut T) -> R) -> R {
     self.with(|rc| {
       let val_opt = rc.replace(None);
       // TODO don't unwrap here, but what to do instead?
