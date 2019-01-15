@@ -1,5 +1,6 @@
 use smithy_types::{
   AsInnerHtml,
+  CollapsedNode,
   Component,
   Node,
   Path,
@@ -29,7 +30,7 @@ use self::node_diff::Diffable;
 // mount()
 thread_local! {
   static ROOT_ELEMENT: RefCell<Option<Element>> = RefCell::new(None);
-  static LAST_RENDERED_NODE: RefCell<Option<Node>> = RefCell::new(None);
+  static LAST_RENDERED_NODE: RefCell<Option<CollapsedNode>> = RefCell::new(None);
   static ROOT_COMPONENT: RefCell<Option<Box<Component>>> = RefCell::new(None);
   static EVENT_DEPTH: RefCell<u32> = RefCell::new(0);
 }
@@ -41,6 +42,13 @@ fn get_window() -> Window {
 fn mount_to_element(mut component: Box<Component>, el: &Element) {
   {
     let node = component.render();
+    js_fns::log(&format!("{:?}", node));
+    let node: CollapsedNode = component.render().into();
+    /**
+     * TODO
+     *
+     * We need impl Into<Vec<CollapsedNode>> for Node
+     */
     el.set_inner_html(&node.as_inner_html(&[]));
     LAST_RENDERED_NODE.store(node);
   }
@@ -92,7 +100,7 @@ fn attach_listeners(el: &Element) {
 
 pub fn rerender() {
   ROOT_COMPONENT.with_inner_value(|root_component| {
-    let newly_rendered_node = root_component.render();
+    let newly_rendered_node: CollapsedNode = root_component.render().into();
 
     LAST_RENDERED_NODE.with_inner_value(|last_rendered_node| {
       web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
