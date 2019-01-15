@@ -195,7 +195,20 @@ fn get_comment_diff(
 ) -> Diff {
   match (old_comment_opt, new_comment_opt) {
     (Some(old_comment), Some(new_comment)) => get_text_diff(old_comment, new_comment, path),
-    _ => vec![],
+    (Some(_), None) => vec![(
+      path,
+      DiffOperation::Replace(ReplaceOperation {
+        // I think?
+        new_inner_html: "<!-- -->".to_string(),
+      }),
+    )],
+    (None, Some(new_comment)) => vec![(
+      path,
+      DiffOperation::Replace(ReplaceOperation {
+        new_inner_html: format!("<!-- {} -->", new_comment),
+      }),
+    )],
+    (None, None) => vec![],
   }
 }
 
