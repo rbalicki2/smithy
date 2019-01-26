@@ -66,11 +66,35 @@ pub trait Diffable {
  */
 impl Diffable for Vec<CollapsedNode> {
   fn get_diff_with(&self, other: &Self) -> Diff {
-    vec![]
-    // let mut diff = get_path_diff(self, other, vec![]);
-    // diff.reverse();
-    // diff
+    get_vec_path_diff(self, other, vec![])
   }
+}
+
+fn get_vec_path_diff(
+  old_nodes: &Vec<CollapsedNode>,
+  new_nodes: &Vec<CollapsedNode>,
+  path: Path,
+) -> Diff {
+  let zipped = optionalize_and_zip(old_nodes.iter(), new_nodes.iter());
+  zipped
+    .enumerate()
+    .flat_map(|(i, (current, new))| match (current, new) {
+      (Some(old_node), Some(new_node)) => {
+        get_path_diff(old_node, new_node, clone_and_extend(&path, i))
+      },
+      (Some(old_node), None) => vec![(
+        clone_and_extend(&path, i),
+        DiffOperation::Delete(DeleteOperation {}),
+      )],
+      (None, Some(new_node)) => vec![(
+        clone_and_extend(&path, i),
+        DiffOperation::Insert(InsertOperation {
+          new_inner_html: new_node.as_inner_html(&path),
+        }),
+      )],
+      (None, None) => panic!("Should not happen - we should not encounter two none's here"),
+    })
+    .collect()
 }
 
 fn get_path_diff(old_node: &CollapsedNode, new_node: &CollapsedNode, path: Path) -> Diff {
