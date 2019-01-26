@@ -64,11 +64,12 @@ pub trait Diffable {
  *
  * - If they differ in type, replace one with the other
  */
-impl Diffable for CollapsedNode {
+impl Diffable for Vec<CollapsedNode> {
   fn get_diff_with(&self, other: &Self) -> Diff {
-    let mut diff = get_path_diff(self, other, vec![]);
-    diff.reverse();
-    diff
+    vec![]
+    // let mut diff = get_path_diff(self, other, vec![]);
+    // diff.reverse();
+    // diff
   }
 }
 

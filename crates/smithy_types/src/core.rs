@@ -29,6 +29,23 @@ fn concat(path: &Path, new_item: usize) -> Vec<usize> {
   [new_path, &[new_item]].concat()
 }
 
+fn clone_and_extend(path: &Vec<usize>, next_item: usize) -> Vec<usize> {
+  let mut path = path.clone();
+  path.extend(&[next_item]);
+  path
+}
+
+impl AsInnerHtml for Vec<CollapsedNode> {
+  fn as_inner_html(&self, base_path: &Path) -> String {
+    let path_as_vec: Vec<usize> = base_path.to_vec();
+    self
+      .iter()
+      .enumerate()
+      .map(|(i, node)| node.as_inner_html(&clone_and_extend(&path_as_vec, i)))
+      .collect()
+  }
+}
+
 impl AsInnerHtml for CollapsedNode {
   fn as_inner_html(&self, base_path: &Path) -> String {
     match self {

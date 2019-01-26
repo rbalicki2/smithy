@@ -17,19 +17,30 @@ pub struct CollapsedHtmlToken {
   pub attributes: crate::Attributes,
 }
 
-impl Into<CollapsedNode> for Node {
-  fn into(self) -> CollapsedNode {
+impl Into<Vec<CollapsedNode>> for Node {
+  fn into(self) -> Vec<CollapsedNode> {
     match self {
-      Node::Dom(html_token) => unimplemented!(),
-      Node::Text(text) => CollapsedNode::Text(text),
-      Node::Comment(comment_opt) => CollapsedNode::Comment(comment_opt),
-      Node::Vec(vec) => panic!("Can't call .into() on a Node::Vec, this shouldn't happen."),
+      Node::Dom(html_token) => vec![CollapsedNode::Dom(CollapsedHtmlToken {
+        node_type: html_token.node_type,
+        attributes: html_token.attributes,
+        children: html_token
+          .children
+          .into_iter()
+          .flat_map(|node| {
+            let v: Vec<CollapsedNode> = node.into();
+            v
+          })
+          .collect(),
+      })],
+      Node::Text(text) => vec![CollapsedNode::Text(text)],
+      Node::Comment(comment_opt) => vec![CollapsedNode::Comment(comment_opt)],
+      Node::Vec(vec) => vec
+        .into_iter()
+        .flat_map(|node| {
+          let v: Vec<CollapsedNode> = node.into();
+          v
+        })
+        .collect(),
     }
-  }
-}
-
-impl Into<CollapsedHtmlToken> for HtmlToken {
-  fn into(self) -> CollapsedHtmlToken {
-    unimplemented!()
   }
 }

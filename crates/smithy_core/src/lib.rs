@@ -30,7 +30,7 @@ use self::node_diff::Diffable;
 // mount()
 thread_local! {
   static ROOT_ELEMENT: RefCell<Option<Element>> = RefCell::new(None);
-  static LAST_RENDERED_NODE: RefCell<Option<CollapsedNode>> = RefCell::new(None);
+  static LAST_RENDERED_NODE: RefCell<Option<Vec<CollapsedNode>>> = RefCell::new(None);
   static ROOT_COMPONENT: RefCell<Option<Box<Component>>> = RefCell::new(None);
   static EVENT_DEPTH: RefCell<u32> = RefCell::new(0);
 }
@@ -42,13 +42,9 @@ fn get_window() -> Window {
 fn mount_to_element(mut component: Box<Component>, el: &Element) {
   {
     let node = component.render();
-    js_fns::log(&format!("{:?}", node));
-    let node: CollapsedNode = component.render().into();
-    /**
-     * TODO
-     *
-     * We need impl Into<Vec<CollapsedNode>> for Node
-     */
+    js_fns::log(&format!("mount to element {:?}", node));
+    let node: Vec<CollapsedNode> = component.render().into();
+    js_fns::log("node into called");
     el.set_inner_html(&node.as_inner_html(&[]));
     LAST_RENDERED_NODE.store(node);
   }
@@ -100,7 +96,8 @@ fn attach_listeners(el: &Element) {
 
 pub fn rerender() {
   ROOT_COMPONENT.with_inner_value(|root_component| {
-    let newly_rendered_node: CollapsedNode = root_component.render().into();
+    js_fns::log("1");
+    let newly_rendered_nodes: Vec<CollapsedNode> = root_component.render().into();
 
     LAST_RENDERED_NODE.with_inner_value(|last_rendered_node| {
       web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
@@ -109,18 +106,18 @@ pub fn rerender() {
       )));
       web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
         "to {:#?}",
-        newly_rendered_node
+        newly_rendered_nodes
       )));
 
-      let diff = last_rendered_node.get_diff_with(&newly_rendered_node);
+      let diff = last_rendered_node.get_diff_with(&newly_rendered_nodes);
       web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!("{:#?}", diff)));
 
       ROOT_ELEMENT.with_inner_value(|el| {
-        el.set_inner_html(&newly_rendered_node.as_inner_html(&[]));
+        el.set_inner_html(&newly_rendered_nodes.as_inner_html(&[]));
       });
     });
 
-    LAST_RENDERED_NODE.store(newly_rendered_node);
+    LAST_RENDERED_NODE.store(newly_rendered_nodes);
   });
 }
 
