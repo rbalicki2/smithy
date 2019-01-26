@@ -28,7 +28,13 @@ fn clone_and_extend(path: &Path, next_item: usize) -> Path {
 
 impl Node {
   pub fn into_collapsed_node(self, path: Path) -> Vec<CollapsedNode> {
-    match self {
+    // Here be monsters...
+    //
+    // What are we doing?
+    // 1. If Node is a Dom/Vec (i.e. iterable), we flat_map over each child
+    // and collect that into a vec of CollapsedNode's.
+    // If Node is a Text/Comment, we collect that into a vec of length 1.
+    let mut node_vec = match self {
       Node::Dom(html_token) => vec![CollapsedNode::Dom(CollapsedHtmlToken {
         path: path.clone(),
         node_type: html_token.node_type,
@@ -47,7 +53,43 @@ impl Node {
         .enumerate()
         .flat_map(|(i, node)| node.into_collapsed_node(clone_and_extend(&path, i)))
         .collect(),
+    };
+
+    // 2. We *super jankily* combine all adjacent CollapsedNode::Text's into single
+    // CollapsedNode's.
+    let len = node_vec.len();
+    let (mut node_vec, str_opt) = node_vec.into_iter().fold(
+      (Vec::with_capacity(len), None),
+      |(mut vec_so_far, str_opt), node| {
+        let mut push = false;
+        let mut ret = match (&node, &str_opt) {
+          (CollapsedNode::Text(text), Some(s)) => (vec_so_far, Some(format!("{}{}", s, text))),
+          (CollapsedNode::Text(text), None) => (vec_so_far, Some(text.to_string())),
+          _ => {
+            push = true;
+            (vec_so_far, str_opt)
+          },
+        };
+        let ret = if push {
+          if let Some(s) = ret.1 {
+            ret.0.push(CollapsedNode::Text(s));
+          };
+          ret.0.push(node);
+          (ret.0, None)
+        } else {
+          ret
+        };
+
+        ret
+      },
+    );
+
+    // 3. If there were terminal CollapsedNode::Text's, we need to push those onto the vec.
+    if let Some(s) = str_opt {
+      node_vec.push(CollapsedNode::Text(s));
     }
+
+    node_vec
   }
 }
 
