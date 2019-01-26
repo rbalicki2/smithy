@@ -37,17 +37,21 @@ fn clone_and_extend(path: &Vec<usize>, next_item: usize) -> Vec<usize> {
 
 impl AsInnerHtml for Vec<CollapsedNode> {
   fn as_inner_html(&self, base_path: &Path) -> String {
+    // TODO the path (clone_and_extend, below) needs to be from the
+    // uncollapsed node and stored in the collapsed node
     let path_as_vec: Vec<usize> = base_path.to_vec();
     self
       .iter()
       .enumerate()
       .map(|(i, node)| node.as_inner_html(&clone_and_extend(&path_as_vec, i)))
+      // .map(|node| node.as_inner_html())
       .collect()
   }
 }
 
 impl AsInnerHtml for CollapsedNode {
   fn as_inner_html(&self, base_path: &Path) -> String {
+    // TODO asInnerHtml no longer needs a path param
     match self {
       CollapsedNode::Dom(token) => token.as_inner_html(base_path),
       CollapsedNode::Text(s) => s.to_string(),
@@ -97,7 +101,7 @@ fn format_path(path: &Path) -> String {
 
 impl AsInnerHtml for CollapsedHtmlToken {
   fn as_inner_html(&self, base_path: &Path) -> String {
-    let path_string = format!(" data-smithy-path=\"{}\"", format_path(base_path));
+    let path_string = format!(" data-smithy-path=\"{}\"", format_path(&self.path));
     let attributes_string = if self.attributes.len() > 0 {
       format!(" {}", format_attributes(&self.attributes),)
     } else {

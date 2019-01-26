@@ -44,7 +44,7 @@ fn mount_to_element(mut component: Box<Component>, el: &Element) {
     let node = component.render();
     js_fns::log(&format!("mount to element {:?}", node));
     let node: Vec<CollapsedNode> = component.render().into();
-    js_fns::log("node into called");
+    js_fns::log(&format!("node into called {:?}", node));
     el.set_inner_html(&node.as_inner_html(&[]));
     LAST_RENDERED_NODE.store(node);
   }
@@ -110,7 +110,10 @@ pub fn rerender() {
       )));
 
       let diff = last_rendered_node.get_diff_with(&newly_rendered_nodes);
-      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!("{:#?}", diff)));
+      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+        "diff = {:#?}",
+        diff
+      )));
 
       ROOT_ELEMENT.with_inner_value(|el| {
         el.set_inner_html(&newly_rendered_nodes.as_inner_html(&[]));
