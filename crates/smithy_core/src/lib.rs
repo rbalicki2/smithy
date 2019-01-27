@@ -24,7 +24,10 @@ mod attach_event_listeners;
 mod js_fns;
 mod node_diff;
 
-use self::node_diff::Diffable;
+use self::node_diff::{
+  ApplicableTo,
+  Diffable,
+};
 
 // TODO this should not be thread-local, but should be instantiated inside of
 // mount()
@@ -96,17 +99,25 @@ fn attach_listeners(el: &Element) {
 
 pub fn rerender() {
   ROOT_COMPONENT.with_inner_value(|root_component| {
-    js_fns::log("1");
+    js_fns::log("\n\n-----------------------------------------------------\nrerender!");
     let newly_rendered_nodes: Vec<CollapsedNode> = root_component.render().into();
 
     LAST_RENDERED_NODE.with_inner_value(|last_rendered_node| {
       web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
-        "\n\n\nfrom {:#?}",
+        "\nfrom {:#?}",
         last_rendered_node
+          .iter()
+          .enumerate()
+          .map(|(i, x)| x.as_inner_html(&vec![i]))
+          .collect::<Vec<String>>()
       )));
       web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
         "to {:#?}",
         newly_rendered_nodes
+          .iter()
+          .enumerate()
+          .map(|(i, x)| x.as_inner_html(&vec![i]))
+          .collect::<Vec<String>>()
       )));
 
       let diff = last_rendered_node.get_diff_with(&newly_rendered_nodes);
@@ -116,6 +127,9 @@ pub fn rerender() {
       )));
 
       ROOT_ELEMENT.with_inner_value(|el| {
+        // for diff_item in diff.iter() {
+        //   diff_item.apply_to(el);
+        // }
         el.set_inner_html(&newly_rendered_nodes.as_inner_html(&[]));
       });
     });
