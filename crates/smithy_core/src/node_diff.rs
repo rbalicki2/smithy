@@ -19,8 +19,9 @@ pub struct ReplaceOperation {
 }
 
 #[derive(Debug)]
-pub struct InsertOperation {
+pub struct InsertChildOperation {
   pub new_inner_html: NewInnerHtml,
+  pub child_index: usize,
 }
 
 #[derive(Debug)]
@@ -36,7 +37,7 @@ pub struct UpdateAttributesOperation {
 #[derive(Debug)]
 pub enum DiffOperation {
   Replace(ReplaceOperation),
-  Insert(InsertOperation),
+  InsertChild(InsertChildOperation),
   DeleteChild(DeleteChildOperation),
   UpdateAttributes(UpdateAttributesOperation),
 }
@@ -75,7 +76,7 @@ impl ApplicableTo<&web_sys::Element> for DiffItem {
       DiffOperation::Replace(replace_operation) => {
         target_el.set_inner_html(&replace_operation.new_inner_html)
       },
-      DiffOperation::Insert(insert_operation) => {},
+      DiffOperation::InsertChild(insert_child_operation) => {},
       DiffOperation::DeleteChild(delete_child_operation) => {},
       DiffOperation::UpdateAttributes(update_attributes_operation) => {
         for (attr, attr_value) in &update_attributes_operation.new_attributes {
@@ -85,6 +86,28 @@ impl ApplicableTo<&web_sys::Element> for DiffItem {
     };
   }
 }
+
+/**
+ * New diffing algo
+ *
+ * - Wrap the outermost Vec<CollapsedNode>
+ *   in another CollapsedNode, representing <div id="app" />
+ *
+ * Diffing Algo:
+ *
+ * - Starting with the <div id="app" />, keep track of its path (aka [])
+ * - For each zipped optionalized child, match:
+ *   - (Some(original), Some(new)) =>
+ *     - If node_type is the same
+ *       - Change attributes
+ *       - Recurse
+ *     - Else
+ *       - ReplaceChild
+ *   - (Some(original), None) =>
+ *     - RemoveChild
+ *   - (None, Some(new)) =>
+ *     - DeleteChild
+ */
 
 /**
  * Diffing algorithm
@@ -106,15 +129,12 @@ impl ApplicableTo<&web_sys::Element> for DiffItem {
  */
 impl Diffable for Vec<CollapsedNode> {
   fn get_diff_with(&self, other: &Self) -> Diff {
-    get_vec_path_diff(self, other, vec![])
+    get_vec_path_diff(self, other)
   }
 }
 
-fn get_vec_path_diff(
-  old_nodes: &Vec<CollapsedNode>,
-  new_nodes: &Vec<CollapsedNode>,
-  path: Path,
-) -> Diff {
+fn get_vec_path_diff(old_nodes: &Vec<CollapsedNode>, new_nodes: &Vec<CollapsedNode>) -> Diff {
+  let path = vec![];
   let zipped = optionalize_and_zip(old_nodes.iter(), new_nodes.iter());
   zipped
     .enumerate()
@@ -124,14 +144,16 @@ fn get_vec_path_diff(
       },
       (Some(old_node), None) => vec![(
         // old_node.path.clone(),
-        clone_and_extend(&path, i),
-        DiffOperation::DeleteChild(DeleteChildOperation { child_index: 123 }),
+        path.clone(),
+        DiffOperation::DeleteChild(DeleteChildOperation { child_index: i }),
       )],
       (None, Some(new_node)) => vec![(
-        clone_and_extend(&path, i),
+        // clone_and_extend(&path, i),
         // new_node.path.clone(),
-        DiffOperation::Insert(InsertOperation {
+        path.clone(),
+        DiffOperation::InsertChild(InsertChildOperation {
           new_inner_html: new_node.as_inner_html(&path),
+          child_index: i,
         }),
       )],
       (None, None) => panic!("Should not happen - we should not encounter two none's here"),
@@ -188,15 +210,15 @@ fn get_html_token_diff(
    * If they're the same, we potentially change attributes
    * And call get_path_diff on each zipped child
    */
-  web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
-    "\n\n\nhtml token diff {}\nold- {:?}\nold attr {:?}\nnew- {:?}\nnew attr {:?} \npath {:?}",
-    old_token.attributes != new_token.attributes,
-    old_token,
-    old_token.attributes,
-    new_token,
-    new_token.attributes,
-    path
-  )));
+  // web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+  //   "\n\n\nhtml token diff {}\nold- {:?}\nold attr {:?}\nnew- {:?}\nnew attr {:?} \npath {:?}",
+  //   old_token.attributes != new_token.attributes,
+  //   old_token,
+  //   old_token.attributes,
+  //   new_token,
+  //   new_token.attributes,
+  //   path
+  // )));
   let old_node_type = &old_token.node_type;
   let new_node_type = &new_token.node_type;
   if old_node_type != new_node_type {
@@ -219,8 +241,9 @@ fn get_html_token_diff(
         )],
         (None, Some(new_child)) => vec![(
           clone_and_extend(&path, i),
-          DiffOperation::Insert(InsertOperation {
+          DiffOperation::InsertChild(InsertChildOperation {
             new_inner_html: new_child.as_inner_html(&path),
+            child_index: i,
           }),
         )],
         _ => panic!("We should not encounter two None's in get_html_token_diff"),

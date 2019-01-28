@@ -103,7 +103,7 @@ impl AsInnerHtml for CollapsedHtmlToken {
   fn as_inner_html(&self, base_path: &Path) -> String {
     let path_string = format!(" data-smithy-path=\"{}\"", format_path(&self.path));
     let attributes_string = if self.attributes.len() > 0 {
-      format!(" {}", format_attributes(&self.attributes),)
+      format!(" {}", format_attributes(&self.attributes))
     } else {
       "".to_string()
     };
