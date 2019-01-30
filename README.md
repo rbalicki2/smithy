@@ -46,3 +46,11 @@ x render-in-progress flag
 ## Issues
 * Think about how to handle match statements, e.g. in the context of routing
 * Perhaps angular-like ng-if's?
+
+## Making smithy generic
+* smd! returns a SmithyComponent
+* SmithyComponent implements Component<SmithyDom>
+* SmithyDom implements Into<WebDom>
+* SmithyDom and WebDom can all be replaced with e.g. NativeDom or whatever
+* Into<WebDom> is where we need to put things like "h1 can't be self closing" etc.
+* WebDom implements Diffable, etc.

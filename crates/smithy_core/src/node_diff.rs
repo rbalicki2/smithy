@@ -16,6 +16,7 @@ pub type Path = Vec<usize>;
 #[derive(Debug)]
 pub struct ReplaceOperation {
   pub new_inner_html: NewInnerHtml,
+  pub child_index: usize,
 }
 
 #[derive(Debug)]
@@ -69,7 +70,6 @@ impl ApplicableTo<&web_sys::Element> for DiffItem {
       // existing node...
       // TODO don't unwrap
       let target_el = el.query_selector(&path_selector).unwrap().unwrap();
-      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&path_selector));
       target_el
     };
     match &self.1 {
@@ -109,72 +109,80 @@ impl ApplicableTo<&web_sys::Element> for DiffItem {
  *     - DeleteChild
  */
 
-/**
- * Diffing algorithm
- *
- * - If both are strings, compare strings
- * - If both are comments, compare contents
- * - If both are DOM elements...
- *   - If the node_type and attributes are the same, keep it, and:
- *     - For each existing child, if it has the same node_type,
- *       keep it, and recurse
- *   - If it has a different node_type or attributes, add it
- *   - For each additional new child, add it
- *
- *   - Thus <div><h1><h2 /><h1></div> to <div><h1><h3 /></h1></div>
- *     should see that the div, is the same and the h1 is the same,
- *     and see that h2 !== h3, and create a diff operation for that.
- *
- * - If they differ in type, replace one with the other
- */
 impl Diffable for Vec<CollapsedNode> {
   fn get_diff_with(&self, other: &Self) -> Diff {
     get_vec_path_diff(self, other)
   }
 }
 
+fn get_i(i: usize, max_len: usize, potentially_deleting: bool) -> usize {
+  if potentially_deleting {
+    max_len - i
+  } else {
+    i
+  }
+}
+
 fn get_vec_path_diff(old_nodes: &Vec<CollapsedNode>, new_nodes: &Vec<CollapsedNode>) -> Diff {
+  let potentially_deleting = old_nodes.len() > new_nodes.len();
+  let max_len = std::cmp::max(old_nodes.len(), new_nodes.len());
+  // N.B. this is *really redundant* and should be refactored away.
   let path = vec![];
-  let zipped = optionalize_and_zip(old_nodes.iter(), new_nodes.iter());
+
+  let mut zipped: Box<Iterator<Item = (Option<&CollapsedNode>, Option<&CollapsedNode>)>> =
+    if potentially_deleting {
+      let zipped = optionalize_and_zip(old_nodes.iter(), new_nodes.iter());
+      let mut vec = zipped.collect::<Vec<(Option<&CollapsedNode>, Option<&CollapsedNode>)>>();
+      vec.reverse();
+      Box::new(vec.into_iter())
+    } else {
+      Box::new(optionalize_and_zip(old_nodes.iter(), new_nodes.iter()))
+    };
+
   zipped
     .enumerate()
-    .flat_map(|(i, (current, new))| match (current, new) {
-      (Some(old_node), Some(new_node)) => {
-        get_diff_between_tokens(old_node, new_node, clone_and_extend(&path, i))
-      },
-      (Some(old_node), None) => vec![(
-        // old_node.path.clone(),
-        path.clone(),
-        DiffOperation::DeleteChild(DeleteChildOperation { child_index: i }),
-      )],
-      (None, Some(new_node)) => vec![(
-        // clone_and_extend(&path, i),
-        // new_node.path.clone(),
-        path.clone(),
-        DiffOperation::InsertChild(InsertChildOperation {
-          new_inner_html: new_node.as_inner_html(&path),
-          child_index: i,
-        }),
-      )],
-      (None, None) => panic!("Should not happen - we should not encounter two none's here"),
+    .flat_map(|(i, (current, new))| {
+      let real_i = get_i(i, max_len, potentially_deleting);
+      match (current, new) {
+        (Some(old_node), Some(new_node)) => {
+          get_diff_between_tokens(old_node, new_node, &path, real_i)
+        },
+        (Some(old_node), None) => vec![(
+          path.clone(),
+          DiffOperation::DeleteChild(DeleteChildOperation {
+            child_index: real_i,
+          }),
+        )],
+        (None, Some(new_node)) => vec![(
+          path.clone(),
+          DiffOperation::InsertChild(InsertChildOperation {
+            new_inner_html: new_node.as_inner_html(&path),
+            child_index: real_i,
+          }),
+        )],
+        (None, None) => panic!("Should not happen - we should not encounter two none's here"),
+      }
     })
     .collect()
 }
 
-fn get_diff_between_tokens(old_node: &CollapsedNode, new_node: &CollapsedNode, path: Path) -> Diff {
-  // let path = old_node.path.clone();
+fn get_diff_between_tokens(
+  old_node: &CollapsedNode,
+  new_node: &CollapsedNode,
+  path_to_parent: &Path,
+  child_index: usize,
+) -> Diff {
   match (old_node, new_node) {
     (CollapsedNode::Dom(ref old_token), CollapsedNode::Dom(ref new_token)) => {
-      // web_sys::console::log_1(&wasm_bindgen::JsValue::from_str("dom"));
-      get_html_token_diff(old_token, new_token, path)
+      get_html_token_diff(old_token, new_token, path_to_parent, child_index)
     },
     (CollapsedNode::Text(ref old_text), CollapsedNode::Text(ref new_text)) => {
-      get_text_diff(old_text, new_text, path)
+      get_text_diff(old_text, new_text, path_to_parent.clone())
     },
     (CollapsedNode::Comment(ref old_comment), CollapsedNode::Comment(ref new_comment)) => {
-      get_comment_diff(old_comment, new_comment, path)
+      get_comment_diff(old_comment, new_comment, path_to_parent.clone())
     },
-    _ => get_replace_diff(new_node, path),
+    _ => get_replace_diff(new_node, path_to_parent, child_index),
   }
 }
 
@@ -203,47 +211,64 @@ fn clone_and_extend(path: &Path, next_item: usize) -> Path {
 fn get_html_token_diff(
   old_token: &CollapsedHtmlToken,
   new_token: &CollapsedHtmlToken,
-  path: Path,
+  path_to_parent: &Path,
+  child_index: usize,
 ) -> Diff {
   /**
    * If the node_type's are different, we replace
    * If they're the same, we potentially change attributes
    * And call get_path_diff on each zipped child
    */
-  // web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
-  //   "\n\n\nhtml token diff {}\nold- {:?}\nold attr {:?}\nnew- {:?}\nnew attr {:?} \npath {:?}",
-  //   old_token.attributes != new_token.attributes,
-  //   old_token,
-  //   old_token.attributes,
-  //   new_token,
-  //   new_token.attributes,
-  //   path
-  // )));
   let old_node_type = &old_token.node_type;
   let new_node_type = &new_token.node_type;
   if old_node_type != new_node_type {
-    let new_inner_html = new_token.as_inner_html(&path);
+    let new_inner_html = new_token.as_inner_html(path_to_parent);
+
     vec![(
-      path,
-      DiffOperation::Replace(ReplaceOperation { new_inner_html }),
+      path_to_parent.to_vec(),
+      DiffOperation::Replace(ReplaceOperation {
+        new_inner_html,
+        child_index,
+      }),
     )]
   } else {
-    let iter = optionalize_and_zip(old_token.children.iter(), new_token.children.iter());
-    let mut diff = iter
+    // node types are the same, so we iterate over children
+    let potentially_deleting = old_token.children.len() > new_token.children.len();
+    let max_len = std::cmp::max(old_token.children.len(), new_token.children.len());
+
+    let mut zipped: Box<Iterator<Item = (Option<&CollapsedNode>, Option<&CollapsedNode>)>> =
+      if potentially_deleting {
+        let zipped = optionalize_and_zip(old_token.children.iter(), new_token.children.iter());
+        let mut vec = zipped.collect::<Vec<(Option<&CollapsedNode>, Option<&CollapsedNode>)>>();
+        vec.reverse();
+        Box::new(vec.into_iter())
+      } else {
+        Box::new(optionalize_and_zip(
+          old_token.children.iter(),
+          new_token.children.iter(),
+        ))
+      };
+
+    let mut diff = zipped
       .enumerate()
       .flat_map(|(i, zipped)| match zipped {
-        (Some(old_child), Some(new_child)) => {
-          get_diff_between_tokens(old_child, new_child, clone_and_extend(&path, i))
-        },
+        (Some(old_child), Some(new_child)) => get_diff_between_tokens(
+          old_child,
+          new_child,
+          &old_token.path,
+          get_i(i, max_len, potentially_deleting),
+        ),
         (Some(old_child), None) => vec![(
-          clone_and_extend(&path, i),
-          DiffOperation::DeleteChild(DeleteChildOperation { child_index: 123 }),
+          old_token.path.clone(),
+          DiffOperation::DeleteChild(DeleteChildOperation {
+            child_index: get_i(i, max_len, potentially_deleting),
+          }),
         )],
         (None, Some(new_child)) => vec![(
-          clone_and_extend(&path, i),
+          old_token.path.clone(),
           DiffOperation::InsertChild(InsertChildOperation {
-            new_inner_html: new_child.as_inner_html(&path),
-            child_index: i,
+            new_inner_html: new_child.as_inner_html(path_to_parent),
+            child_index: get_i(i, max_len, potentially_deleting),
           }),
         )],
         _ => panic!("We should not encounter two None's in get_html_token_diff"),
@@ -269,6 +294,7 @@ fn get_text_diff(old_text: &String, new_text: &String, path: Path) -> Diff {
       path,
       DiffOperation::Replace(ReplaceOperation {
         new_inner_html: new_text.to_string(),
+        child_index: 1237,
       }),
     )]
   } else {
@@ -288,22 +314,27 @@ fn get_comment_diff(
       DiffOperation::Replace(ReplaceOperation {
         // I think?
         new_inner_html: "<!-- -->".to_string(),
+        child_index: 123,
       }),
     )],
     (None, Some(new_comment)) => vec![(
       path,
       DiffOperation::Replace(ReplaceOperation {
         new_inner_html: format!("<!-- {} -->", new_comment),
+        child_index: 123,
       }),
     )],
     (None, None) => vec![],
   }
 }
 
-fn get_replace_diff(new_node: &CollapsedNode, path: Path) -> Diff {
-  let new_inner_html = new_node.as_inner_html(&path);
+fn get_replace_diff(new_node: &CollapsedNode, path_to_parent: &Path, child_index: usize) -> Diff {
+  let new_inner_html = new_node.as_inner_html(&clone_and_extend(path_to_parent, child_index));
   vec![(
-    path,
-    DiffOperation::Replace(ReplaceOperation { new_inner_html }),
+    path_to_parent.to_vec(),
+    DiffOperation::Replace(ReplaceOperation {
+      new_inner_html,
+      child_index: 1234,
+    }),
   )]
 }
