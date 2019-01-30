@@ -23,6 +23,7 @@ use std::{
 mod attach_event_listeners;
 mod js_fns;
 mod node_diff;
+mod zip_util;
 
 use self::node_diff::{
   ApplicableTo,

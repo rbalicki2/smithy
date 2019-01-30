@@ -4,17 +4,13 @@ use smithy_types::{
   CollapsedHtmlToken,
   CollapsedNode,
 };
-use std::{
-  cmp::max,
-  iter::repeat_with,
-};
 
 type NewInnerHtml = String;
 
 pub type Path = Vec<usize>;
 
 #[derive(Debug)]
-pub struct ReplaceOperation {
+pub struct ReplaceChildOperation {
   pub new_inner_html: NewInnerHtml,
   pub child_index: usize,
 }
@@ -37,7 +33,7 @@ pub struct UpdateAttributesOperation {
 
 #[derive(Debug)]
 pub enum DiffOperation {
-  Replace(ReplaceOperation),
+  ReplaceChild(ReplaceChildOperation),
   InsertChild(InsertChildOperation),
   DeleteChild(DeleteChildOperation),
   UpdateAttributes(UpdateAttributesOperation),
@@ -73,8 +69,8 @@ impl ApplicableTo<&web_sys::Element> for DiffItem {
       target_el
     };
     match &self.1 {
-      DiffOperation::Replace(replace_operation) => {
-        target_el.set_inner_html(&replace_operation.new_inner_html)
+      DiffOperation::ReplaceChild(replace_child_operation) => {
+        target_el.set_inner_html(&replace_child_operation.new_inner_html)
       },
       DiffOperation::InsertChild(insert_child_operation) => {},
       DiffOperation::DeleteChild(delete_child_operation) => {},
@@ -102,7 +98,7 @@ impl ApplicableTo<&web_sys::Element> for DiffItem {
  *       - Change attributes
  *       - Recurse
  *     - Else
- *       - ReplaceChild
+ *       - ReplaceChildChild
  *   - (Some(original), None) =>
  *     - RemoveChild
  *   - (None, Some(new)) =>
@@ -129,14 +125,19 @@ fn get_vec_path_diff(old_nodes: &Vec<CollapsedNode>, new_nodes: &Vec<CollapsedNo
   // N.B. this is *really redundant* and should be refactored away.
   let path = vec![];
 
+  // let zipped =
+  //   crate::zip_util::optionalize_zip_reverse_and_enumerate(old_nodes.iter(), new_nodes.iter());
   let mut zipped: Box<Iterator<Item = (Option<&CollapsedNode>, Option<&CollapsedNode>)>> =
     if potentially_deleting {
-      let zipped = optionalize_and_zip(old_nodes.iter(), new_nodes.iter());
+      let zipped = crate::zip_util::optionalize_and_zip(old_nodes.iter(), new_nodes.iter());
       let mut vec = zipped.collect::<Vec<(Option<&CollapsedNode>, Option<&CollapsedNode>)>>();
       vec.reverse();
       Box::new(vec.into_iter())
     } else {
-      Box::new(optionalize_and_zip(old_nodes.iter(), new_nodes.iter()))
+      Box::new(crate::zip_util::optionalize_and_zip(
+        old_nodes.iter(),
+        new_nodes.iter(),
+      ))
     };
 
   zipped
@@ -186,22 +187,6 @@ fn get_diff_between_tokens(
   }
 }
 
-fn optionalize_and_extend_with_none<T>(
-  iter: impl Iterator<Item = T>,
-) -> impl Iterator<Item = Option<T>> {
-  iter.map(|item| Some(item)).chain(repeat_with(|| None))
-}
-
-fn optionalize_and_zip<T, U>(
-  left_iter: impl ExactSizeIterator<Item = T>,
-  right_iter: impl ExactSizeIterator<Item = U>,
-) -> impl Iterator<Item = (Option<T>, Option<U>)> {
-  let max_len = max(left_iter.len(), right_iter.len());
-  let left_optionalized = optionalize_and_extend_with_none(left_iter);
-  let right_optionalized = optionalize_and_extend_with_none(right_iter);
-  left_optionalized.zip(right_optionalized).take(max_len)
-}
-
 fn clone_and_extend(path: &Path, next_item: usize) -> Path {
   let mut path = path.clone();
   path.extend(&[next_item]);
@@ -226,7 +211,7 @@ fn get_html_token_diff(
 
     vec![(
       path_to_parent.to_vec(),
-      DiffOperation::Replace(ReplaceOperation {
+      DiffOperation::ReplaceChild(ReplaceChildOperation {
         new_inner_html,
         child_index,
       }),
@@ -238,12 +223,15 @@ fn get_html_token_diff(
 
     let mut zipped: Box<Iterator<Item = (Option<&CollapsedNode>, Option<&CollapsedNode>)>> =
       if potentially_deleting {
-        let zipped = optionalize_and_zip(old_token.children.iter(), new_token.children.iter());
+        let zipped = crate::zip_util::optionalize_and_zip(
+          old_token.children.iter(),
+          new_token.children.iter(),
+        );
         let mut vec = zipped.collect::<Vec<(Option<&CollapsedNode>, Option<&CollapsedNode>)>>();
         vec.reverse();
         Box::new(vec.into_iter())
       } else {
-        Box::new(optionalize_and_zip(
+        Box::new(crate::zip_util::optionalize_and_zip(
           old_token.children.iter(),
           new_token.children.iter(),
         ))
@@ -292,7 +280,7 @@ fn get_text_diff(old_text: &String, new_text: &String, path: Path) -> Diff {
   if old_text != new_text {
     vec![(
       path,
-      DiffOperation::Replace(ReplaceOperation {
+      DiffOperation::ReplaceChild(ReplaceChildOperation {
         new_inner_html: new_text.to_string(),
         child_index: 1237,
       }),
@@ -311,7 +299,7 @@ fn get_comment_diff(
     (Some(old_comment), Some(new_comment)) => get_text_diff(old_comment, new_comment, path),
     (Some(_old_comment), None) => vec![(
       path,
-      DiffOperation::Replace(ReplaceOperation {
+      DiffOperation::ReplaceChild(ReplaceChildOperation {
         // I think?
         new_inner_html: "<!-- -->".to_string(),
         child_index: 123,
@@ -319,7 +307,7 @@ fn get_comment_diff(
     )],
     (None, Some(new_comment)) => vec![(
       path,
-      DiffOperation::Replace(ReplaceOperation {
+      DiffOperation::ReplaceChild(ReplaceChildOperation {
         new_inner_html: format!("<!-- {} -->", new_comment),
         child_index: 123,
       }),
@@ -332,7 +320,7 @@ fn get_replace_diff(new_node: &CollapsedNode, path_to_parent: &Path, child_index
   let new_inner_html = new_node.as_inner_html(&clone_and_extend(path_to_parent, child_index));
   vec![(
     path_to_parent.to_vec(),
-    DiffOperation::Replace(ReplaceOperation {
+    DiffOperation::ReplaceChild(ReplaceChildOperation {
       new_inner_html,
       child_index: 1234,
     }),
