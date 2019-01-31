@@ -50,36 +50,81 @@ pub trait ApplicableTo<E> {
   fn apply_to(&self, other: E);
 }
 
+fn node_from_str(s: &str) -> web_sys::Node {
+  let doc = web_sys::window().unwrap().document().unwrap();
+  let new_container_el = doc.create_element("div").unwrap();
+  new_container_el.set_inner_html(s);
+  new_container_el.first_child().unwrap()
+}
+
+fn apply_diff_item_to_element_ref(diff_op: &DiffOperation, target_el: &web_sys::Element) {
+  match &diff_op {
+    DiffOperation::ReplaceChild(replace_child_operation) => {
+      let child_opt = target_el
+        .child_nodes()
+        .get(replace_child_operation.child_index as u32);
+
+      match child_opt {
+        Some(child) => {
+          let new_node = node_from_str(&replace_child_operation.new_inner_html);
+          target_el.replace_child(&new_node, &child);
+        },
+        _ => panic!("no child found"),
+      }
+    },
+    DiffOperation::InsertChild(insert_child_operation) => {
+      let new_inner_dom = node_from_str(&insert_child_operation.new_inner_html);
+
+      let child_opt = target_el
+        .child_nodes()
+        .get(insert_child_operation.child_index as u32);
+
+      // TODO figure out how to get child_opt.map(|x| &x) to compile
+      let _ = match child_opt {
+        Some(child) => target_el.insert_before(&new_inner_dom, Some(&child)),
+        None => target_el.insert_before(&new_inner_dom, None),
+      };
+    },
+    DiffOperation::DeleteChild(delete_child_operation) => {
+      let child = target_el
+        .child_nodes()
+        .get(delete_child_operation.child_index as u32)
+        .unwrap();
+
+      let _ = target_el.remove_child(&child);
+    },
+    DiffOperation::UpdateAttributes(update_attributes_operation) => {
+      for (attr, attr_value) in &update_attributes_operation.new_attributes {
+        let _ = target_el.set_attribute(&attr, &attr_value);
+      }
+    },
+  };
+}
+
 impl ApplicableTo<&web_sys::Element> for DiffItem {
   fn apply_to(&self, el: &web_sys::Element) {
-    let target_el = {
-      let path_to_parent = &self.0;
-      let path_selector = format!(
-        "[data-smithy-path=\"{}\"]",
-        path_to_parent
-          .iter()
-          .map(|u| u.to_string())
-          .collect::<Vec<String>>()
-          .join(",")
-      );
-      // this should never fail, the path_to_parent should always point to an
-      // existing node...
-      // TODO don't unwrap
-      let target_el = el.query_selector(&path_selector).unwrap().unwrap();
-      target_el
-    };
-    match &self.1 {
-      DiffOperation::ReplaceChild(replace_child_operation) => {
-        target_el.set_inner_html(&replace_child_operation.new_inner_html)
-      },
-      DiffOperation::InsertChild(insert_child_operation) => {},
-      DiffOperation::DeleteChild(delete_child_operation) => {},
-      DiffOperation::UpdateAttributes(update_attributes_operation) => {
-        for (attr, attr_value) in &update_attributes_operation.new_attributes {
-          let _ = target_el.set_attribute(&attr, &attr_value);
-        }
-      },
-    };
+    if self.0.len() == 0 {
+      apply_diff_item_to_element_ref(&self.1, el);
+    } else {
+      let target_el = {
+        let path_to_parent = &self.0;
+        let path_selector = format!(
+          "[data-smithy-path=\"{}\"]",
+          path_to_parent
+            .iter()
+            .map(|u| u.to_string())
+            .collect::<Vec<String>>()
+            .join(",")
+        );
+        // this should never fail, the path_to_parent should always point to an
+        // existing node...
+        // TODO don't unwrap
+
+        let target_el = el.query_selector(&path_selector).unwrap().unwrap();
+        target_el
+      };
+      apply_diff_item_to_element_ref(&self.1, &target_el);
+    }
   }
 }
 
@@ -113,7 +158,7 @@ impl Diffable for Vec<CollapsedNode> {
 
 fn get_i(i: usize, max_len: usize, potentially_deleting: bool) -> usize {
   if potentially_deleting {
-    max_len - i
+    max_len - i - 1
   } else {
     i
   }

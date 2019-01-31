@@ -46,9 +46,7 @@ fn get_window() -> Window {
 fn mount_to_element(mut component: Box<Component>, el: &Element) {
   {
     let node = component.render();
-    js_fns::log(&format!("mount to element {:?}", node));
     let node: Vec<CollapsedNode> = component.render().into();
-    js_fns::log(&format!("node into called {:?}", node));
     el.set_inner_html(&node.as_inner_html(&[]));
     LAST_RENDERED_NODE.store(node);
   }
@@ -100,38 +98,14 @@ fn attach_listeners(el: &Element) {
 
 pub fn rerender() {
   ROOT_COMPONENT.with_inner_value(|root_component| {
-    js_fns::log("\n\n-----------------------------------------------------\nrerender!");
     let newly_rendered_nodes: Vec<CollapsedNode> = root_component.render().into();
 
     LAST_RENDERED_NODE.with_inner_value(|last_rendered_node| {
-      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
-        "\nfrom {:#?}",
-        last_rendered_node
-          .iter()
-          .enumerate()
-          .map(|(i, x)| x.as_inner_html(&vec![i]))
-          .collect::<Vec<String>>()
-      )));
-      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
-        "to {:#?}",
-        newly_rendered_nodes
-          .iter()
-          .enumerate()
-          .map(|(i, x)| x.as_inner_html(&vec![i]))
-          .collect::<Vec<String>>()
-      )));
-
       let diff = last_rendered_node.get_diff_with(&newly_rendered_nodes);
-      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
-        "diff = {:#?}",
-        diff
-      )));
-
       ROOT_ELEMENT.with_inner_value(|el| {
-        // for diff_item in diff.iter() {
-        //   diff_item.apply_to(el);
-        // }
-        el.set_inner_html(&newly_rendered_nodes.as_inner_html(&[]));
+        for diff_item in diff.iter() {
+          diff_item.apply_to(el);
+        }
       });
     });
 
