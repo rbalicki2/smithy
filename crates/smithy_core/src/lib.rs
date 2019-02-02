@@ -103,20 +103,24 @@ pub fn rerender() {
     LAST_RENDERED_NODE.with_inner_value(|last_rendered_node| {
       let diff = last_rendered_node.get_diff_with(&newly_rendered_nodes);
       web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
-        "\n\n\nrerender\n------------------------\n\nfrom {:?}\n\nto {:?}\n\ndiff {:?}",
-        last_rendered_node
-          .iter()
-          .enumerate()
-          .map(|(i, x)| x.as_inner_html(&vec![i]))
-          .collect::<Vec<String>>(),
-        newly_rendered_nodes
-          .iter()
-          .enumerate()
-          .map(|(i, x)| x.as_inner_html(&vec![i]))
-          .collect::<Vec<String>>(),
+        "\n\n\nrerender\n------------------------\n\nfrom {:?}\n\nto {:?}\n\ndiff {:#?}\n\n",
+        last_rendered_node.as_inner_html(&vec![]),
+        // .iter()
+        // .enumerate()
+        // .map(|(i, x)| x.as_inner_html(&vec![i]))
+        // .collect::<Vec<String>>(),
+        newly_rendered_nodes.as_inner_html(&vec![]),
+        //   .iter()
+        //   .enumerate()
+        //   .map(|(i, x)| x.as_inner_html(&vec![i]))
+        //   .collect::<Vec<String>>(),
         diff
       )));
       ROOT_ELEMENT.with_inner_value(|el| {
+        web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+          "\n\nroot el inner {:?}",
+          el.inner_html()
+        )));
         for diff_item in diff.iter() {
           diff_item.apply_to(el);
         }
@@ -128,6 +132,7 @@ pub fn rerender() {
 }
 
 pub fn mount(component: Box<Component>, el: Element) {
+  console_error_panic_hook::set_once();
   mount_to_element(component, &el);
   attach_listeners(&el);
   ROOT_ELEMENT.store(el);

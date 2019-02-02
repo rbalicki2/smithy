@@ -121,6 +121,11 @@ fn apply_diff_item_to_element_ref(diff_op: &DiffOperation, target_el: &web_sys::
 
 impl ApplicableTo<&web_sys::Element> for DiffItem {
   fn apply_to(&self, el: &web_sys::Element) {
+    web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+      "apply to {:?}",
+      self
+    )));
+
     if self.0.len() == 0 {
       apply_diff_item_to_element_ref(&self.1, el);
     } else {
@@ -137,6 +142,13 @@ impl ApplicableTo<&web_sys::Element> for DiffItem {
         // this should never fail, the path_to_parent should always point to an
         // existing node...
         // TODO don't unwrap
+
+        web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+          "inner {:?}\n\nis_some {:?}\nselector {:?}",
+          el.inner_html(),
+          el.query_selector(&path_selector).unwrap().is_some(),
+          path_selector
+        )));
 
         let target_el = el.query_selector(&path_selector).unwrap().unwrap();
         target_el
@@ -331,11 +343,11 @@ fn get_html_token_diff(
       })
       .collect::<Vec<DiffItem>>();
 
-    if old_token.attributes != new_token.attributes {
+    if old_token.attributes != new_token.attributes || old_token.path != new_token.path {
       diff.push((
         old_token.path.clone(),
         DiffOperation::UpdateAttributes(UpdateAttributesOperation {
-          new_attributes: new_token.attributes.clone(),
+          new_attributes: new_token.get_attributes_including_path(),
         }),
       ))
     };

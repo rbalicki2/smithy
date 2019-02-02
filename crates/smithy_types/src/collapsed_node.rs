@@ -20,6 +20,22 @@ pub struct CollapsedHtmlToken {
   pub path: Vec<usize>,
 }
 
+impl CollapsedHtmlToken {
+  pub fn get_attributes_including_path(&self) -> crate::Attributes {
+    let mut attributes = self.attributes.clone();
+    attributes.insert(
+      "data-smithy-path".to_string(),
+      self
+        .path
+        .iter()
+        .map(|u| u.to_string())
+        .collect::<Vec<String>>()
+        .join(","),
+    );
+    attributes
+  }
+}
+
 fn clone_and_extend(path: &Path, next_item: usize) -> Path {
   let mut path = path.clone();
   path.extend(&[next_item]);
