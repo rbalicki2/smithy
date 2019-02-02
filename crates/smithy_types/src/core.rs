@@ -108,21 +108,23 @@ impl AsInnerHtml for CollapsedHtmlToken {
       "".to_string()
     };
 
-    if self.children.len() > 0 {
-      let child_html = self
-        .children
-        .iter()
-        .enumerate()
-        .map(|(i, node)| node.as_inner_html(&concat(base_path, i)))
-        .collect::<Vec<String>>()
-        .join("");
-      format!(
-        "<{}{}{}>{}</{}>",
-        self.node_type, attributes_string, path_string, child_html, self.node_type
-      )
-    } else {
-      format!("<{}{}{} />", self.node_type, attributes_string, path_string)
-    }
+    // N.B. self-closing nodes do not always work. TODO: make a list of self closing nodes
+    // because always making them non-self-closing is also bad.
+    // if self.children.len() > 0 {
+    let child_html = self
+      .children
+      .iter()
+      .enumerate()
+      .map(|(i, node)| node.as_inner_html(&concat(base_path, i)))
+      .collect::<Vec<String>>()
+      .join("");
+    format!(
+      "<{}{}{}>{}</{}>",
+      self.node_type, attributes_string, path_string, child_html, self.node_type
+    )
+    // } else {
+    //   format!("<{}{}{} />", self.node_type, attributes_string, path_string)
+    // }
   }
 }
 

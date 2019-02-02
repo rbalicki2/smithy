@@ -58,6 +58,10 @@ fn node_from_str(s: &str) -> web_sys::Node {
 }
 
 fn apply_diff_item_to_element_ref(diff_op: &DiffOperation, target_el: &web_sys::Element) {
+  web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+    "apply diff {:?}",
+    diff_op
+  )));
   match &diff_op {
     DiffOperation::ReplaceChild(replace_child_operation) => {
       let child_opt = target_el
@@ -86,6 +90,14 @@ fn apply_diff_item_to_element_ref(diff_op: &DiffOperation, target_el: &web_sys::
       };
     },
     DiffOperation::DeleteChild(delete_child_operation) => {
+      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+        "delete {:?} {:?}",
+        target_el
+          .child_nodes()
+          .get(delete_child_operation.child_index as u32)
+          .is_some(),
+        target_el.child_nodes().length()
+      )));
       let child = target_el
         .child_nodes()
         .get(delete_child_operation.child_index as u32)

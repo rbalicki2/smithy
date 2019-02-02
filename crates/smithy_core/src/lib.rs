@@ -102,6 +102,20 @@ pub fn rerender() {
 
     LAST_RENDERED_NODE.with_inner_value(|last_rendered_node| {
       let diff = last_rendered_node.get_diff_with(&newly_rendered_nodes);
+      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+        "\n\n\nrerender\nfrom {:?}\nto {:?}\ndiff {:?}",
+        last_rendered_node
+          .iter()
+          .enumerate()
+          .map(|(i, x)| x.as_inner_html(&vec![i]))
+          .collect::<Vec<String>>(),
+        newly_rendered_nodes
+          .iter()
+          .enumerate()
+          .map(|(i, x)| x.as_inner_html(&vec![i]))
+          .collect::<Vec<String>>(),
+        diff
+      )));
       ROOT_ELEMENT.with_inner_value(|el| {
         for diff_item in diff.iter() {
           diff_item.apply_to(el);
