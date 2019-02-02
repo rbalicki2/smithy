@@ -108,8 +108,9 @@ impl AsInnerHtml for CollapsedHtmlToken {
       "".to_string()
     };
 
-    // N.B. self-closing nodes do not always work. TODO: make a list of self closing nodes
-    // because always making them non-self-closing is also bad.
+    // TODO we cannot do this without referring to the type of tag that we are potentially
+    // making self-closing. For example, <span /> must become <span></span>, but <br />
+    // cannot become <br><br /> (which the browser turns into two <br/>'s).
     // if self.children.len() > 0 {
     let child_html = self
       .children
