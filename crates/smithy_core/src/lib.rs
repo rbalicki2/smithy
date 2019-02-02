@@ -103,7 +103,7 @@ pub fn rerender() {
     LAST_RENDERED_NODE.with_inner_value(|last_rendered_node| {
       let diff = last_rendered_node.get_diff_with(&newly_rendered_nodes);
       web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
-        "\n\n\nrerender\nfrom {:?}\nto {:?}\ndiff {:?}",
+        "\n\n\nrerender\n------------------------\n\nfrom {:?}\n\nto {:?}\n\ndiff {:?}",
         last_rendered_node
           .iter()
           .enumerate()

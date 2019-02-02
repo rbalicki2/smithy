@@ -22,12 +22,13 @@ x derive eq etc on Nodes
 ## Blockers to pre-alpha/blog post
 x macros for event types
 ? `impl Component` for a bunch of things
-* reconciliation algorithm (sounds important!!)
+x reconciliation algorithm + diff (sounds important!!)
 * file size
 * confirm <input> works reasonably
 x render-in-progress flag
 * convert existing comments to /// comments
 * prelude
+* self closing tags
 
 ## Blockers to alpha
 * compilation bugs, like `smd!()` `smd!(<div />` etc

@@ -67,6 +67,12 @@ fn apply_diff_item_to_element_ref(diff_op: &DiffOperation, target_el: &web_sys::
       let child_opt = target_el
         .child_nodes()
         .get(replace_child_operation.child_index as u32);
+      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+        "replace op {:?} {:?}\nexisting inner {:?}",
+        child_opt.is_some(),
+        target_el.child_nodes().length(),
+        target_el.inner_html()
+      )));
 
       match child_opt {
         Some(child) => {
