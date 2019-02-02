@@ -235,10 +235,15 @@ fn get_diff_between_tokens(
       get_html_token_diff(old_token, new_token, path_to_parent, child_index)
     },
     (CollapsedNode::Text(ref old_text), CollapsedNode::Text(ref new_text)) => {
-      get_text_diff(old_text, new_text, path_to_parent.clone())
+      get_text_diff(old_text, new_text, path_to_parent.to_vec(), child_index)
     },
     (CollapsedNode::Comment(ref old_comment), CollapsedNode::Comment(ref new_comment)) => {
-      get_comment_diff(old_comment, new_comment, path_to_parent.clone())
+      get_comment_diff(
+        old_comment,
+        new_comment,
+        path_to_parent.to_vec(),
+        child_index,
+      )
     },
     _ => get_replace_diff(new_node, path_to_parent, child_index),
   }
@@ -333,13 +338,13 @@ fn get_html_token_diff(
   }
 }
 
-fn get_text_diff(old_text: &String, new_text: &String, path: Path) -> Diff {
+fn get_text_diff(old_text: &String, new_text: &String, path: Path, child_index: usize) -> Diff {
   if old_text != new_text {
     vec![(
       path,
       DiffOperation::ReplaceChild(ReplaceChildOperation {
         new_inner_html: new_text.to_string(),
-        child_index: 1237,
+        child_index,
       }),
     )]
   } else {
@@ -351,22 +356,25 @@ fn get_comment_diff(
   old_comment_opt: &Option<String>,
   new_comment_opt: &Option<String>,
   path: Path,
+  child_index: usize,
 ) -> Diff {
   match (old_comment_opt, new_comment_opt) {
-    (Some(old_comment), Some(new_comment)) => get_text_diff(old_comment, new_comment, path),
+    (Some(old_comment), Some(new_comment)) => {
+      get_text_diff(old_comment, new_comment, path, child_index)
+    },
     (Some(_old_comment), None) => vec![(
       path,
       DiffOperation::ReplaceChild(ReplaceChildOperation {
         // I think?
         new_inner_html: "<!-- -->".to_string(),
-        child_index: 123,
+        child_index,
       }),
     )],
     (None, Some(new_comment)) => vec![(
       path,
       DiffOperation::ReplaceChild(ReplaceChildOperation {
         new_inner_html: format!("<!-- {} -->", new_comment),
-        child_index: 123,
+        child_index,
       }),
     )],
     (None, None) => vec![],
@@ -379,7 +387,7 @@ fn get_replace_diff(new_node: &CollapsedNode, path_to_parent: &Path, child_index
     path_to_parent.to_vec(),
     DiffOperation::ReplaceChild(ReplaceChildOperation {
       new_inner_html,
-      child_index: 1234,
+      child_index,
     }),
   )]
 }
