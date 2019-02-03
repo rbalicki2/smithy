@@ -117,6 +117,7 @@ pub fn make_component(
 
   quote!({
     use smithy::types as smithy_types;
+    // extern crate web_sys;
     let component: smithy_types::SmithyComponent = smithy_types::SmithyComponent(Box::new(move |phase| {
       match phase {
         smithy_types::Phase::Rendering => smithy_types::PhaseResult::Rendering(#token),
@@ -133,6 +134,11 @@ pub fn make_component(
             #inner_window_event_handling
             _ => smithy_types::PhaseResult::WindowEventHandling(event_handled),
           }
+        },
+        smithy_types::Phase::PostRendering(el) => {
+          // N.B. this breaks tests in smd_macro!!!
+          // web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!("post rendering in make smithy tokens (resume here!)")));
+          smithy_types::PhaseResult::PostRendering
         },
       }
     }));

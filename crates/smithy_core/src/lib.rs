@@ -118,6 +118,10 @@ pub fn rerender() {
     });
 
     LAST_RENDERED_NODE.store(newly_rendered_nodes);
+
+    ROOT_ELEMENT.with_inner_value(|el| {
+      root_component.handle_post_render(&el.child_nodes());
+    });
   });
 }
 

@@ -7,6 +7,7 @@ use enum_derive::{
   enum_derive_util,
   EnumFromInner,
 };
+use web_sys::Node as WebSysNode;
 
 pub type Attributes = std::collections::HashMap<String, String>;
 
@@ -175,6 +176,7 @@ pub type Path = [usize];
 /// of the match statement, causing them not to conflict.
 pub enum Phase<'a> {
   Rendering,
+  PostRendering(&'a web_sys::NodeList),
   UiEventHandling((&'a crate::UiEvent, &'a Path)),
   WindowEventHandling(&'a crate::WindowEvent),
 }
@@ -199,6 +201,7 @@ pub enum PhaseResult {
   Rendering(Node),
   UiEventHandling(EventHandled),
   WindowEventHandling(EventHandled),
+  PostRendering,
 }
 
 impl PhaseResult {
@@ -233,6 +236,7 @@ pub trait Component {
   fn handle_window_event(&mut self, _event: &crate::WindowEvent) -> EventHandled {
     false
   }
+  fn handle_post_render(&mut self, _vec: &web_sys::NodeList) {}
   fn render(&mut self) -> Node;
 }
 
@@ -247,5 +251,9 @@ impl<'a> Component for SmithyComponent<'a> {
 
   fn render(&mut self) -> Node {
     self.0(Phase::Rendering).unwrap_node()
+  }
+
+  fn handle_post_render(&mut self, vec: &web_sys::NodeList) {
+    self.0(Phase::PostRendering(vec));
   }
 }

@@ -61,3 +61,4 @@ x attribute values should be enclosed in quotes
 ## Lifecycle events
 * Start by adding a post_render={Fn(Vec<HtmlElement>)}
 * Handled in the same way as window event handlers
+* Enum of WindowEventInfo | LifeCycleEventInfo

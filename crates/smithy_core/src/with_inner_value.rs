@@ -4,7 +4,7 @@ use std::{
 };
 
 pub trait WithInnerValue<T> {
-  fn with_inner_value<R>(&'static self, callback: impl Fn(&mut T) -> R) -> R;
+  fn with_inner_value<R>(&'static self, callback: impl FnMut(&mut T) -> R) -> R;
   fn store(&'static self, val: T);
   // TODO implement
   // fn replace_inner_value(&'static self, callback: impl Fn(T));
