@@ -95,8 +95,13 @@ named!(
       match_closing_tag
     ),
     |((name, attributes_and_event_handlers), children_and_events, closing_tag_name)| {
-      // TODO add a descriptive error message
-      assert_eq!(name, closing_tag_name);
+      assert_eq!(
+        name,
+        closing_tag_name,
+        "Opening and closing tag names ({} and {}) do not match",
+        name,
+        closing_tag_name,
+      );
       let (attributes, event_handlers) = attributes_and_event_handlers.split_by_type();
       let (children, child_event_infos) = children_and_events.split_by_type();
       let token_stream = make_html_tokens(name, attributes, children);

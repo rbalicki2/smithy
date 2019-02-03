@@ -115,6 +115,18 @@ pub fn make_component(
         }
       });
 
+  // N.B. right now "lifecycle" == "post_render", but that needs to be disambiguated
+  let inner_lifecycle_event_handling =
+    lifecycle_event_handling_infos
+      .into_iter()
+      .fold(quote!{}, |accum, lifecycle_info| {
+        let cb = lifecycle_info.callback;
+        quote!{
+          #accum
+          (#cb)(node_list);
+        }
+      });
+
   quote!({
     use smithy::types as smithy_types;
     // extern crate web_sys;
@@ -135,9 +147,8 @@ pub fn make_component(
             _ => smithy_types::PhaseResult::WindowEventHandling(event_handled),
           }
         },
-        smithy_types::Phase::PostRendering(el) => {
-          // N.B. this breaks tests in smd_macro!!!
-          // web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!("post rendering in make smithy tokens (resume here!)")));
+        smithy_types::Phase::PostRendering(node_list) => {
+          #inner_lifecycle_event_handling
           smithy_types::PhaseResult::PostRendering
         },
       }
