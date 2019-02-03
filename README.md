@@ -30,6 +30,7 @@ x render-in-progress flag
 * prelude
 x self closing tags
 x attribute values should be enclosed in quotes
+* remaining events
 
 ## Blockers to alpha
 * compilation bugs, like `smd!()` `smd!(<div />` etc

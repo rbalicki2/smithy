@@ -123,7 +123,10 @@ lazy_static! {
   pub static ref WINDOW_EVENT_NAMES: HashMap<String, String> = {
     // Remember to update this as you add more!
     let mut event_names = HashMap::with_capacity(54);
+    event_names.insert("on_before_unload".into(), "OnBeforeUnload".into());
     event_names.insert("on_hash_change".into(), "OnHashChange".into());
+    event_names.insert("on_pop_state".into(), "OnPopState".into());
+    event_names.insert("on_unhandled_rejection".into(), "OnUnhandledRejection".into());
     event_names
   };
 }
