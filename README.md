@@ -28,7 +28,7 @@ x reconciliation algorithm + diff (sounds important!!)
 x render-in-progress flag
 * convert existing comments to /// comments
 * prelude
-* self closing tags
+x self closing tags
 
 ## Blockers to alpha
 * compilation bugs, like `smd!()` `smd!(<div />` etc
