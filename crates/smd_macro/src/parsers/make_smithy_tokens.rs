@@ -1,4 +1,5 @@
 use crate::types::{
+  LifecycleEventHandlingInfo,
   StringTokenStreamPair,
   UIEventHandlingInfo,
   WindowEventHandlingInfo,
@@ -60,6 +61,7 @@ pub fn make_component(
   token: TokenStream,
   ui_event_handling_infos: Vec<UIEventHandlingInfo>,
   window_event_handling_infos: Vec<WindowEventHandlingInfo>,
+  lifecycle_event_handling_infos: Vec<LifecycleEventHandlingInfo>,
 ) -> TokenStream {
   let group_window_event_handling = ui_event_handling_infos
     .iter()

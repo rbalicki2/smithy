@@ -205,7 +205,7 @@ named!(
             (window_event_handler_infos, lifecycle_event_handling_infos)
           }
         );
-      super::make_smithy_tokens::make_component(token, event_handling_infos, window_event_handler_infos)
+      super::make_smithy_tokens::make_component(token, event_handling_infos, window_event_handler_infos, lifecycle_event_handling_infos)
     }
   )
 );
