@@ -77,7 +77,7 @@ fn apply_diff_item_to_element_ref(diff_op: &DiffOperation, target_el: &web_sys::
       match child_opt {
         Some(child) => {
           let new_node = node_from_str(&replace_child_operation.new_inner_html);
-          target_el.replace_child(&new_node, &child);
+          let _ = target_el.replace_child(&new_node, &child);
         },
         _ => panic!("no child found"),
       }
@@ -200,9 +200,7 @@ fn get_vec_path_diff(old_nodes: &Vec<CollapsedNode>, new_nodes: &Vec<CollapsedNo
   // N.B. this is *really redundant* and should be refactored away.
   let path = vec![];
 
-  // let zipped =
-  //   crate::zip_util::optionalize_zip_reverse_and_enumerate(old_nodes.iter(), new_nodes.iter());
-  let mut zipped: Box<Iterator<Item = (Option<&CollapsedNode>, Option<&CollapsedNode>)>> =
+  let zipped: Box<Iterator<Item = (Option<&CollapsedNode>, Option<&CollapsedNode>)>> =
     if potentially_deleting {
       let zipped = crate::zip_util::optionalize_and_zip(old_nodes.iter(), new_nodes.iter());
       let mut vec = zipped.collect::<Vec<(Option<&CollapsedNode>, Option<&CollapsedNode>)>>();
@@ -223,7 +221,7 @@ fn get_vec_path_diff(old_nodes: &Vec<CollapsedNode>, new_nodes: &Vec<CollapsedNo
         (Some(old_node), Some(new_node)) => {
           get_diff_between_tokens(old_node, new_node, &path, real_i)
         },
-        (Some(old_node), None) => vec![(
+        (Some(_old_node), None) => vec![(
           path.clone(),
           DiffOperation::DeleteChild(DeleteChildOperation {
             child_index: real_i,
@@ -279,11 +277,9 @@ fn get_html_token_diff(
   path_to_parent: &Path,
   child_index: usize,
 ) -> Diff {
-  /**
-   * If the node_type's are different, we replace
-   * If they're the same, we potentially change attributes
-   * And call get_path_diff on each zipped child
-   */
+  // If the node_type's are different, we replace
+  // If they're the same, we potentially change attributes
+  // And call get_path_diff on each zipped child
   let old_node_type = &old_token.node_type;
   let new_node_type = &new_token.node_type;
   if old_node_type != new_node_type {
@@ -301,7 +297,7 @@ fn get_html_token_diff(
     let potentially_deleting = old_token.children.len() > new_token.children.len();
     let max_len = std::cmp::max(old_token.children.len(), new_token.children.len());
 
-    let mut zipped: Box<Iterator<Item = (Option<&CollapsedNode>, Option<&CollapsedNode>)>> =
+    let zipped: Box<Iterator<Item = (Option<&CollapsedNode>, Option<&CollapsedNode>)>> =
       if potentially_deleting {
         let zipped = crate::zip_util::optionalize_and_zip(
           old_token.children.iter(),
@@ -326,7 +322,7 @@ fn get_html_token_diff(
           &old_token.path,
           get_i(i, max_len, potentially_deleting),
         ),
-        (Some(old_child), None) => vec![(
+        (Some(_old_child), None) => vec![(
           old_token.path.clone(),
           DiffOperation::DeleteChild(DeleteChildOperation {
             child_index: get_i(i, max_len, potentially_deleting),

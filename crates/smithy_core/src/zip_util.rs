@@ -6,7 +6,6 @@ fn optionalize_and_extend_with_none<T>(
   iter.map(|item| Some(item)).chain(repeat_with(|| None))
 }
 
-type ZippedOptionalizedItem<T, U> = (Option<T>, Option<U>);
 pub fn optionalize_and_zip<T, U>(
   left_iter: impl ExactSizeIterator<Item = T>,
   right_iter: impl ExactSizeIterator<Item = U>,
@@ -17,7 +16,7 @@ pub fn optionalize_and_zip<T, U>(
   left_optionalized.zip(right_optionalized).take(max_len)
 }
 
-// TODO figure out why this doesn't work
+// TODO figure out why this doesn't compile
 // pub fn optionalize_zip_reverse_and_enumerate<T, U> (
 //   left_iter: impl ExactSizeIterator<Item = T>,
 //   right_iter: impl ExactSizeIterator<Item = U>,

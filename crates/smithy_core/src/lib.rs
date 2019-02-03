@@ -2,7 +2,6 @@ use smithy_types::{
   AsInnerHtml,
   CollapsedNode,
   Component,
-  Node,
   Path,
   UiEvent,
   UnwrappedPromise,
@@ -45,7 +44,6 @@ fn get_window() -> Window {
 
 fn mount_to_element(mut component: Box<Component>, el: &Element) {
   {
-    let node = component.render();
     let node: Vec<CollapsedNode> = component.render().into();
     el.set_inner_html(&node.as_inner_html(&[]));
     LAST_RENDERED_NODE.store(node);
