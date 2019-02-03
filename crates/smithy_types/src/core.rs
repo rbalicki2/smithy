@@ -99,6 +99,32 @@ fn format_path(path: &Path) -> String {
   }
 }
 
+use lazy_static::lazy_static;
+lazy_static! {
+  static ref VOID_TAGS: std::collections::HashSet<String> = {
+    // see https://www.w3.org/TR/2011/WD-html-markup-20110113/syntax.html#syntax-elements
+    // area, base, br, col, command, embed, hr, img, input, keygen, link, meta, param, source, track, wbr
+    let mut void_tags = std::collections::HashSet::new();
+    void_tags.insert("area".to_string());
+    void_tags.insert("base".to_string());
+    void_tags.insert("br".to_string());
+    void_tags.insert("col".to_string());
+    void_tags.insert("command".to_string());
+    void_tags.insert("embed".to_string());
+    void_tags.insert("hr".to_string());
+    void_tags.insert("img".to_string());
+    void_tags.insert("input".to_string());
+    void_tags.insert("keygen".to_string());
+    void_tags.insert("link".to_string());
+    void_tags.insert("meta".to_string());
+    void_tags.insert("param".to_string());
+    void_tags.insert("source".to_string());
+    void_tags.insert("track".to_string());
+    void_tags.insert("wbr".to_string());
+    void_tags
+  };
+}
+
 impl AsInnerHtml for CollapsedHtmlToken {
   fn as_inner_html(&self, base_path: &Path) -> String {
     let path_string = format!(" data-smithy-path=\"{}\"", format_path(&self.path));
@@ -108,24 +134,21 @@ impl AsInnerHtml for CollapsedHtmlToken {
       "".to_string()
     };
 
-    // TODO we cannot do this without referring to the type of tag that we are potentially
-    // making self-closing. For example, <span /> must become <span></span>, but <br />
-    // cannot become <br><br /> (which the browser turns into two <br/>'s).
-    // if self.children.len() > 0 {
-    let child_html = self
-      .children
-      .iter()
-      .enumerate()
-      .map(|(i, node)| node.as_inner_html(&concat(base_path, i)))
-      .collect::<Vec<String>>()
-      .join("");
-    format!(
-      "<{}{}{}>{}</{}>",
-      self.node_type, attributes_string, path_string, child_html, self.node_type
-    )
-    // } else {
-    //   format!("<{}{}{} />", self.node_type, attributes_string, path_string)
-    // }
+    if !VOID_TAGS.contains(&self.node_type) {
+      let child_html = self
+        .children
+        .iter()
+        .enumerate()
+        .map(|(i, node)| node.as_inner_html(&concat(base_path, i)))
+        .collect::<Vec<String>>()
+        .join("");
+      format!(
+        "<{}{}{}>{}</{}>",
+        self.node_type, attributes_string, path_string, child_html, self.node_type
+      )
+    } else {
+      format!("<{}{}{} />", self.node_type, attributes_string, path_string)
+    }
   }
 }
 
