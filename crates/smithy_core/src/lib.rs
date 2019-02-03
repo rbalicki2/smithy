@@ -45,7 +45,7 @@ fn get_window() -> Window {
 fn mount_to_element(mut component: Box<Component>, el: &Element) {
   {
     let node: Vec<CollapsedNode> = component.render().into();
-    el.set_inner_html(&node.as_inner_html(&[]));
+    el.set_inner_html(&node.as_inner_html());
     LAST_RENDERED_NODE.store(node);
   }
   ROOT_COMPONENT.store(component);
@@ -102,16 +102,8 @@ pub fn rerender() {
       let diff = last_rendered_node.get_diff_with(&newly_rendered_nodes);
       web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
         "\n\n\nrerender\n------------------------\n\nfrom {:?}\n\nto {:?}\n\ndiff {:#?}\n\n",
-        last_rendered_node.as_inner_html(&vec![]),
-        // .iter()
-        // .enumerate()
-        // .map(|(i, x)| x.as_inner_html(&vec![i]))
-        // .collect::<Vec<String>>(),
-        newly_rendered_nodes.as_inner_html(&vec![]),
-        //   .iter()
-        //   .enumerate()
-        //   .map(|(i, x)| x.as_inner_html(&vec![i]))
-        //   .collect::<Vec<String>>(),
+        last_rendered_node.as_inner_html(),
+        newly_rendered_nodes.as_inner_html(),
         diff
       )));
       ROOT_ELEMENT.with_inner_value(|el| {

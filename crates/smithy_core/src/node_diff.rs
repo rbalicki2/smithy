@@ -197,7 +197,6 @@ fn get_i(i: usize, max_len: usize, potentially_deleting: bool) -> usize {
 fn get_vec_path_diff(old_nodes: &Vec<CollapsedNode>, new_nodes: &Vec<CollapsedNode>) -> Diff {
   let potentially_deleting = old_nodes.len() > new_nodes.len();
   let max_len = std::cmp::max(old_nodes.len(), new_nodes.len());
-  // N.B. this is *really redundant* and should be refactored away.
   let path = vec![];
 
   let zipped: Box<Iterator<Item = (Option<&CollapsedNode>, Option<&CollapsedNode>)>> =
@@ -230,7 +229,7 @@ fn get_vec_path_diff(old_nodes: &Vec<CollapsedNode>, new_nodes: &Vec<CollapsedNo
         (None, Some(new_node)) => vec![(
           path.clone(),
           DiffOperation::InsertChild(InsertChildOperation {
-            new_inner_html: new_node.as_inner_html(&path),
+            new_inner_html: new_node.as_inner_html(),
             child_index: real_i,
           }),
         )],
@@ -265,12 +264,6 @@ fn get_diff_between_tokens(
   }
 }
 
-fn clone_and_extend(path: &Path, next_item: usize) -> Path {
-  let mut path = path.clone();
-  path.extend(&[next_item]);
-  path
-}
-
 fn get_html_token_diff(
   old_token: &CollapsedHtmlToken,
   new_token: &CollapsedHtmlToken,
@@ -283,7 +276,7 @@ fn get_html_token_diff(
   let old_node_type = &old_token.node_type;
   let new_node_type = &new_token.node_type;
   if old_node_type != new_node_type {
-    let new_inner_html = new_token.as_inner_html(path_to_parent);
+    let new_inner_html = new_token.as_inner_html();
 
     vec![(
       path_to_parent.to_vec(),
@@ -331,7 +324,7 @@ fn get_html_token_diff(
         (None, Some(new_child)) => vec![(
           old_token.path.clone(),
           DiffOperation::InsertChild(InsertChildOperation {
-            new_inner_html: new_child.as_inner_html(path_to_parent),
+            new_inner_html: new_child.as_inner_html(),
             child_index: get_i(i, max_len, potentially_deleting),
           }),
         )],
@@ -345,7 +338,7 @@ fn get_html_token_diff(
         DiffOperation::UpdateAttributes(UpdateAttributesOperation {
           new_attributes: new_token.get_attributes_including_path(),
         }),
-      ))
+      ));
     };
 
     diff
@@ -396,7 +389,7 @@ fn get_comment_diff(
 }
 
 fn get_replace_diff(new_node: &CollapsedNode, path_to_parent: &Path, child_index: usize) -> Diff {
-  let new_inner_html = new_node.as_inner_html(&clone_and_extend(path_to_parent, child_index));
+  let new_inner_html = new_node.as_inner_html();
   vec![(
     path_to_parent.to_vec(),
     DiffOperation::ReplaceChild(ReplaceChildOperation {

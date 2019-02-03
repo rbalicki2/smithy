@@ -21,7 +21,7 @@ custom_derive! {
 }
 
 pub trait AsInnerHtml {
-  fn as_inner_html(&self, base_path: &Path) -> String;
+  fn as_inner_html(&self) -> String;
 }
 
 fn concat(path: &Path, new_item: usize) -> Vec<usize> {
@@ -36,31 +36,22 @@ fn clone_and_extend(path: &Vec<usize>, next_item: usize) -> Vec<usize> {
 }
 
 impl AsInnerHtml for Vec<CollapsedNode> {
-  fn as_inner_html(&self, base_path: &Path) -> String {
+  fn as_inner_html(&self) -> String {
     // TODO the path (clone_and_extend, below) needs to be from the
     // uncollapsed node and stored in the collapsed node
-    let path_as_vec: Vec<usize> = base_path.to_vec();
     self
       .iter()
       .enumerate()
-      .map(|(i, node)| node.as_inner_html(&clone_and_extend(&path_as_vec, i)))
-      // .map(|node| node.as_inner_html())
+      .map(|(i, node)| node.as_inner_html())
       .collect()
   }
 }
 
 impl AsInnerHtml for CollapsedNode {
-  fn as_inner_html(&self, base_path: &Path) -> String {
-    // TODO asInnerHtml no longer needs a path param
+  fn as_inner_html(&self) -> String {
     match self {
-      CollapsedNode::Dom(token) => token.as_inner_html(base_path),
+      CollapsedNode::Dom(token) => token.as_inner_html(),
       CollapsedNode::Text(s) => s.to_string(),
-      // Node::Vec(vec) => vec
-      //   .iter()
-      //   .enumerate()
-      //   .map(|(i, node)| node.as_inner_html(&concat(base_path, i)))
-      //   .collect::<Vec<String>>()
-      //   .join(""),
       CollapsedNode::Comment(str_opt) => match str_opt {
         Some(s) => format!("<!-- {} -->", s),
         None => "<!-- -->".into(),
@@ -126,7 +117,7 @@ lazy_static! {
 }
 
 impl AsInnerHtml for CollapsedHtmlToken {
-  fn as_inner_html(&self, base_path: &Path) -> String {
+  fn as_inner_html(&self) -> String {
     let path_string = format!(" data-smithy-path=\"{}\"", format_path(&self.path));
     let attributes_string = if self.attributes.len() > 0 {
       format!(" {}", format_attributes(&self.attributes))
@@ -139,7 +130,7 @@ impl AsInnerHtml for CollapsedHtmlToken {
         .children
         .iter()
         .enumerate()
-        .map(|(i, node)| node.as_inner_html(&concat(base_path, i)))
+        .map(|(i, node)| node.as_inner_html())
         .collect::<Vec<String>>()
         .join("");
       format!(
@@ -258,49 +249,3 @@ impl<'a> Component for SmithyComponent<'a> {
     self.0(Phase::Rendering).unwrap_node()
   }
 }
-
-// OLD
-// impl AsInnerHtml for CollapsedNode {
-//   fn as_inner_html(&self, base_path: &Path) -> String {
-//     match self {
-//       Node::Dom(token) => token.as_inner_html(base_path),
-//       Node::Text(s) => s.to_string(),
-//       // Node::Vec(vec) => vec
-//       //   .iter()
-//       //   .enumerate()
-//       //   .map(|(i, node)| node.as_inner_html(&concat(base_path, i)))
-//       //   .collect::<Vec<String>>()
-//       //   .join(""),
-//       Node::Comment(str_opt) => match str_opt {
-//         Some(s) => format!("<!-- {} -->", s),
-//         None => "<!-- -->".into(),
-//       },
-//     }
-//   }
-// }
-// impl AsInnerHtml for CollapsedHtmlToken {
-//   fn as_inner_html(&self, base_path: &Path) -> String {
-//     let path_string = format!(" data-smithy-path=\"{}\"", format_path(base_path));
-//     let attributes_string = if self.attributes.len() > 0 {
-//       format!(" {}", format_attributes(&self.attributes),)
-//     } else {
-//       "".to_string()
-//     };
-
-//     if self.children.len() > 0 {
-//       let child_html = self
-//         .children
-//         .iter()
-//         .enumerate()
-//         .map(|(i, node)| node.as_inner_html(&concat(base_path, i)))
-//         .collect::<Vec<String>>()
-//         .join("");
-//       format!(
-//         "<{}{}{}>{}</{}>",
-//         self.node_type, attributes_string, path_string, child_html, self.node_type
-//       )
-//     } else {
-//       format!("<{}{}{} />", self.node_type, attributes_string, path_string)
-//     }
-//   }
-// }
