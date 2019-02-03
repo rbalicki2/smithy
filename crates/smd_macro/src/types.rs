@@ -104,16 +104,19 @@ impl SplitByType<Vec<TokenStream>, Vec<UIEventHandlingInfo>>
   }
 }
 
+#[derive(Debug)]
 pub struct WindowEventHandlingInfo {
   pub event: String,
   pub callback: TokenStream,
 }
 
+#[derive(Debug)]
 pub struct LifecycleEventHandlingInfo {
   pub lifecycle_event: String,
   pub callback: TokenStream,
 }
 
+#[derive(Debug)]
 pub enum GlobalEventHandlingInfo {
   Window(WindowEventHandlingInfo),
   Lifecycle(LifecycleEventHandlingInfo),

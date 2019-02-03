@@ -193,23 +193,24 @@ named!(
         );
       let token = util::reduce_vec_to_node(&vec_of_node_tokens);
 
-      let (window_event_handler_infos, lifecycle_event_handling_infos): (Vec<WindowEventHandlingInfo>, Vec<LifecycleEventHandlingInfo>) = global_event_handling_infos
-        .into_iter()
-        .fold(
-          (vec![], vec![]),
-          |(mut window_event_handler_infos, mut lifecycle_event_handling_infos), current_global_event_handling_info| {
-            // Can this be done more parsimoniously, e.g. using a library?
-            match current_global_event_handling_info {
-              GlobalEventHandlingInfo::Window(window_event_handling_info) => {
-                window_event_handler_infos.push(window_event_handling_info);
-              },
-              GlobalEventHandlingInfo::Lifecycle(lifecycle_event_handling_info) => {
-                lifecycle_event_handling_infos.push(lifecycle_event_handling_info);
-              },
-            };
-            (window_event_handler_infos, lifecycle_event_handling_infos)
-          }
-        );
+      let (window_event_handler_infos, lifecycle_event_handling_infos): (Vec<WindowEventHandlingInfo>, Vec<LifecycleEventHandlingInfo>)
+        = global_event_handling_infos
+          .into_iter()
+          .fold(
+            (vec![], vec![]),
+            |(mut window_event_handler_infos, mut lifecycle_event_handling_infos), current_global_event_handling_info| {
+              // Can this be done more parsimoniously, e.g. using a library?
+              match current_global_event_handling_info {
+                GlobalEventHandlingInfo::Window(window_event_handling_info) => {
+                  window_event_handler_infos.push(window_event_handling_info);
+                },
+                GlobalEventHandlingInfo::Lifecycle(lifecycle_event_handling_info) => {
+                  lifecycle_event_handling_infos.push(lifecycle_event_handling_info);
+                },
+              };
+              (window_event_handler_infos, lifecycle_event_handling_infos)
+            }
+          );
       super::make_smithy_tokens::make_component(token, event_handling_infos, window_event_handler_infos, lifecycle_event_handling_infos)
     }
   )

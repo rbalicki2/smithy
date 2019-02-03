@@ -74,6 +74,17 @@ pub fn make_component(
       }
     });
 
+  let group_lifecycle_event_handling = ui_event_handling_infos
+    .iter()
+    .filter(|info| info.is_group)
+    .map(|info| info.callback.clone())
+    .fold(quote!{}, |accum, group| {
+      quote!{
+        #accum
+        (#group).handle_post_render(node_list);
+      }
+    });
+
   let inner_ui_event_handling =
     ui_event_handling_infos
       .into_iter()
@@ -148,6 +159,7 @@ pub fn make_component(
           }
         },
         smithy_types::Phase::PostRendering(node_list) => {
+          #group_lifecycle_event_handling
           #inner_lifecycle_event_handling
           smithy_types::PhaseResult::PostRendering
         },
