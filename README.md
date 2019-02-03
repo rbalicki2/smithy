@@ -29,6 +29,7 @@ x render-in-progress flag
 * convert existing comments to /// comments
 * prelude
 x self closing tags
+x attribute values should be enclosed in quotes
 
 ## Blockers to alpha
 * compilation bugs, like `smd!()` `smd!(<div />` etc
