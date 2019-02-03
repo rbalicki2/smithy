@@ -108,3 +108,13 @@ pub struct WindowEventHandlingInfo {
   pub event: String,
   pub callback: TokenStream,
 }
+
+pub struct LifecycleEventHandlingInfo {
+  pub lifecycle_event: String,
+  pub callback: TokenStream,
+}
+
+pub enum GlobalEventHandlingInfo {
+  Window(WindowEventHandlingInfo),
+  Lifecycle(LifecycleEventHandlingInfo),
+}

@@ -1,9 +1,12 @@
 use crate::types::{
   AttributeOrEventHandler,
+  GlobalEventHandlingInfo,
+  LifecycleEventHandlingInfo,
   SplitByType,
   TokenStreamEventHandlingInfoPair,
   TokenTreeSlice,
   UIEventHandlingInfo,
+  WindowEventHandlingInfo,
 };
 use nom::{
   alt,
@@ -168,7 +171,7 @@ named!(
       many_0_custom!(match_window_event_handlers),
       many_1_custom!(match_node)
     ),
-    |(window_event_handler_infos, dom_vec)| {
+    |(global_event_handling_infos, dom_vec)| {
       let (vec_of_node_tokens, event_handling_infos) = dom_vec.into_iter().enumerate()
         .fold(
           (vec![], vec![]),
@@ -184,6 +187,24 @@ named!(
           }
         );
       let token = util::reduce_vec_to_node(&vec_of_node_tokens);
+
+      let (window_event_handler_infos, lifecycle_event_handling_infos): (Vec<WindowEventHandlingInfo>, Vec<LifecycleEventHandlingInfo>) = global_event_handling_infos
+        .into_iter()
+        .fold(
+          (vec![], vec![]),
+          |(mut window_event_handler_infos, mut lifecycle_event_handling_infos), current_global_event_handling_info| {
+            // Can this be done more parsimoniously, e.g. using a library?
+            match current_global_event_handling_info {
+              GlobalEventHandlingInfo::Window(window_event_handling_info) => {
+                window_event_handler_infos.push(window_event_handling_info);
+              },
+              GlobalEventHandlingInfo::Lifecycle(lifecycle_event_handling_info) => {
+                lifecycle_event_handling_infos.push(lifecycle_event_handling_info);
+              },
+            };
+            (window_event_handler_infos, lifecycle_event_handling_infos)
+          }
+        );
       super::make_smithy_tokens::make_component(token, event_handling_infos, window_event_handler_infos)
     }
   )

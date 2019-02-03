@@ -117,16 +117,20 @@ lazy_static! {
     event_names.insert("on_toggle".into(), "OnToggle".into());
     event_names
   };
-}
 
-lazy_static! {
   pub static ref WINDOW_EVENT_NAMES: HashMap<String, String> = {
     // Remember to update this as you add more!
-    let mut event_names = HashMap::with_capacity(54);
+    let mut event_names = HashMap::with_capacity(4);
     event_names.insert("on_before_unload".into(), "OnBeforeUnload".into());
     event_names.insert("on_hash_change".into(), "OnHashChange".into());
     event_names.insert("on_pop_state".into(), "OnPopState".into());
     event_names.insert("on_unhandled_rejection".into(), "OnUnhandledRejection".into());
     event_names
+  };
+
+  pub static ref LIFECYCLE_EVENT_NAMES: HashMap<String, String> = {
+    let mut lifecycle_event_names = HashMap::with_capacity(1);
+    lifecycle_event_names.insert("post_render".into(), "PostRender".into());
+    lifecycle_event_names
   };
 }

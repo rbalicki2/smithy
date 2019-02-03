@@ -57,3 +57,7 @@ x attribute values should be enclosed in quotes
 * SmithyDom and WebDom can all be replaced with e.g. NativeDom or whatever
 * Into<WebDom> is where we need to put things like "h1 can't be self closing" etc.
 * WebDom implements Diffable, etc.
+
+## Lifecycle events
+* Start by adding a post_render={Fn(Vec<HtmlElement>)}
+* Handled in the same way as window event handlers
