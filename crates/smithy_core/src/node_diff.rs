@@ -44,6 +44,9 @@ pub type Diff = Vec<DiffItem>;
 
 pub trait Diffable {
   fn get_diff_with(&self, other: &Self) -> Diff;
+  // N.B. this **does not** belong on this trait!
+  // TODO think clearly about this
+  fn split_node_list(&self, node_vec: Vec<web_sys::Node>) -> Vec<Vec<web_sys::Node>>;
 }
 
 pub trait ApplicableTo<E> {
@@ -183,6 +186,11 @@ impl ApplicableTo<&web_sys::Element> for DiffItem {
 impl Diffable for Vec<CollapsedNode> {
   fn get_diff_with(&self, other: &Self) -> Diff {
     get_vec_path_diff(self, other)
+  }
+
+  fn split_node_list(&self, node_vec: Vec<web_sys::Node>) -> Vec<Vec<web_sys::Node>> {
+    vec![node_vec]
+    // unimplemented!("split node list")
   }
 }
 

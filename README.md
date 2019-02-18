@@ -45,6 +45,7 @@ x attribute values should be enclosed in quotes
 ## Non-blockers
 * more tests
 * organize types and separate true core from SmithyComponent implementation
+* variable names are non-opaque :(
 
 ## Issues
 * Think about how to handle match statements, e.g. in the context of routing
@@ -62,3 +63,11 @@ x attribute values should be enclosed in quotes
 * Start by adding a post_render={Fn(Vec<HtmlElement>)}
 * Handled in the same way as window event handlers
 * Enum of WindowEventInfo | LifeCycleEventInfo
+* cannot be a NodeList, needs to be a Vec<Node>, since { &mut first }{ &mut second }
+  need to each receive disjoint nodes
+
+## GetterSetter
+* way to put a single piece of state in a wrapper, so that it can be used
+  in a sub-component
+* since we can't pass `(state, |new_state| state = new_state)` as params to an input,
+  but we can do `let state_wrapped = GetterSetter::wrap(state); render(state_wrapped)`

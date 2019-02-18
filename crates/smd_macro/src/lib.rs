@@ -16,7 +16,7 @@ pub fn smd(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   // println!("\nin smd parsed - {:?}", parsed);
 
   let unwrapped = parsed.unwrap();
-  // println!("\nlet mut a = {};\n", unwrapped.1);
+  println!("\nlet mut a = {};\n", unwrapped.1);
   let remaining = unwrapped.0;
 
   // TODO handle this at the nom level

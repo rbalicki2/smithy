@@ -94,8 +94,19 @@ fn attach_listeners(el: &Element) {
   attach_event_listeners::attach_window_event_listeners(&window);
 }
 
+fn convert_node_list_to_vec(node_list: &web_sys::NodeList) -> Vec<web_sys::Node> {
+  let len = node_list.length();
+  let mut vec = Vec::with_capacity(len as usize);
+  for i in 0..len {
+    vec.push(node_list.get(i).unwrap());
+  }
+  vec
+}
+
 pub fn rerender() {
   ROOT_COMPONENT.with_inner_value(|root_component| {
+    // We need to also emit information about the collapsing process for the post-render method later
+    // e.g. let newly_rendered_nodes = (Vec<CollapsedNode>, Vec<usize>) = root_component.render().into();
     let newly_rendered_nodes: Vec<CollapsedNode> = root_component.render().into();
 
     LAST_RENDERED_NODE.with_inner_value(|last_rendered_node| {
@@ -117,11 +128,17 @@ pub fn rerender() {
       });
     });
 
-    LAST_RENDERED_NODE.store(newly_rendered_nodes);
-
     ROOT_ELEMENT.with_inner_value(|el| {
-      root_component.handle_post_render(&el.child_nodes());
+      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+        "bout to call pre_render {:?}",
+        newly_rendered_nodes
+      )));
+      // root_component.handle_post_render(&convert_node_list_to_vec(&el.child_nodes()));
+      root_component.handle_post_render(
+        &newly_rendered_nodes.split_node_list(convert_node_list_to_vec(&el.child_nodes())),
+      );
     });
+    LAST_RENDERED_NODE.store(newly_rendered_nodes);
   });
 }
 

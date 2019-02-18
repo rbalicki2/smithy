@@ -176,7 +176,7 @@ pub type Path = [usize];
 /// of the match statement, causing them not to conflict.
 pub enum Phase<'a> {
   Rendering,
-  PostRendering(&'a web_sys::NodeList),
+  PostRendering(&'a Vec<web_sys::Node>),
   UiEventHandling((&'a crate::UiEvent, &'a Path)),
   WindowEventHandling(&'a crate::WindowEvent),
 }
@@ -236,7 +236,7 @@ pub trait Component {
   fn handle_window_event(&mut self, _event: &crate::WindowEvent) -> EventHandled {
     false
   }
-  fn handle_post_render(&mut self, _vec: &web_sys::NodeList) {}
+  fn handle_post_render(&mut self, _vec: &Vec<Vec<web_sys::Node>>) {}
   fn render(&mut self) -> Node;
 }
 
@@ -253,7 +253,7 @@ impl<'a> Component for SmithyComponent<'a> {
     self.0(Phase::Rendering).unwrap_node()
   }
 
-  fn handle_post_render(&mut self, vec: &web_sys::NodeList) {
-    self.0(Phase::PostRendering(vec));
+  fn handle_post_render(&mut self, vec: &Vec<Vec<web_sys::Node>>) {
+    self.0(Phase::PostRendering(&vec![]));
   }
 }

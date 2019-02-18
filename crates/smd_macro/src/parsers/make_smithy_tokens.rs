@@ -77,12 +77,19 @@ pub fn make_component(
   let group_lifecycle_event_handling = ui_event_handling_infos
     .iter()
     .filter(|info| info.is_group)
-    .map(|info| info.callback.clone())
-    .fold(quote!{}, |accum, group| {
-      quote!{
+    .map(|info| (info.callback.clone(), info.reversed_path.clone()))
+    .fold(quote!{}, |accum, (group, reversed_path)| {
+      quote!{{
         #accum
-        (#group).handle_post_render(node_list);
-      }
+        // let node_list =
+        // N.B. this line fails - node_list is a vec, but this should be a vec of vecs
+        // TODO think about this
+        // This is when we apply post render to children
+        // (#group).handle_post_render(node_list);
+        (#group).handle_post_render(&vec![]);
+        // N.B. cannot wrap in vec![node_list] because that has type Vec<&Vec<X>> instead of &Vec<Vec<X>>
+        // DAMMIT
+      }}
     });
 
   let inner_ui_event_handling =
@@ -140,7 +147,6 @@ pub fn make_component(
 
   quote!({
     use smithy::types as smithy_types;
-    // extern crate web_sys;
     let component: smithy_types::SmithyComponent = smithy_types::SmithyComponent(Box::new(move |phase| {
       match phase {
         smithy_types::Phase::Rendering => smithy_types::PhaseResult::Rendering(#token),
