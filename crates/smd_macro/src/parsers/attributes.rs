@@ -44,7 +44,13 @@ impl AttributeOrEventHandler {
   fn create_from_string(string: String, t: TokenStream) -> AttributeOrEventHandler {
     match UI_EVENT_NAMES.get(&string) {
       Some(event_name) => AttributeOrEventHandler::EventHandler((event_name.to_string(), t)),
-      None => AttributeOrEventHandler::Attribute((string, t)),
+      None => {
+        if string == "ref" {
+          AttributeOrEventHandler::DomRef(t)
+        } else {
+          AttributeOrEventHandler::Attribute((string, t))
+        }
+      },
     }
   }
 }

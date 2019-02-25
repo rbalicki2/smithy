@@ -2,7 +2,8 @@ use crate::types::{
   AttributeOrEventHandler,
   GlobalEventHandlingInfo,
   LifecycleEventHandlingInfo,
-  SplitByType,
+  SplitAttributeOrEventHandlers,
+  SplitTokenStreamEventHandlingInfoPairs,
   TokenStreamEventHandlingInfoPair,
   TokenTreeSlice,
   UIEventHandlingInfo,
@@ -51,7 +52,7 @@ named!(
       )
     ),
     |(name, attributes_and_event_handlers)| {
-      let (attributes, event_handlers) = attributes_and_event_handlers.split_by_type();
+      let SplitAttributeOrEventHandlers(attributes, event_handlers, dom_ref_opt) = attributes_and_event_handlers.into();
       let component = make_html_tokens(name, attributes, vec![]);
       let event_handlers = event_handlers
         .into_iter()
@@ -102,8 +103,8 @@ named!(
         name,
         closing_tag_name,
       );
-      let (attributes, event_handlers) = attributes_and_event_handlers.split_by_type();
-      let (children, child_event_infos) = children_and_events.split_by_type();
+      let SplitAttributeOrEventHandlers(attributes, event_handlers, dom_ref_opt) = attributes_and_event_handlers.into();
+      let SplitTokenStreamEventHandlingInfoPairs(children, child_event_infos) = children_and_events.into();
       let token_stream = make_html_tokens(name, attributes, children);
       let mut event_infos: Vec<UIEventHandlingInfo> = event_handlers
         .into_iter()

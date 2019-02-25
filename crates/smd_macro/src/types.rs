@@ -49,56 +49,62 @@ impl UIEventHandlingInfo {
 pub type TokenTreeSlice<'a> = &'a [TokenTree];
 
 pub type TokenStreamEventHandlingInfoPair = (TokenStream, Vec<UIEventHandlingInfo>);
-
 pub type StringTokenStreamPair = (String, TokenStream);
 
+// TODO add Ref here
 pub enum AttributeOrEventHandler {
   Attribute(StringTokenStreamPair),
   EventHandler(StringTokenStreamPair),
+  DomRef(TokenStream),
 }
 
-// TODO convert into Into/From
-pub trait SplitByType<T1, T2> {
-  fn split_by_type(self) -> (T1, T2);
-}
-
-impl SplitByType<Vec<StringTokenStreamPair>, Vec<StringTokenStreamPair>>
-  for Vec<AttributeOrEventHandler>
-{
-  fn split_by_type(self) -> (Vec<StringTokenStreamPair>, Vec<StringTokenStreamPair>) {
+pub struct SplitAttributeOrEventHandlers(
+  pub Vec<StringTokenStreamPair>,
+  pub Vec<StringTokenStreamPair>,
+  pub Option<TokenStream>,
+);
+impl Into<SplitAttributeOrEventHandlers> for Vec<AttributeOrEventHandler> {
+  fn into(self) -> SplitAttributeOrEventHandlers {
     let len = self.len();
     let attributes = Vec::with_capacity(len);
     let event_handlers = Vec::with_capacity(len);
     self.into_iter().fold(
-      (attributes, event_handlers),
-      |(mut attributes, mut event_handlers), next_val| {
+      SplitAttributeOrEventHandlers(attributes, event_handlers, None),
+      |SplitAttributeOrEventHandlers(mut attributes, mut event_handlers, mut dom_ref), next_val| {
         match next_val {
           AttributeOrEventHandler::Attribute(attr) => attributes.push(attr),
           AttributeOrEventHandler::EventHandler(event_handler) => {
             event_handlers.push(event_handler)
           },
+          AttributeOrEventHandler::DomRef(stream) => dom_ref = Some(stream),
         };
-        (attributes, event_handlers)
+        SplitAttributeOrEventHandlers(attributes, event_handlers, dom_ref)
       },
     )
   }
 }
 
-impl SplitByType<Vec<TokenStream>, Vec<UIEventHandlingInfo>>
-  for Vec<TokenStreamEventHandlingInfoPair>
-{
-  fn split_by_type(self) -> (Vec<TokenStream>, Vec<UIEventHandlingInfo>) {
+pub struct SplitTokenStreamEventHandlingInfoPairs(
+  pub Vec<TokenStream>,
+  pub Vec<UIEventHandlingInfo>,
+);
+impl Into<SplitTokenStreamEventHandlingInfoPairs> for Vec<TokenStreamEventHandlingInfoPair> {
+  fn into(self) -> SplitTokenStreamEventHandlingInfoPairs {
     let child_token_streams = Vec::with_capacity(self.len());
     let child_event_handling_infos = vec![];
     self.into_iter().enumerate().fold(
-      (child_token_streams, child_event_handling_infos),
-      |(mut child_token_streams, mut child_event_handling_infos), (i, item)| {
+      SplitTokenStreamEventHandlingInfoPairs(child_token_streams, child_event_handling_infos),
+      |SplitTokenStreamEventHandlingInfoPairs(
+        mut child_token_streams,
+        mut child_event_handling_infos,
+      ),
+       (i, item)| {
         child_token_streams.push(item.0);
         for mut current_event_handling_info in item.1.into_iter() {
           current_event_handling_info.reversed_path.push(i);
           child_event_handling_infos.push(current_event_handling_info);
         }
-        (child_token_streams, child_event_handling_infos)
+        SplitTokenStreamEventHandlingInfoPairs(child_token_streams, child_event_handling_infos)
       },
     )
   }

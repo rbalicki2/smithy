@@ -71,3 +71,8 @@ x attribute values should be enclosed in quotes
   in a sub-component
 * since we can't pass `(state, |new_state| state = new_state)` as params to an input,
   but we can do `let state_wrapped = GetterSetter::wrap(state); render(state_wrapped)`
+
+## TODO wrt attribute or event handlers
+* SplitAttributeOrEventHandlers should also contain a ref
+* It should be passed down in core.rs in smd_macro
+* TokenStreamEventHandlingInfoPair needs to have a dom_ref_opt in there
