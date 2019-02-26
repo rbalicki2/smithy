@@ -46,12 +46,29 @@ impl UIEventHandlingInfo {
   }
 }
 
+#[derive(Debug)]
+pub struct DomRefInfo {
+  pub reversed_path: Vec<usize>,
+  pub dom_ref: TokenStream,
+}
+
+impl DomRefInfo {
+  pub fn from_token_stream(t: TokenStream) -> DomRefInfo {
+    DomRefInfo {
+      dom_ref: t,
+      reversed_path: vec![],
+    }
+  }
+}
+
 pub type TokenTreeSlice<'a> = &'a [TokenTree];
 
-pub type TokenStreamEventHandlingInfoPair = (TokenStream, Vec<UIEventHandlingInfo>);
-pub type StringTokenStreamPair = (String, TokenStream);
+// TODO rename, perhaps to TokenStreamEventHandlingInfoDomRefOptTrio
+// ... or something
+pub type TokenStreamEventHandlingInfoPair =
+  (TokenStream, Vec<UIEventHandlingInfo>, Option<DomRefInfo>);
 
-// TODO add Ref here
+pub type StringTokenStreamPair = (String, TokenStream);
 pub enum AttributeOrEventHandler {
   Attribute(StringTokenStreamPair),
   EventHandler(StringTokenStreamPair),

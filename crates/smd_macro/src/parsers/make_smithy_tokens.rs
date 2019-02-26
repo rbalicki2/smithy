@@ -1,4 +1,5 @@
 use crate::types::{
+  DomRefInfo,
   LifecycleEventHandlingInfo,
   StringTokenStreamPair,
   UIEventHandlingInfo,
@@ -62,7 +63,9 @@ pub fn make_component(
   ui_event_handling_infos: Vec<UIEventHandlingInfo>,
   window_event_handling_infos: Vec<WindowEventHandlingInfo>,
   lifecycle_event_handling_infos: Vec<LifecycleEventHandlingInfo>,
+  dom_ref_infos: Vec<DomRefInfo>,
 ) -> TokenStream {
+  println!("\n\n\ndom ref info {:?}", dom_ref_infos);
   let group_window_event_handling = ui_event_handling_infos
     .iter()
     .filter(|info| info.is_group)

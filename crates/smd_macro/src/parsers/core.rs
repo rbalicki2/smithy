@@ -1,5 +1,6 @@
 use crate::types::{
   AttributeOrEventHandler,
+  DomRefInfo,
   GlobalEventHandlingInfo,
   LifecycleEventHandlingInfo,
   SplitAttributeOrEventHandlers,
@@ -52,13 +53,17 @@ named!(
       )
     ),
     |(name, attributes_and_event_handlers)| {
-      let SplitAttributeOrEventHandlers(attributes, event_handlers, dom_ref_opt) = attributes_and_event_handlers.into();
+      let SplitAttributeOrEventHandlers(attributes, event_handlers, dom_ref_opt)
+        = attributes_and_event_handlers.into();
+
+      let dom_ref_opt = dom_ref_opt.map(DomRefInfo::from_token_stream);
+
       let component = make_html_tokens(name, attributes, vec![]);
       let event_handlers = event_handlers
         .into_iter()
         .map(UIEventHandlingInfo::from_string_token_stream_pair)
         .collect();
-      (component, event_handlers)
+      (component, event_handlers, dom_ref_opt)
     }
   )
 );
@@ -104,6 +109,9 @@ named!(
         closing_tag_name,
       );
       let SplitAttributeOrEventHandlers(attributes, event_handlers, dom_ref_opt) = attributes_and_event_handlers.into();
+
+      let dom_ref_opt = dom_ref_opt.map(DomRefInfo::from_token_stream);
+
       let SplitTokenStreamEventHandlingInfoPairs(children, child_event_infos) = children_and_events.into();
       let token_stream = make_html_tokens(name, attributes, children);
       let mut event_infos: Vec<UIEventHandlingInfo> = event_handlers
@@ -111,7 +119,7 @@ named!(
         .map(UIEventHandlingInfo::from_string_token_stream_pair)
         .collect();
       event_infos.extend(child_event_infos.into_iter());
-      (token_stream, event_infos)
+      (token_stream, event_infos, dom_ref_opt)
     }
   )
 );
@@ -141,7 +149,7 @@ named!(
     many_1_custom!(match_ident_2),
     |vec| {
       let joined = vec.iter().map(|ident| ident.to_string()).collect::<Vec<String>>().join("");
-      (make_text_node(joined), vec![])
+      (make_text_node(joined), vec![], None)
     }
   )
 );
@@ -157,7 +165,7 @@ named!(
         callback: quote!(#x),
         is_group: true,
       }
-    ])
+    ], None)
   )
 );
 
@@ -170,6 +178,7 @@ named!(
   )
 );
 
+// N.B. this is the "entry point" of this file.
 named!(
   pub match_html_component <TokenTreeSlice, TokenStream>,
   map!(
@@ -178,18 +187,34 @@ named!(
       many_1_custom!(match_node)
     ),
     |(global_event_handling_infos, dom_vec)| {
-      let (vec_of_node_tokens, event_handling_infos) = dom_vec.into_iter().enumerate()
+      // dom_vec is a vector of (TokenStream, Vec<UIHandlingInfo>, Option<TokenStream>)
+      // where the last token stream is the ref, if present
+      let (vec_of_node_tokens, event_handling_infos, dom_ref_vec) = dom_vec
+        .into_iter()
+        .enumerate()
         .fold(
-          (vec![], vec![]),
-          |(mut vec_of_node_tokens, mut event_handling_infos), (i, (token, current_event_handling_infos))| {
+          (vec![], vec![], vec![]),
+          |(mut vec_of_node_tokens, mut event_handling_infos, mut vec_of_dom_refs), (i, (token, current_event_handling_infos, dom_ref_opt))| {
             vec_of_node_tokens.push(token);
 
+            // append i to the path of the current_event_handling_infos and
+            // append that vec to event_handling_infos
             let mut vec = current_event_handling_infos.into_iter().map(|mut info| {
               info.reversed_path.push(i);
               info
             }).collect::<Vec<UIEventHandlingInfo>>();
             event_handling_infos.append(&mut vec);
-            (vec_of_node_tokens, event_handling_infos)
+
+            if let Some(mut dom_ref) = dom_ref_opt {
+              // println!("dom ref found");
+              // println!("{}", i);
+              // i is the current index of the guy, so maybe we need
+              // to do this same path stuff and thus pass down the path
+              // in the dom_ref_opt
+              dom_ref.reversed_path.push(i);
+              vec_of_dom_refs.push(dom_ref);
+            }
+            (vec_of_node_tokens, event_handling_infos, vec_of_dom_refs)
           }
         );
       let token = util::reduce_vec_to_node(&vec_of_node_tokens);
@@ -212,7 +237,7 @@ named!(
               (window_event_handler_infos, lifecycle_event_handling_infos)
             }
           );
-      super::make_smithy_tokens::make_component(token, event_handling_infos, window_event_handler_infos, lifecycle_event_handling_infos)
+      super::make_smithy_tokens::make_component(token, event_handling_infos, window_event_handler_infos, lifecycle_event_handling_infos, dom_ref_vec)
     }
   )
 );
