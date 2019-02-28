@@ -113,14 +113,9 @@ named!(
       );
       let SplitAttributeOrEventHandlers(attributes, event_handlers, dom_ref_opt)
         = attributes_and_event_handlers.into();
+      let SplitTokenStreamEventHandlingInfoPairs(children, child_event_infos, mut dom_ref_vec)
+        = children_and_events.into();
 
-      let dom_ref_opt = dom_ref_opt.map(DomRefInfo::from_token_stream);
-
-      let SplitTokenStreamEventHandlingInfoPairs(
-        children,
-        child_event_infos,
-        dom_ref_vec
-      ) = children_and_events.into();
       let token_stream = make_html_tokens(name, attributes, children);
 
       let mut event_infos: Vec<UIEventHandlingInfo> = event_handlers
@@ -129,11 +124,8 @@ named!(
         .collect();
       event_infos.extend(child_event_infos.into_iter());
 
-      let mut dom_ref_vec: Vec<DomRefInfo> = dom_ref_vec.into_iter().map(DomRefInfo::from_token_stream).collect();
-      println!("regular dom ref vec 1 {:?}", dom_ref_vec);
+      let dom_ref_opt = dom_ref_opt.map(DomRefInfo::from_token_stream);
       dom_ref_vec.extend(dom_ref_opt.into_iter());
-      println!("regular dom ref vec 2 {:?}", dom_ref_vec);
-
 
       (token_stream, event_infos, dom_ref_vec)
     }

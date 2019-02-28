@@ -104,7 +104,7 @@ impl Into<SplitAttributeOrEventHandlers> for Vec<AttributeOrEventHandler> {
 pub struct SplitTokenStreamEventHandlingInfoPairs(
   pub Vec<TokenStream>,
   pub Vec<UIEventHandlingInfo>,
-  pub Vec<TokenStream>,
+  pub Vec<DomRefInfo>,
 );
 impl Into<SplitTokenStreamEventHandlingInfoPairs> for Vec<TokenStreamEventHandlingInfoPair> {
   fn into(self) -> SplitTokenStreamEventHandlingInfoPairs {
@@ -130,8 +130,7 @@ impl Into<SplitTokenStreamEventHandlingInfoPairs> for Vec<TokenStreamEventHandli
         }
         for mut current_dom_ref_info in item.2.into_iter() {
           current_dom_ref_info.reversed_path.push(i);
-          // TODO this next
-          // child_dom_ref_token_streams.push(current_dom_ref_info);
+          child_dom_ref_token_streams.push(current_dom_ref_info);
         }
         SplitTokenStreamEventHandlingInfoPairs(
           child_token_streams,
