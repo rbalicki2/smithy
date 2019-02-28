@@ -78,7 +78,7 @@ pub enum AttributeOrEventHandler {
 pub struct SplitAttributeOrEventHandlers(
   pub Vec<StringTokenStreamPair>,
   pub Vec<StringTokenStreamPair>,
-  pub Option<TokenStream>,
+  pub Vec<DomRefInfo>,
 );
 impl Into<SplitAttributeOrEventHandlers> for Vec<AttributeOrEventHandler> {
   fn into(self) -> SplitAttributeOrEventHandlers {
@@ -86,14 +86,16 @@ impl Into<SplitAttributeOrEventHandlers> for Vec<AttributeOrEventHandler> {
     let attributes = Vec::with_capacity(len);
     let event_handlers = Vec::with_capacity(len);
     self.into_iter().fold(
-      SplitAttributeOrEventHandlers(attributes, event_handlers, None),
+      SplitAttributeOrEventHandlers(attributes, event_handlers, vec![]),
       |SplitAttributeOrEventHandlers(mut attributes, mut event_handlers, mut dom_ref), next_val| {
         match next_val {
           AttributeOrEventHandler::Attribute(attr) => attributes.push(attr),
           AttributeOrEventHandler::EventHandler(event_handler) => {
             event_handlers.push(event_handler)
           },
-          AttributeOrEventHandler::DomRef(stream) => dom_ref = Some(stream),
+          AttributeOrEventHandler::DomRef(dom_ref_token) => {
+            dom_ref.push(DomRefInfo::from_token_stream(dom_ref_token))
+          },
         };
         SplitAttributeOrEventHandlers(attributes, event_handlers, dom_ref)
       },

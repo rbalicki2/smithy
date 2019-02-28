@@ -65,7 +65,7 @@ pub fn make_component(
   lifecycle_event_handling_infos: Vec<LifecycleEventHandlingInfo>,
   dom_ref_infos: Vec<DomRefInfo>,
 ) -> TokenStream {
-  println!("\n\n\ndom ref info {:?}", dom_ref_infos);
+  // println!("\n\n\nmake_component dom ref info {:?}", dom_ref_infos);
   let group_window_event_handling = ui_event_handling_infos
     .iter()
     .filter(|info| info.is_group)
