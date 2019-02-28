@@ -66,7 +66,7 @@ pub type TokenTreeSlice<'a> = &'a [TokenTree];
 // TODO rename, perhaps to TokenStreamEventHandlingInfoDomRefOptTrio
 // ... or something
 pub type TokenStreamEventHandlingInfoPair =
-  (TokenStream, Vec<UIEventHandlingInfo>, Option<DomRefInfo>);
+  (TokenStream, Vec<UIEventHandlingInfo>, Vec<DomRefInfo>);
 
 pub type StringTokenStreamPair = (String, TokenStream);
 pub enum AttributeOrEventHandler {
@@ -104,16 +104,23 @@ impl Into<SplitAttributeOrEventHandlers> for Vec<AttributeOrEventHandler> {
 pub struct SplitTokenStreamEventHandlingInfoPairs(
   pub Vec<TokenStream>,
   pub Vec<UIEventHandlingInfo>,
+  pub Vec<TokenStream>,
 );
 impl Into<SplitTokenStreamEventHandlingInfoPairs> for Vec<TokenStreamEventHandlingInfoPair> {
   fn into(self) -> SplitTokenStreamEventHandlingInfoPairs {
     let child_token_streams = Vec::with_capacity(self.len());
     let child_event_handling_infos = vec![];
+    let child_dom_ref_token_streams = vec![];
     self.into_iter().enumerate().fold(
-      SplitTokenStreamEventHandlingInfoPairs(child_token_streams, child_event_handling_infos),
+      SplitTokenStreamEventHandlingInfoPairs(
+        child_token_streams,
+        child_event_handling_infos,
+        child_dom_ref_token_streams,
+      ),
       |SplitTokenStreamEventHandlingInfoPairs(
         mut child_token_streams,
         mut child_event_handling_infos,
+        mut child_dom_ref_token_streams,
       ),
        (i, item)| {
         child_token_streams.push(item.0);
@@ -121,7 +128,16 @@ impl Into<SplitTokenStreamEventHandlingInfoPairs> for Vec<TokenStreamEventHandli
           current_event_handling_info.reversed_path.push(i);
           child_event_handling_infos.push(current_event_handling_info);
         }
-        SplitTokenStreamEventHandlingInfoPairs(child_token_streams, child_event_handling_infos)
+        for mut current_dom_ref_info in item.2.into_iter() {
+          current_dom_ref_info.reversed_path.push(i);
+          // TODO this next
+          // child_dom_ref_token_streams.push(current_dom_ref_info);
+        }
+        SplitTokenStreamEventHandlingInfoPairs(
+          child_token_streams,
+          child_event_handling_infos,
+          child_dom_ref_token_streams,
+        )
       },
     )
   }

@@ -53,17 +53,20 @@ named!(
       )
     ),
     |(name, attributes_and_event_handlers)| {
+      // does not work
       let SplitAttributeOrEventHandlers(attributes, event_handlers, dom_ref_opt)
         = attributes_and_event_handlers.into();
 
-      let dom_ref_opt = dom_ref_opt.map(DomRefInfo::from_token_stream);
+      let dom_ref_vec = dom_ref_opt.map(DomRefInfo::from_token_stream).into_iter().collect::<Vec<DomRefInfo>>();
 
       let component = make_html_tokens(name, attributes, vec![]);
+      println!("\nself closing\n{:?}", dom_ref_vec);
+
       let event_handlers = event_handlers
         .into_iter()
         .map(UIEventHandlingInfo::from_string_token_stream_pair)
         .collect();
-      (component, event_handlers, dom_ref_opt)
+      (component, event_handlers, dom_ref_vec)
     }
   )
 );
@@ -108,18 +111,31 @@ named!(
         name,
         closing_tag_name,
       );
-      let SplitAttributeOrEventHandlers(attributes, event_handlers, dom_ref_opt) = attributes_and_event_handlers.into();
+      let SplitAttributeOrEventHandlers(attributes, event_handlers, dom_ref_opt)
+        = attributes_and_event_handlers.into();
 
       let dom_ref_opt = dom_ref_opt.map(DomRefInfo::from_token_stream);
 
-      let SplitTokenStreamEventHandlingInfoPairs(children, child_event_infos) = children_and_events.into();
+      let SplitTokenStreamEventHandlingInfoPairs(
+        children,
+        child_event_infos,
+        dom_ref_vec
+      ) = children_and_events.into();
       let token_stream = make_html_tokens(name, attributes, children);
+
       let mut event_infos: Vec<UIEventHandlingInfo> = event_handlers
         .into_iter()
         .map(UIEventHandlingInfo::from_string_token_stream_pair)
         .collect();
       event_infos.extend(child_event_infos.into_iter());
-      (token_stream, event_infos, dom_ref_opt)
+
+      let mut dom_ref_vec: Vec<DomRefInfo> = dom_ref_vec.into_iter().map(DomRefInfo::from_token_stream).collect();
+      println!("regular dom ref vec 1 {:?}", dom_ref_vec);
+      dom_ref_vec.extend(dom_ref_opt.into_iter());
+      println!("regular dom ref vec 2 {:?}", dom_ref_vec);
+
+
+      (token_stream, event_infos, dom_ref_vec)
     }
   )
 );
@@ -149,7 +165,7 @@ named!(
     many_1_custom!(match_ident_2),
     |vec| {
       let joined = vec.iter().map(|ident| ident.to_string()).collect::<Vec<String>>().join("");
-      (make_text_node(joined), vec![], None)
+      (make_text_node(joined), vec![], vec![])
     }
   )
 );
@@ -165,7 +181,7 @@ named!(
         callback: quote!(#x),
         is_group: true,
       }
-    ], None)
+    ], vec![])
   )
 );
 
@@ -187,14 +203,16 @@ named!(
       many_1_custom!(match_node)
     ),
     |(global_event_handling_infos, dom_vec)| {
-      // dom_vec is a vector of (TokenStream, Vec<UIHandlingInfo>, Option<TokenStream>)
+      // dom_vec is a vector of (TokenStream, Vec<UIHandlingInfo>, Vec<DomRefInfo>)
       // where the last token stream is the ref, if present
+      // innerref is not present here
+      println!("vec dom ref info in match_html_component {:?}", dom_vec);
       let (vec_of_node_tokens, event_handling_infos, dom_ref_vec) = dom_vec
         .into_iter()
         .enumerate()
         .fold(
           (vec![], vec![], vec![]),
-          |(mut vec_of_node_tokens, mut event_handling_infos, mut vec_of_dom_refs), (i, (token, current_event_handling_infos, dom_ref_opt))| {
+          |(mut vec_of_node_tokens, mut event_handling_infos, mut vec_of_dom_refs), (i, (token, current_event_handling_infos, dom_ref_vec))| {
             vec_of_node_tokens.push(token);
 
             // append i to the path of the current_event_handling_infos and
@@ -205,7 +223,9 @@ named!(
             }).collect::<Vec<UIEventHandlingInfo>>();
             event_handling_infos.append(&mut vec);
 
-            if let Some(mut dom_ref) = dom_ref_opt {
+            // TODO clean this up, vec_of_refs.extend(...) and the like
+            // if let Some(mut dom_ref) = dom_ref_opt {
+            for mut dom_ref in dom_ref_vec {
               // println!("dom ref found");
               // println!("{}", i);
               // i is the current index of the guy, so maybe we need
