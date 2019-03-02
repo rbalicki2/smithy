@@ -130,13 +130,14 @@ pub fn rerender() {
 
     ROOT_ELEMENT.with_inner_value(|el| {
       web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
-        "bout to call pre_render {:?}",
+        "bout to call post_render {:?}",
         newly_rendered_nodes
       )));
       // root_component.handle_post_render(&convert_node_list_to_vec(&el.child_nodes()));
       root_component.handle_post_render(
         &newly_rendered_nodes.split_node_list(convert_node_list_to_vec(&el.child_nodes())),
       );
+      root_component.handle_ref_assignment();
     });
     LAST_RENDERED_NODE.store(newly_rendered_nodes);
   });
@@ -147,6 +148,8 @@ pub fn mount(component: Box<Component>, el: Element) {
   mount_to_element(component, &el);
   attach_listeners(&el);
   ROOT_ELEMENT.store(el);
+  // N.B. maybe (probably) we don't want this; it's here for ease of testing.
+  rerender();
 }
 
 pub fn unwrapped_promise_from_future<S: 'static, E: 'static>(

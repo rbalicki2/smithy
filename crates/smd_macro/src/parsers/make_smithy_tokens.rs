@@ -65,7 +65,20 @@ pub fn make_component(
   lifecycle_event_handling_infos: Vec<LifecycleEventHandlingInfo>,
   dom_ref_infos: Vec<DomRefInfo>,
 ) -> TokenStream {
-  // println!("\n\n\nmake_component dom ref info {:?}", dom_ref_infos);
+  println!("\n\n\nmake_component dom ref info {:?}", dom_ref_infos);
+
+  let dom_ref_infos = dom_ref_infos
+    .into_iter()
+    .fold(quote!{}, |accum, dom_ref_info| {
+      let stream = dom_ref_info.dom_ref;
+      quote!{
+        #accum
+        #stream,
+      }
+    });
+  let dom_ref_infos =
+    quote!{ { let dom_refs: Vec<&mut smithy::types::DomRef> = vec![#dom_ref_infos]; dom_refs }};
+
   let group_window_event_handling = ui_event_handling_infos
     .iter()
     .filter(|info| info.is_group)
@@ -171,6 +184,15 @@ pub fn make_component(
           #group_lifecycle_event_handling
           #inner_lifecycle_event_handling
           smithy_types::PhaseResult::PostRendering
+        },
+        smithy_types::Phase::RefAssignment => {
+          for dom_ref in #dom_ref_infos.into_iter() {
+            // TODO find and assign the dom ref here
+            // dom_ref.byah();
+          }
+          // web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!("ref assignment {:?}", #dom_ref_infos)));
+          // TODO call child ones
+          smithy_types::PhaseResult::RefAssignment
         },
       }
     }));
