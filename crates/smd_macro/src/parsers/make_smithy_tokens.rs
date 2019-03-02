@@ -78,8 +78,6 @@ pub fn make_component(
   lifecycle_event_handling_infos: Vec<LifecycleEventHandlingInfo>,
   dom_ref_infos: Vec<DomRefInfo>,
 ) -> TokenStream {
-  println!("\n\n\nmake_component dom ref info {:?}", dom_ref_infos);
-
   let dom_ref_infos = dom_ref_infos
     .into_iter()
     .fold(quote!{}, |accum, dom_ref_info| {
@@ -94,6 +92,7 @@ pub fn make_component(
     quote!{ { let dom_refs: Vec<smithy::types::DomRefWithPath> = vec![#dom_ref_infos]; dom_refs }};
   let ref_assignment_quote = quote!{
     for (path, dom_ref) in (#dom_ref_infos).into_iter() {
+      use wasm_bindgen::JsCast;
       let doc = web_sys::window().unwrap().document().unwrap();
       let strs = path.into_iter().map(|x| x.to_string()).collect::<Vec<String>>();
       let selector = strs.join(",");
@@ -105,7 +104,6 @@ pub fn make_component(
 
       dom_ref.set(el);
     }
-    // web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!("ref assignment {:?}", #dom_ref_infos)));
     // TODO call child ones
   };
 
