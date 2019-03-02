@@ -133,11 +133,10 @@ pub fn rerender() {
         "bout to call post_render {:?}",
         newly_rendered_nodes
       )));
-      // root_component.handle_post_render(&convert_node_list_to_vec(&el.child_nodes()));
+      root_component.handle_ref_assignment();
       root_component.handle_post_render(
         &newly_rendered_nodes.split_node_list(convert_node_list_to_vec(&el.child_nodes())),
       );
-      root_component.handle_ref_assignment();
     });
     LAST_RENDERED_NODE.store(newly_rendered_nodes);
   });

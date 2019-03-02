@@ -10,7 +10,10 @@ use proc_macro2::{
   Span,
   TokenStream,
 };
-use quote::quote;
+use quote::{
+  quote,
+  ToTokens,
+};
 
 pub fn make_html_tokens(
   name: String,
@@ -58,6 +61,16 @@ pub fn make_html_tokens(
   }))
 }
 
+fn vec_to_quote<X>(v: Vec<X>) -> TokenStream
+where
+  X: ToTokens,
+{
+  let ret = v
+    .into_iter()
+    .fold(quote!{}, |accum, item| quote!(#accum #item,));
+  quote!(vec![#ret])
+}
+
 pub fn make_component(
   token: TokenStream,
   ui_event_handling_infos: Vec<UIEventHandlingInfo>,
@@ -70,14 +83,31 @@ pub fn make_component(
   let dom_ref_infos = dom_ref_infos
     .into_iter()
     .fold(quote!{}, |accum, dom_ref_info| {
-      let stream = dom_ref_info.dom_ref;
+      let dom_ref = dom_ref_info.dom_ref;
+      let path = vec_to_quote(dom_ref_info.reversed_path);
       quote!{
         #accum
-        #stream,
+        (#path, #dom_ref),
       }
     });
   let dom_ref_infos =
-    quote!{ { let dom_refs: Vec<&mut smithy::types::DomRef> = vec![#dom_ref_infos]; dom_refs }};
+    quote!{ { let dom_refs: Vec<smithy::types::DomRefWithPath> = vec![#dom_ref_infos]; dom_refs }};
+  let ref_assignment_quote = quote!{
+    for (path, dom_ref) in (#dom_ref_infos).into_iter() {
+      let doc = web_sys::window().unwrap().document().unwrap();
+      let strs = path.into_iter().map(|x| x.to_string()).collect::<Vec<String>>();
+      let selector = strs.join(",");
+      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!("[data-smithy-path=\"{}\"]", selector)));
+      // TODO avoid unwrapping here
+      let el: Option<web_sys::HtmlElement> = doc.query_selector(&format!("[data-smithy-path=\"{}\"]", selector))
+        .unwrap()
+        .map(JsCast::unchecked_into);
+
+      dom_ref.set(el);
+    }
+    // web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!("ref assignment {:?}", #dom_ref_infos)));
+    // TODO call child ones
+  };
 
   let group_window_event_handling = ui_event_handling_infos
     .iter()
@@ -186,12 +216,7 @@ pub fn make_component(
           smithy_types::PhaseResult::PostRendering
         },
         smithy_types::Phase::RefAssignment => {
-          for dom_ref in #dom_ref_infos.into_iter() {
-            // TODO find and assign the dom ref here
-            // dom_ref.byah();
-          }
-          // web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!("ref assignment {:?}", #dom_ref_infos)));
-          // TODO call child ones
+          #ref_assignment_quote
           smithy_types::PhaseResult::RefAssignment
         },
       }
