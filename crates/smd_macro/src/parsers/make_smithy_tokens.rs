@@ -78,6 +78,30 @@ pub fn make_component(
   lifecycle_event_handling_infos: Vec<LifecycleEventHandlingInfo>,
   dom_ref_infos: Vec<DomRefInfo>,
 ) -> TokenStream {
+  println!("\n\n\nmake_component dom ref info {:?}", dom_ref_infos);
+  let (child_ref_assignment, group_window_event_handling) = ui_event_handling_infos
+    .iter()
+    .filter(|info| info.is_group)
+    .map(|info| (info.reversed_path.clone(), info.callback.clone()))
+    .fold(
+      (quote!{}, quote!{}),
+      |(ref_accum, group_accum), (reversed_path, group)| {
+        // TODO pass reversed_path or whatnot to handle_ref_assignment
+        let quotable_path = vec_to_quote(reversed_path);
+        (
+          quote!{
+            #ref_accum
+            let new_path = path_so_far.clone().into_iter().chain(#quotable_path).collect();
+            (#group).handle_ref_assignment(new_path);
+          },
+          quote!{
+            #group_accum
+            event_handled = (#group).handle_window_event(window_event) || event_handled;
+          },
+        )
+      },
+    );
+
   let dom_ref_infos = dom_ref_infos
     .into_iter()
     .fold(quote!{}, |accum, dom_ref_info| {
@@ -94,29 +118,26 @@ pub fn make_component(
     for (path, dom_ref) in (#dom_ref_infos).into_iter() {
       use wasm_bindgen::JsCast;
       let doc = web_sys::window().unwrap().document().unwrap();
-      let strs = path.into_iter().map(|x| x.to_string()).collect::<Vec<String>>();
+      let strs = path_so_far
+        .clone()
+        .into_iter()
+        .chain(path)
+        .map(|x| x.to_string())
+        .collect::<Vec<String>>();
+
       let selector = strs.join(",");
       web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!("[data-smithy-path=\"{}\"]", selector)));
       // TODO avoid unwrapping here
-      let el: Option<web_sys::HtmlElement> = doc.query_selector(&format!("[data-smithy-path=\"{}\"]", selector))
+      let el_opt: Option<web_sys::HtmlElement> = doc.query_selector(&format!("[data-smithy-path=\"{}\"]", selector))
         .unwrap()
         .map(JsCast::unchecked_into);
 
-      dom_ref.set(el);
-    }
-    // TODO call child ones
-  };
+      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!("is some - {}, setting in dom ref with name {}", el_opt.is_some(), dom_ref.name)));
 
-  let group_window_event_handling = ui_event_handling_infos
-    .iter()
-    .filter(|info| info.is_group)
-    .map(|info| info.callback.clone())
-    .fold(quote!{}, |accum, group| {
-      quote!{
-        #accum
-        event_handled = (#group).handle_window_event(window_event) || event_handled;
-      }
-    });
+      dom_ref.set(el_opt);
+    }
+    #child_ref_assignment
+  };
 
   let group_lifecycle_event_handling = ui_event_handling_infos
     .iter()
@@ -213,7 +234,8 @@ pub fn make_component(
           #inner_lifecycle_event_handling
           smithy_types::PhaseResult::PostRendering
         },
-        smithy_types::Phase::RefAssignment => {
+        smithy_types::Phase::RefAssignment(path_so_far) => {
+          web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!("ref handling, path so far = {:?}", path_so_far)));
           #ref_assignment_quote
           smithy_types::PhaseResult::RefAssignment
         },

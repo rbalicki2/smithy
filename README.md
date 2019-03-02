@@ -46,6 +46,7 @@ x attribute values should be enclosed in quotes
 * more tests
 * organize types and separate true core from SmithyComponent implementation
 * variable names are non-opaque :(
+* use a Trait for DomRef
 
 ## Issues
 * Think about how to handle match statements, e.g. in the context of routing
@@ -76,3 +77,4 @@ x attribute values should be enclosed in quotes
 * SplitAttributeOrEventHandlers should also contain a ref
 * It should be passed down in core.rs in smd_macro
 * TokenStreamEventHandlingInfoPair needs to have a dom_ref_opt in there
+

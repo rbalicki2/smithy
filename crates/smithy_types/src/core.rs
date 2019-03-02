@@ -179,7 +179,7 @@ pub enum Phase<'a> {
   PostRendering(&'a Vec<web_sys::Node>),
   UiEventHandling((&'a crate::UiEvent, &'a Path)),
   WindowEventHandling(&'a crate::WindowEvent),
-  RefAssignment,
+  RefAssignment(Vec<usize>),
 }
 
 pub type EventHandled = bool;
@@ -234,7 +234,7 @@ pub struct SmithyComponent<'a>(pub Box<FnMut(Phase) -> PhaseResult + 'a>);
 pub trait Component {
   fn render(&mut self) -> Node;
   fn handle_post_render(&mut self, _vec: &Vec<Vec<web_sys::Node>>) {}
-  fn handle_ref_assignment(&mut self) {}
+  fn handle_ref_assignment(&mut self, _path_so_far: Vec<usize>) {}
   fn handle_ui_event(&mut self, _event: &crate::UiEvent, _path: &Path) -> EventHandled {
     false
   }
@@ -260,7 +260,7 @@ impl<'a> Component for SmithyComponent<'a> {
     self.0(Phase::PostRendering(&vec![]));
   }
 
-  fn handle_ref_assignment(&mut self) {
-    self.0(Phase::RefAssignment);
+  fn handle_ref_assignment(&mut self, path_so_far: Vec<usize>) {
+    self.0(Phase::RefAssignment(path_so_far));
   }
 }
