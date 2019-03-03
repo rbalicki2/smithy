@@ -30,7 +30,8 @@ use self::node_diff::{
 };
 
 // TODO this should not be thread-local, but should be instantiated inside of
-// mount()
+// mount(). This will *probably* require us to not call crate::rerender in some
+// callbacks.
 thread_local! {
   static ROOT_ELEMENT: RefCell<Option<Element>> = RefCell::new(None);
   static LAST_RENDERED_NODE: RefCell<Option<Vec<CollapsedNode>>> = RefCell::new(None);
@@ -42,13 +43,10 @@ fn get_window() -> Window {
   web_sys::window().unwrap()
 }
 
-fn mount_to_element(mut component: Box<Component>, el: &Element) {
-  {
-    let node: Vec<CollapsedNode> = component.render().into();
-    el.set_inner_html(&node.as_inner_html());
-    LAST_RENDERED_NODE.store(node);
-  }
-  ROOT_COMPONENT.store(component);
+fn render_initially(component: &mut Box<Component>, el: &Element) {
+  let node: Vec<CollapsedNode> = component.render().into();
+  el.set_inner_html(&node.as_inner_html());
+  LAST_RENDERED_NODE.store(node);
 }
 
 fn with_increased_event_depth<T>(f: impl Fn() -> T) -> T {
@@ -96,8 +94,6 @@ fn attach_listeners(el: &Element) {
 
 pub fn rerender() {
   ROOT_COMPONENT.with_inner_value(|root_component| {
-    // We need to also emit information about the collapsing process for the post-render method later
-    // e.g. let newly_rendered_nodes = (Vec<CollapsedNode>, Vec<usize>) = root_component.render().into();
     let newly_rendered_nodes: Vec<CollapsedNode> = root_component.render().into();
 
     LAST_RENDERED_NODE.with_inner_value(|last_rendered_node| {
@@ -125,16 +121,14 @@ pub fn rerender() {
   });
 }
 
-pub fn mount(component: Box<Component>, el: Element) {
+pub fn mount(mut component: Box<Component>, el: Element) {
   console_error_panic_hook::set_once();
-  mount_to_element(component, &el);
+  render_initially(&mut component, &el);
   attach_listeners(&el);
   ROOT_ELEMENT.store(el);
-  // TODO don't consume in mount_to_element?
-  ROOT_COMPONENT.with_inner_value(|root_component| {
-    root_component.handle_ref_assignment(vec![]);
-    root_component.handle_post_render();
-  });
+  component.handle_ref_assignment(vec![]);
+  component.handle_post_render();
+  ROOT_COMPONENT.store(component);
 }
 
 pub fn unwrapped_promise_from_future<S: 'static, E: 'static>(
