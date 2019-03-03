@@ -130,7 +130,6 @@ pub fn make_component(
         .unwrap()
         .map(JsCast::unchecked_into);
 
-      // dom_ref.set(el_opt);
       *dom_ref = el_opt;
     }
     #child_ref_assignment
@@ -139,8 +138,8 @@ pub fn make_component(
   let group_lifecycle_event_handling = ui_event_handling_infos
     .iter()
     .filter(|info| info.is_group)
-    .map(|info| (info.callback.clone(), info.reversed_path.clone()))
-    .fold(quote!{}, |accum, (group, reversed_path)| {
+    .map(|info| info.callback.clone())
+    .fold(quote!{}, |accum, group| {
       quote!{{
         #accum
         // let node_list =
