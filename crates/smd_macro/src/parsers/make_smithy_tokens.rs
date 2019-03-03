@@ -81,7 +81,7 @@ pub fn make_component(
   println!("\n\n\nmake_component dom ref info {:?}", dom_ref_infos);
   let (child_ref_assignment, group_window_event_handling) = ui_event_handling_infos
     .iter()
-    .filter(|info| info.is_group)
+    .filter(|info| !info.event.is_some())
     .map(|info| (info.reversed_path.clone(), info.callback.clone()))
     .fold(
       (quote!{}, quote!{}),
@@ -137,7 +137,7 @@ pub fn make_component(
 
   let group_lifecycle_event_handling = ui_event_handling_infos
     .iter()
-    .filter(|info| info.is_group)
+    .filter(|info| !info.event.is_some())
     .map(|info| info.callback.clone())
     .fold(quote!{}, |accum, group| {
       quote!{{

@@ -7,13 +7,11 @@ use quote::quote;
 #[derive(Debug)]
 pub struct UIEventHandlingInfo {
   pub reversed_path: Vec<usize>,
-  /// None implies we're matching on all events,
-  /// Which is used only when is_group is true
-  /// TODO: get rid of the is_group param
+  /// if event is none, this implies that this is a UIEventHandlingInfo
+  /// for a group (e.g. { &mut child_el }).
   pub event: Option<String>,
   /// callback is actually the TokenStream group... it's a really bad name :(
   pub callback: TokenStream,
-  pub is_group: bool,
 }
 
 impl UIEventHandlingInfo {
@@ -22,7 +20,6 @@ impl UIEventHandlingInfo {
       reversed_path: vec![],
       event: Some(event),
       callback,
-      is_group: false,
     }
   }
 
@@ -35,7 +32,7 @@ impl UIEventHandlingInfo {
       .fold(quote!{}, |accum, path_item| {
         quote!{ #accum #path_item, }
       });
-    let additional_dot_dot = if self.is_group {
+    let additional_dot_dot = if !self.event.is_some() {
       quote!{ rest.. }
     } else {
       quote!{}
@@ -48,6 +45,7 @@ impl UIEventHandlingInfo {
 
 #[derive(Debug)]
 pub struct DomRefInfo {
+  // TODO is this path actually reversed...?
   pub reversed_path: Vec<usize>,
   pub dom_ref: TokenStream,
 }

@@ -171,7 +171,6 @@ named!(
         reversed_path: vec![],
         event: None,
         callback: quote!(#x),
-        is_group: true,
       }
     ], vec![])
   )
