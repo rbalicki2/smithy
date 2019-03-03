@@ -78,7 +78,6 @@ pub fn make_component(
   lifecycle_event_handling_infos: Vec<LifecycleEventHandlingInfo>,
   dom_ref_infos: Vec<DomRefInfo>,
 ) -> TokenStream {
-  println!("\n\n\nmake_component dom ref info {:?}", dom_ref_infos);
   let (child_ref_assignment, group_window_event_handling) = ui_event_handling_infos
     .iter()
     .filter(|info| !info.event.is_some())
@@ -142,13 +141,7 @@ pub fn make_component(
     .fold(quote!{}, |accum, group| {
       quote!{{
         #accum
-        // let node_list =
-        // N.B. this line fails - node_list is a vec, but this should be a vec of vecs
-        // TODO think about this
-        // This is when we apply post render to children
         (#group).handle_post_render();
-        // N.B. cannot wrap in vec![node_list] because that has type Vec<&Vec<X>> instead of &Vec<Vec<X>>
-        // DAMMIT
       }}
     });
 
