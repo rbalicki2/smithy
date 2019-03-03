@@ -146,8 +146,7 @@ pub fn make_component(
         // N.B. this line fails - node_list is a vec, but this should be a vec of vecs
         // TODO think about this
         // This is when we apply post render to children
-        // (#group).handle_post_render(node_list);
-        (#group).handle_post_render(&vec![]);
+        (#group).handle_post_render();
         // N.B. cannot wrap in vec![node_list] because that has type Vec<&Vec<X>> instead of &Vec<Vec<X>>
         // DAMMIT
       }}
@@ -194,6 +193,7 @@ pub fn make_component(
         }
       });
 
+  // TODO disambiguate this
   // N.B. right now "lifecycle" == "post_render", but that needs to be disambiguated
   let inner_lifecycle_event_handling =
     lifecycle_event_handling_infos
@@ -202,7 +202,7 @@ pub fn make_component(
         let cb = lifecycle_info.callback;
         quote!{
           #accum
-          (#cb)(node_list);
+          (#cb)();
         }
       });
 
@@ -225,7 +225,7 @@ pub fn make_component(
             _ => smithy_types::PhaseResult::WindowEventHandling(event_handled),
           }
         },
-        smithy_types::Phase::PostRendering(node_list) => {
+        smithy_types::Phase::PostRendering => {
           #group_lifecycle_event_handling
           #inner_lifecycle_event_handling
           smithy_types::PhaseResult::PostRendering
