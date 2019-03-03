@@ -74,7 +74,6 @@ macro_rules! attach_ui_event_listener {
   };
 }
 
-// TODO reuse closures
 pub fn attach_ui_event_listeners(html_el: &js_fns::HTMLElement) {
   // --Clipboard
   #[cfg(feature = "copy-events")]
