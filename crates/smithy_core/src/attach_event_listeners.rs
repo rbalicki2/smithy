@@ -11,6 +11,7 @@ use web_sys::{
   AnimationEvent,
   BeforeUnloadEvent,
   ClipboardEvent,
+  Event,
   FocusEvent,
   HashChangeEvent,
   HtmlElement,
@@ -40,7 +41,7 @@ macro_rules! attach_ui_event_listener {
     $event_name:expr,
     $should_bubble:expr
   ) => {
-    let event_handler_cb = Closure::new(move |evt: WebSysUiEvent| {
+    let event_handler_cb = Closure::new(move |evt: Event| {
       let evt: $web_sys_event_type = evt.unchecked_into();
       if let Some(path) = evt
         .target()
@@ -68,7 +69,7 @@ macro_rules! attach_ui_event_listener {
         }
       }
     });
-    $html_el.add_ui_event_listener($event_name, &event_handler_cb, $should_bubble);
+    $html_el.attach_event_listener($event_name, &event_handler_cb, $should_bubble);
     event_handler_cb.forget();
   };
 }
@@ -206,10 +207,10 @@ macro_rules! attach_window_event_listener {
     $window:expr,
     $web_sys_event_type:ident,
     $smithy_event_type:ident,
-    $window_method:ident,
     $event_name:expr
   ) => {
-    let handle_event_cb = Closure::new(move |evt: $web_sys_event_type| {
+    let handle_event_cb = Closure::new(move |evt: Event| {
+      let evt: $web_sys_event_type = evt.unchecked_into();
       let event_wrapped = WindowEvent::$smithy_event_type(evt);
       let handle_event = move || {
         let handled = crate::handle_window_event(&event_wrapped);
@@ -227,38 +228,19 @@ macro_rules! attach_window_event_listener {
       }
     });
 
-    $window.$window_method($event_name, &handle_event_cb);
+    $window.attach_event_listener($event_name, &handle_event_cb);
     handle_event_cb.forget();
   };
 }
 
 pub fn attach_window_event_listeners(window: &js_fns::WINDOW) {
-  attach_window_event_listener!(
-    window,
-    BeforeUnloadEvent,
-    OnBeforeUnload,
-    add_before_unload_event_listener,
-    "beforeunload"
-  );
-  attach_window_event_listener!(
-    window,
-    HashChangeEvent,
-    OnHashChange,
-    add_hash_change_event_listener,
-    "hashchange"
-  );
-  attach_window_event_listener!(
-    window,
-    PopStateEvent,
-    OnPopState,
-    add_pop_state_event_listener,
-    "popstate"
-  );
+  attach_window_event_listener!(window, BeforeUnloadEvent, OnBeforeUnload, "beforeunload");
+  attach_window_event_listener!(window, HashChangeEvent, OnHashChange, "hashchange");
+  attach_window_event_listener!(window, PopStateEvent, OnPopState, "popstate");
   attach_window_event_listener!(
     window,
     PromiseRejectionEvent,
     OnUnhandledRejection,
-    add_promise_rejection_event_listener,
     "unhandledrejection"
   );
 }
