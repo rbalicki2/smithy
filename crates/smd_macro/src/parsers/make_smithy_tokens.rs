@@ -54,7 +54,7 @@ pub fn make_html_tokens(
   };
 
   // TODO implement and call .flatten_children
-  quote!(smithy_types::Node::Dom(smithy_types::HtmlToken {
+  quote!(smithy::types::Node::Dom(smithy::types::HtmlToken {
     node_type: #name.into(),
     attributes: #attribute_initialization,
     children: #child_initialization,
@@ -156,9 +156,9 @@ pub fn make_component(
             let event = Ident::new(&event, Span::call_site());
             quote!{
               #accum
-              (smithy_types::UiEvent::#event(val), #path) => {
+              (smithy::types::UiEvent::#event(val), #path) => {
                 (#callback)(val);
-                smithy_types::PhaseResult::UiEventHandling(true)
+                smithy::types::PhaseResult::UiEventHandling(true)
               },
             }
           },
@@ -166,7 +166,7 @@ pub fn make_component(
             #accum
             // N.B. path (aka get_path_match) matches the rest of the path as the variable rest
             // which we pass onto the child
-            (evt, #path) => smithy_types::PhaseResult::UiEventHandling(#callback.handle_ui_event(evt, rest)),
+            (evt, #path) => smithy::types::PhaseResult::UiEventHandling(#callback.handle_ui_event(evt, rest)),
           },
         }
       });
@@ -179,9 +179,9 @@ pub fn make_component(
         let event = Ident::new(&event, Span::call_site());
         quote!{
           #accum
-          smithy_types::WindowEvent::#event(val) => {
+          smithy::types::WindowEvent::#event(val) => {
             (#callback)(val);
-            smithy_types::PhaseResult::WindowEventHandling(true)
+            smithy::types::PhaseResult::WindowEventHandling(true)
           }
         }
       });
@@ -200,32 +200,31 @@ pub fn make_component(
       });
 
   quote!({
-    use smithy::types as smithy_types;
-    let component: smithy_types::SmithyComponent = smithy_types::SmithyComponent(Box::new(move |phase| {
+    let component: smithy::types::SmithyComponent = smithy::types::SmithyComponent(Box::new(move |phase| {
       match phase {
-        smithy_types::Phase::Rendering => smithy_types::PhaseResult::Rendering(#token),
-        smithy_types::Phase::UiEventHandling(ui_event_handling) => {
+        smithy::types::Phase::Rendering => smithy::types::PhaseResult::Rendering(#token),
+        smithy::types::Phase::UiEventHandling(ui_event_handling) => {
           match ui_event_handling {
             #inner_ui_event_handling
-            _ => smithy_types::PhaseResult::UiEventHandling(false)
+            _ => smithy::types::PhaseResult::UiEventHandling(false)
           }
         },
-        smithy_types::Phase::WindowEventHandling(window_event) => {
+        smithy::types::Phase::WindowEventHandling(window_event) => {
           let mut event_handled = false;
           #group_window_event_handling
           match window_event {
             #inner_window_event_handling
-            _ => smithy_types::PhaseResult::WindowEventHandling(event_handled),
+            _ => smithy::types::PhaseResult::WindowEventHandling(event_handled),
           }
         },
-        smithy_types::Phase::PostRendering => {
+        smithy::types::Phase::PostRendering => {
           #group_lifecycle_event_handling
           #inner_lifecycle_event_handling
-          smithy_types::PhaseResult::PostRendering
+          smithy::types::PhaseResult::PostRendering
         },
-        smithy_types::Phase::RefAssignment(path_so_far) => {
+        smithy::types::Phase::RefAssignment(path_so_far) => {
           #ref_assignment_quote
-          smithy_types::PhaseResult::RefAssignment
+          smithy::types::PhaseResult::RefAssignment
         },
       }
     }));
@@ -234,5 +233,5 @@ pub fn make_component(
 }
 
 pub fn make_text_node(s: String) -> TokenStream {
-  quote!(smithy_types::Node::Text(#s.into()))
+  quote!(smithy::types::Node::Text(#s.into()))
 }

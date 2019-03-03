@@ -94,15 +94,6 @@ fn attach_listeners(el: &Element) {
   attach_event_listeners::attach_window_event_listeners(&window);
 }
 
-fn convert_node_list_to_vec(node_list: &web_sys::NodeList) -> Vec<web_sys::Node> {
-  let len = node_list.length();
-  let mut vec = Vec::with_capacity(len as usize);
-  for i in 0..len {
-    vec.push(node_list.get(i).unwrap());
-  }
-  vec
-}
-
 pub fn rerender() {
   ROOT_COMPONENT.with_inner_value(|root_component| {
     // We need to also emit information about the collapsing process for the post-render method later
@@ -139,8 +130,11 @@ pub fn mount(component: Box<Component>, el: Element) {
   mount_to_element(component, &el);
   attach_listeners(&el);
   ROOT_ELEMENT.store(el);
-  // N.B. maybe (probably) we don't want this; it's here for ease of testing.
-  rerender();
+  // TODO don't consume in mount_to_element?
+  ROOT_COMPONENT.with_inner_value(|root_component| {
+    root_component.handle_ref_assignment(vec![]);
+    root_component.handle_post_render();
+  });
 }
 
 pub fn unwrapped_promise_from_future<S: 'static, E: 'static>(
