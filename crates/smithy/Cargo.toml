@@ -8,3 +8,18 @@ edition = "2018"
 smd_macro = { path = "../smd_macro" }
 smithy_core = { path = "../smithy_core" }
 smithy_types = { path = "../smithy_types" }
+
+[features]
+copy-events = ["smithy_core/copy-events"]
+keyboard-events = ["smithy_core/keyboard-events"]
+focus-events = ["smithy_core/focus-events"]
+input-events = ["smithy_core/input-events"]
+mouse-events = ["smithy_core/mouse-events"]
+pointer-events = ["smithy_core/pointer-events"]
+select-events = ["smithy_core/select-events"]
+touch-events = ["smithy_core/touch-events"]
+scroll-events = ["smithy_core/scroll-events"]
+image-events = ["smithy_core/image-events"]
+animation-events = ["smithy_core/animation-events"]
+transition-events = ["smithy_core/transition-events"]
+toggle-events = ["smithy_core/toggle-events"]

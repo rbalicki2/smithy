@@ -39,3 +39,18 @@ js-sys = "0.3.5"
 futures = "0.1.25"
 wasm-bindgen-futures = "0.3.5"
 console_error_panic_hook = "0.1.5"
+
+[features]
+copy-events = []
+keyboard-events = []
+focus-events = []
+input-events = []
+mouse-events = []
+pointer-events = []
+select-events = []
+touch-events = []
+scroll-events = []
+image-events = []
+animation-events = []
+transition-events = []
+toggle-events = []

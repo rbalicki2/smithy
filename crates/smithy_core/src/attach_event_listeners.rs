@@ -77,129 +77,168 @@ macro_rules! attach_ui_event_listener {
 // TODO reuse closures
 pub fn attach_ui_event_listeners(html_el: &js_fns::HTMLElement) {
   // --Clipboard
-  attach_ui_event_listener!(html_el, ClipboardEvent, OnCopy, "copy", true);
-  attach_ui_event_listener!(html_el, ClipboardEvent, OnCut, "cut", true);
-  attach_ui_event_listener!(html_el, ClipboardEvent, OnPaste, "paste", true);
+  #[cfg(feature = "copy-events")]
+  {
+    attach_ui_event_listener!(html_el, ClipboardEvent, OnCopy, "copy", true);
+    attach_ui_event_listener!(html_el, ClipboardEvent, OnCut, "cut", true);
+    attach_ui_event_listener!(html_el, ClipboardEvent, OnPaste, "paste", true);
+  }
 
   // --Composition
 
   // --Keyboard
-  attach_ui_event_listener!(html_el, KeyboardEvent, OnKeyDown, "keydown", false);
-  attach_ui_event_listener!(html_el, KeyboardEvent, OnKeyPress, "keypress", false);
-  attach_ui_event_listener!(html_el, KeyboardEvent, OnKeyUp, "keyup", false);
+  #[cfg(feature = "keyboard-events")]
+  {
+    attach_ui_event_listener!(html_el, KeyboardEvent, OnKeyDown, "keydown", false);
+    attach_ui_event_listener!(html_el, KeyboardEvent, OnKeyPress, "keypress", false);
+    attach_ui_event_listener!(html_el, KeyboardEvent, OnKeyUp, "keyup", false);
+  }
 
   // --Focus
-  attach_ui_event_listener!(html_el, FocusEvent, OnFocus, "focus", false);
-  attach_ui_event_listener!(html_el, FocusEvent, OnBlur, "blur", false);
+  #[cfg(feature = "focus-events")]
+  {
+    attach_ui_event_listener!(html_el, FocusEvent, OnFocus, "focus", false);
+    attach_ui_event_listener!(html_el, FocusEvent, OnBlur, "blur", false);
+  }
 
   // --Form
-  attach_ui_event_listener!(html_el, InputEvent, OnChange, "change", false);
-  attach_ui_event_listener!(html_el, InputEvent, OnInput, "input", false);
-  attach_ui_event_listener!(html_el, InputEvent, OnInvalid, "invalid", false);
-  attach_ui_event_listener!(html_el, InputEvent, OnSubmit, "submit", false);
+  #[cfg(feature = "input-events")]
+  {
+    attach_ui_event_listener!(html_el, InputEvent, OnChange, "change", false);
+    attach_ui_event_listener!(html_el, InputEvent, OnInput, "input", false);
+    attach_ui_event_listener!(html_el, InputEvent, OnInvalid, "invalid", false);
+    attach_ui_event_listener!(html_el, InputEvent, OnSubmit, "submit", false);
+  }
 
   // --Mouse
-  attach_ui_event_listener!(html_el, MouseEvent, OnClick, "click", false);
-  attach_ui_event_listener!(html_el, MouseEvent, OnContextMenu, "contextmenu", false);
-  attach_ui_event_listener!(html_el, MouseEvent, OnDblClick, "dblclick", false);
+  #[cfg(feature = "mouse-events")]
+  {
+    attach_ui_event_listener!(html_el, MouseEvent, OnClick, "click", false);
+    attach_ui_event_listener!(html_el, MouseEvent, OnContextMenu, "contextmenu", false);
+    attach_ui_event_listener!(html_el, MouseEvent, OnDblClick, "dblclick", false);
 
-  attach_ui_event_listener!(html_el, MouseEvent, OnDrag, "drag", false);
-  attach_ui_event_listener!(html_el, MouseEvent, OnDragEnd, "dragend", false);
-  attach_ui_event_listener!(html_el, MouseEvent, OnDragEnter, "dragenter", false);
-  attach_ui_event_listener!(html_el, MouseEvent, OnDragExit, "dragexit", false);
-  attach_ui_event_listener!(html_el, MouseEvent, OnDragLeave, "dragleave", false);
-  attach_ui_event_listener!(html_el, MouseEvent, OnDragOver, "dragover", false);
-  attach_ui_event_listener!(html_el, MouseEvent, OnDragStart, "dragstart", false);
-  attach_ui_event_listener!(html_el, MouseEvent, OnDrop, "drop", false);
+    attach_ui_event_listener!(html_el, MouseEvent, OnDrag, "drag", false);
+    attach_ui_event_listener!(html_el, MouseEvent, OnDragEnd, "dragend", false);
+    attach_ui_event_listener!(html_el, MouseEvent, OnDragEnter, "dragenter", false);
+    attach_ui_event_listener!(html_el, MouseEvent, OnDragExit, "dragexit", false);
+    attach_ui_event_listener!(html_el, MouseEvent, OnDragLeave, "dragleave", false);
+    attach_ui_event_listener!(html_el, MouseEvent, OnDragOver, "dragover", false);
+    attach_ui_event_listener!(html_el, MouseEvent, OnDragStart, "dragstart", false);
+    attach_ui_event_listener!(html_el, MouseEvent, OnDrop, "drop", false);
 
-  attach_ui_event_listener!(html_el, MouseEvent, OnMouseDown, "mousedown", false);
-  attach_ui_event_listener!(html_el, MouseEvent, OnMouseEnter, "mouseenter", false);
-  attach_ui_event_listener!(html_el, MouseEvent, OnMouseLeave, "mouseleave", false);
-  attach_ui_event_listener!(html_el, MouseEvent, OnMouseMove, "mousemove", false);
-  attach_ui_event_listener!(html_el, MouseEvent, OnMouseOver, "mouseover", false);
-  attach_ui_event_listener!(html_el, MouseEvent, OnMouseOut, "mouseout", false);
-  attach_ui_event_listener!(html_el, MouseEvent, OnMouseUp, "mouseup", false);
+    attach_ui_event_listener!(html_el, MouseEvent, OnMouseDown, "mousedown", false);
+    attach_ui_event_listener!(html_el, MouseEvent, OnMouseEnter, "mouseenter", false);
+    attach_ui_event_listener!(html_el, MouseEvent, OnMouseLeave, "mouseleave", false);
+    attach_ui_event_listener!(html_el, MouseEvent, OnMouseMove, "mousemove", false);
+    attach_ui_event_listener!(html_el, MouseEvent, OnMouseOver, "mouseover", false);
+    attach_ui_event_listener!(html_el, MouseEvent, OnMouseOut, "mouseout", false);
+    attach_ui_event_listener!(html_el, MouseEvent, OnMouseUp, "mouseup", false);
+  }
 
   // --Pointer
-  attach_ui_event_listener!(html_el, PointerEvent, OnPointerDown, "pointerdown", false);
-  attach_ui_event_listener!(html_el, PointerEvent, OnPointerMove, "pointermove", false);
-  attach_ui_event_listener!(html_el, PointerEvent, OnPointerUp, "pointerup", false);
-  attach_ui_event_listener!(
-    html_el,
-    PointerEvent,
-    OnPointerCancel,
-    "pointercancel",
-    false
-  );
-  attach_ui_event_listener!(
-    html_el,
-    PointerEvent,
-    OnGotPointerCapture,
-    "gotpointercapture",
-    false
-  );
-  attach_ui_event_listener!(
-    html_el,
-    PointerEvent,
-    OnLostPointerCapture,
-    "lostpointercapture",
-    false
-  );
-  attach_ui_event_listener!(html_el, PointerEvent, OnPointerEnter, "pointerenter", false);
-  attach_ui_event_listener!(html_el, PointerEvent, OnPointerLeave, "pointerleave", false);
-  attach_ui_event_listener!(html_el, PointerEvent, OnPointerOver, "pointerover", false);
-  attach_ui_event_listener!(html_el, PointerEvent, OnPointerOut, "pointerout", false);
+  #[cfg(feature = "pointer-events")]
+  {
+    attach_ui_event_listener!(html_el, PointerEvent, OnPointerDown, "pointerdown", false);
+    attach_ui_event_listener!(html_el, PointerEvent, OnPointerMove, "pointermove", false);
+    attach_ui_event_listener!(html_el, PointerEvent, OnPointerUp, "pointerup", false);
+    attach_ui_event_listener!(
+      html_el,
+      PointerEvent,
+      OnPointerCancel,
+      "pointercancel",
+      false
+    );
+    attach_ui_event_listener!(
+      html_el,
+      PointerEvent,
+      OnGotPointerCapture,
+      "gotpointercapture",
+      false
+    );
+    attach_ui_event_listener!(
+      html_el,
+      PointerEvent,
+      OnLostPointerCapture,
+      "lostpointercapture",
+      false
+    );
+    attach_ui_event_listener!(html_el, PointerEvent, OnPointerEnter, "pointerenter", false);
+    attach_ui_event_listener!(html_el, PointerEvent, OnPointerLeave, "pointerleave", false);
+    attach_ui_event_listener!(html_el, PointerEvent, OnPointerOver, "pointerover", false);
+    attach_ui_event_listener!(html_el, PointerEvent, OnPointerOut, "pointerout", false);
+  }
 
   // --Selection
-  attach_ui_event_listener!(html_el, WebSysUiEvent, OnSelect, "onselect", false);
+  #[cfg(feature = "select-events")]
+  {
+    attach_ui_event_listener!(html_el, WebSysUiEvent, OnSelect, "onselect", false);
+  }
 
   // --Touch
-  attach_ui_event_listener!(html_el, TouchEvent, OnTouchCancel, "touchcancel", false);
-  attach_ui_event_listener!(html_el, TouchEvent, OnTouchEnd, "touchend", false);
-  attach_ui_event_listener!(html_el, TouchEvent, OnTouchMove, "touchmove", false);
-  attach_ui_event_listener!(html_el, TouchEvent, OnTouchStart, "touchstart", false);
+  #[cfg(feature = "touch-events")]
+  {
+    attach_ui_event_listener!(html_el, TouchEvent, OnTouchCancel, "touchcancel", false);
+    attach_ui_event_listener!(html_el, TouchEvent, OnTouchEnd, "touchend", false);
+    attach_ui_event_listener!(html_el, TouchEvent, OnTouchMove, "touchmove", false);
+    attach_ui_event_listener!(html_el, TouchEvent, OnTouchStart, "touchstart", false);
+  }
 
   // --Scroll
-  attach_ui_event_listener!(html_el, ScrollAreaEvent, OnScroll, "scroll", false);
+  #[cfg(feature = "scroll-events")]
+  {
+    attach_ui_event_listener!(html_el, ScrollAreaEvent, OnScroll, "scroll", false);
+  }
 
   // --Image
-  attach_ui_event_listener!(html_el, WebSysUiEvent, OnLoad, "load", false);
-  attach_ui_event_listener!(html_el, WebSysUiEvent, OnError, "error", false);
+  #[cfg(feature = "image-events")]
+  {
+    attach_ui_event_listener!(html_el, WebSysUiEvent, OnLoad, "load", false);
+    attach_ui_event_listener!(html_el, WebSysUiEvent, OnError, "error", false);
+  }
 
   // --Animation
-  attach_ui_event_listener!(
-    html_el,
-    AnimationEvent,
-    OnAnimationStart,
-    "animationstart",
-    false
-  );
-  attach_ui_event_listener!(
-    html_el,
-    AnimationEvent,
-    OnAnimationEnd,
-    "animationend",
-    false
-  );
-  attach_ui_event_listener!(
-    html_el,
-    AnimationEvent,
-    OnAnimationIteration,
-    "animationiteration",
-    false
-  );
+  #[cfg(feature = "animation-events")]
+  {
+    attach_ui_event_listener!(
+      html_el,
+      AnimationEvent,
+      OnAnimationStart,
+      "animationstart",
+      false
+    );
+    attach_ui_event_listener!(
+      html_el,
+      AnimationEvent,
+      OnAnimationEnd,
+      "animationend",
+      false
+    );
+    attach_ui_event_listener!(
+      html_el,
+      AnimationEvent,
+      OnAnimationIteration,
+      "animationiteration",
+      false
+    );
+  }
 
   // --Transition
-  attach_ui_event_listener!(
-    html_el,
-    TransitionEvent,
-    OnTransitionEnd,
-    "transitionend",
-    false
-  );
+  #[cfg(feature = "transition-events")]
+  {
+    attach_ui_event_listener!(
+      html_el,
+      TransitionEvent,
+      OnTransitionEnd,
+      "transitionend",
+      false
+    );
+  }
 
   // --Other
-  attach_ui_event_listener!(html_el, WebSysUiEvent, OnToggle, "toggle", false);
+  #[cfg(feature = "toggle-events")]
+  {
+    attach_ui_event_listener!(html_el, WebSysUiEvent, OnToggle, "toggle", false);
+  }
 }
 
 macro_rules! attach_window_event_listener {
