@@ -7,24 +7,47 @@ use wasm_bindgen::{
   closure::Closure,
   JsCast,
 };
+
+#[cfg(feature = "animation-events")]
+use web_sys::AnimationEvent;
+
+#[cfg(feature = "clipboard-events")]
+use web_sys::ClipboardEvent;
+
+#[cfg(feature = "focus-events")]
+use web_sys::FocusEvent;
+
+#[cfg(feature = "keyboard-events")]
+use web_sys::KeyboardEvent;
+
+#[cfg(feature = "mouse-events")]
+use web_sys::MouseEvent;
+
+#[cfg(feature = "pointer-events")]
+use web_sys::PointerEvent;
+
+#[cfg(feature = "scroll-events")]
+use web_sys::ScrollAreaEvent;
+
+#[cfg(feature = "touch-events")]
+use web_sys::TouchEvent;
+
+#[cfg(feature = "transition-events")]
+use web_sys::TransitionEvent;
+
+#[cfg(feature = "input-events")]
+use web_sys::InputEvent;
+
+#[cfg(feature = "web-sys-ui-event")]
+use web_sys::UiEvent as WebSysUiEvent;
+
 use web_sys::{
-  AnimationEvent,
   BeforeUnloadEvent,
-  ClipboardEvent,
   Event,
-  FocusEvent,
   HashChangeEvent,
   HtmlElement,
-  InputEvent,
-  KeyboardEvent,
-  MouseEvent,
-  PointerEvent,
   PopStateEvent,
   PromiseRejectionEvent,
-  ScrollAreaEvent,
-  TouchEvent,
-  TransitionEvent,
-  UiEvent as WebSysUiEvent,
 };
 
 fn derive_path(s: String) -> Result<Vec<usize>, std::num::ParseIntError> {

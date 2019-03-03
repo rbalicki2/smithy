@@ -10,6 +10,7 @@ smithy_core = { path = "../smithy_core" }
 smithy_types = { path = "../smithy_types" }
 
 [features]
+default = ["keyboard-events", "input-events", "focus-events"]
 copy-events = ["smithy_core/copy-events", "smithy_types/copy-events"]
 keyboard-events = ["smithy_core/keyboard-events", "smithy_types/keyboard-events"]
 focus-events = ["smithy_core/focus-events", "smithy_types/focus-events"]
