@@ -128,14 +128,8 @@ pub fn rerender() {
       });
     });
 
-    ROOT_ELEMENT.with_inner_value(|el| {
-      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
-        "bout to call post_render {:?}",
-        newly_rendered_nodes
-      )));
-      root_component.handle_ref_assignment(vec![]);
-      root_component.handle_post_render();
-    });
+    root_component.handle_ref_assignment(vec![]);
+    root_component.handle_post_render();
     LAST_RENDERED_NODE.store(newly_rendered_nodes);
   });
 }
