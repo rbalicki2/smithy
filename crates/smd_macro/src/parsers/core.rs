@@ -196,9 +196,6 @@ named!(
     ),
     |(global_event_handling_infos, dom_vec)| {
       // dom_vec is a vector of (TokenStream, Vec<UIHandlingInfo>, Vec<DomRefInfo>)
-      // where the last token stream is the ref, if present
-      // innerref is not present here
-      println!("vec dom ref info in match_html_component {:?}", dom_vec);
       let (vec_of_node_tokens, event_handling_infos, dom_ref_vec) = dom_vec
         .into_iter()
         .enumerate()
@@ -215,17 +212,11 @@ named!(
             }).collect::<Vec<UIEventHandlingInfo>>();
             event_handling_infos.append(&mut vec);
 
-            // TODO clean this up, vec_of_refs.extend(...) and the like
-            // if let Some(mut dom_ref) = dom_ref_opt {
             for mut dom_ref in dom_ref_vec {
-              // println!("dom ref found");
-              // println!("{}", i);
-              // i is the current index of the guy, so maybe we need
-              // to do this same path stuff and thus pass down the path
-              // in the dom_ref_opt
               dom_ref.reversed_path.push(i);
               vec_of_dom_refs.push(dom_ref);
             }
+
             (vec_of_node_tokens, event_handling_infos, vec_of_dom_refs)
           }
         );

@@ -38,8 +38,6 @@ fn clone_and_extend(path: &Vec<usize>, next_item: usize) -> Vec<usize> {
 
 impl AsInnerHtml for Vec<CollapsedNode> {
   fn as_inner_html(&self) -> String {
-    // TODO the path (clone_and_extend, below) needs to be from the
-    // uncollapsed node and stored in the collapsed node
     self
       .iter()
       .enumerate()

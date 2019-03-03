@@ -134,7 +134,6 @@ pub fn rerender() {
         newly_rendered_nodes
       )));
       root_component.handle_ref_assignment(vec![]);
-      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str("ref assignment done"));
       root_component.handle_post_render(
         &newly_rendered_nodes.split_node_list(convert_node_list_to_vec(&el.child_nodes())),
       );

@@ -86,7 +86,6 @@ pub fn make_component(
     .fold(
       (quote!{}, quote!{}),
       |(ref_accum, group_accum), (reversed_path, group)| {
-        // TODO pass reversed_path or whatnot to handle_ref_assignment
         let quotable_path = vec_to_quote(reversed_path);
         (
           quote!{
@@ -126,13 +125,10 @@ pub fn make_component(
         .collect::<Vec<String>>();
 
       let selector = strs.join(",");
-      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!("[data-smithy-path=\"{}\"]", selector)));
       // TODO avoid unwrapping here
       let el_opt: Option<web_sys::HtmlElement> = doc.query_selector(&format!("[data-smithy-path=\"{}\"]", selector))
         .unwrap()
         .map(JsCast::unchecked_into);
-
-      web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!("is some - {}, setting in dom ref with name {}", el_opt.is_some(), dom_ref.name)));
 
       dom_ref.set(el_opt);
     }
@@ -235,7 +231,6 @@ pub fn make_component(
           smithy_types::PhaseResult::PostRendering
         },
         smithy_types::Phase::RefAssignment(path_so_far) => {
-          web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!("ref handling, path so far = {:?}", path_so_far)));
           #ref_assignment_quote
           smithy_types::PhaseResult::RefAssignment
         },
