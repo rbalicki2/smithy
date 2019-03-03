@@ -33,7 +33,7 @@ x attribute values should be enclosed in quotes
 * remaining events
 
 ## Blockers to alpha
-* compilation bugs, like `smd!()` `smd!(<div />` etc
+* compilation bugs, like `smd!()` `smd!(<div />)` etc
 * better compilation error messages
 * Do not use thread_local!, instantiate things in mount
   * Maybe I need to call (reactor, mount) = initiaite_smithy();
