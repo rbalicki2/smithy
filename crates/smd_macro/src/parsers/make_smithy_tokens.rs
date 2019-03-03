@@ -130,7 +130,8 @@ pub fn make_component(
         .unwrap()
         .map(JsCast::unchecked_into);
 
-      dom_ref.set(el_opt);
+      // dom_ref.set(el_opt);
+      *dom_ref = el_opt;
     }
     #child_ref_assignment
   };
