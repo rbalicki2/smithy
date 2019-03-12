@@ -23,14 +23,21 @@ x derive eq etc on Nodes
 x macros for event types
 ? `impl Component` for a bunch of things
 x reconciliation algorithm + diff (sounds important!!)
-* file size
-* confirm <input> works reasonably
+x confirm <input> works reasonably
+  * do more?
 x render-in-progress flag
 * convert existing comments to /// comments
 * prelude
 x self closing tags
 x attribute values should be enclosed in quotes
 * remaining events
+* file size
+* build:prod and deployment
+
+## Sites to build
+* <input> demo
+* routing
+* API calls without race conditions
 
 ## Blockers to alpha
 * compilation bugs, like `smd!()` `smd!(<div />)` etc
