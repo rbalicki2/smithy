@@ -25,17 +25,6 @@ pub trait AsInnerHtml {
   fn as_inner_html(&self) -> String;
 }
 
-fn concat(path: &Path, new_item: usize) -> Vec<usize> {
-  let new_path = path.clone();
-  [new_path, &[new_item]].concat()
-}
-
-fn clone_and_extend(path: &Vec<usize>, next_item: usize) -> Vec<usize> {
-  let mut path = path.clone();
-  path.extend(&[next_item]);
-  path
-}
-
 impl AsInnerHtml for Vec<CollapsedNode> {
   fn as_inner_html(&self) -> String {
     self

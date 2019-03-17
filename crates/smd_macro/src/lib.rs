@@ -1,4 +1,9 @@
-#![feature(proc_macro_span, proc_macro_raw_ident, slice_patterns)]
+#![feature(
+  proc_macro_span,
+  proc_macro_raw_ident,
+  slice_patterns,
+  extern_crate_item_prelude
+)]
 #![recursion_limit = "128"]
 
 extern crate proc_macro;

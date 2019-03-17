@@ -50,7 +50,7 @@ impl Node {
     // 1. If Node is a Dom/Vec (i.e. iterable), we flat_map over each child
     // and collect that into a vec of CollapsedNode's.
     // If Node is a Text/Comment, we collect that into a vec of length 1.
-    let mut node_vec = match self {
+    let node_vec = match self {
       Node::Dom(html_token) => vec![CollapsedNode::Dom(CollapsedHtmlToken {
         path: path.clone(),
         node_type: html_token.node_type,
