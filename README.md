@@ -85,3 +85,5 @@ x attribute values should be enclosed in quotes
 * It should be passed down in core.rs in smd_macro
 * TokenStreamEventHandlingInfoPair needs to have a dom_ref_opt in there
 
+## Bugs
+* No need for `"keyboard-events"` feature?

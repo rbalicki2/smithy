@@ -57,3 +57,5 @@ toggle-events = ["web-sys-ui-events"]
 # Private cfg flags... these should probably not be used.
 web-sys-ui-events = ["any-ui-events"]
 any-ui-events = []
+
+debug-logs = []
