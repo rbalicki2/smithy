@@ -113,9 +113,9 @@ pub fn make_component(
   let dom_ref_infos =
     quote!{ { let dom_refs: Vec<smithy::types::DomRefWithPath> = vec![#dom_ref_infos]; dom_refs }};
   let ref_assignment_quote = quote!{
+    let document = web_sys::window().unwrap().document().unwrap();
     for (path, dom_ref) in (#dom_ref_infos).into_iter() {
       use wasm_bindgen::JsCast;
-      let doc = web_sys::window().unwrap().document().unwrap();
       let strs = path_so_far
         .clone()
         .into_iter()
@@ -125,7 +125,8 @@ pub fn make_component(
 
       let selector = strs.join(",");
       // TODO avoid unwrapping here
-      let el_opt: Option<web_sys::HtmlElement> = doc.query_selector(&format!("[data-smithy-path=\"{}\"]", selector))
+      let el_opt: Option<web_sys::HtmlElement> = document
+        .query_selector(&format!("[data-smithy-path=\"{}\"]", selector))
         .unwrap()
         .map(JsCast::unchecked_into);
 
