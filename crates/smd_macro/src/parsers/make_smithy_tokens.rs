@@ -201,6 +201,8 @@ pub fn make_component(
       });
 
   quote!({
+    #[allow(dead_code)]
+    use smithy::types::Component;
     let component: smithy::types::SmithyComponent = smithy::types::SmithyComponent(Box::new(move |phase| {
       match phase {
         smithy::types::Phase::Rendering => smithy::types::PhaseResult::Rendering(#token),
