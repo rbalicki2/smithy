@@ -76,7 +76,7 @@ impl Node {
     let len = node_vec.len();
     let (mut node_vec, str_opt) = node_vec.into_iter().fold(
       (Vec::with_capacity(len), None),
-      |(mut vec_so_far, str_opt), node| {
+      |(vec_so_far, str_opt), node| {
         let mut push = false;
         let mut ret = match (&node, &str_opt) {
           (CollapsedNode::Text(text), Some(s)) => (vec_so_far, Some(format!("{}{}", s, text))),
