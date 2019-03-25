@@ -54,6 +54,15 @@ x attribute values should be enclosed in quotes
 * organize types and separate true core from SmithyComponent implementation
 * variable names are non-opaque :(
 * use a Trait for DomRef
+* Store interpolations in a vector at the top of the function.
+* Add a new syntax for display-only interpolations?
+* Add a new syntax for conditional rendering
+* Perhaps the rendering phase can be split into many rendering phases?
+  * Render and collect the leaves `{ inner }`, clone each of their `CollapsedNode`
+    (which may already be a clone?), and then move up.
+  * Maybe there will be types of `SmithyComponent`s - one that clones in the above
+    process, and a (maybe) faster one that does not do that, but which may not
+    compile.
 
 ## Issues
 * Think about how to handle match statements, e.g. in the context of routing
