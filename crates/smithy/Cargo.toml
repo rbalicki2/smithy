@@ -26,3 +26,4 @@ transition-events = ["smithy_core/transition-events", "smithy_types/transition-e
 toggle-events = ["smithy_core/toggle-events", "smithy_types/toggle-events"]
 
 debug-logs = ["smithy_core/debug-logs"]
+smd-logs = ["smd_macro/smd-logs"]
