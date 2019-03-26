@@ -89,7 +89,9 @@ pub fn make_component(
         (
           quote!{
             #ref_accum
-            let new_path = path_so_far.clone().into_iter().chain(#quotable_path).collect();
+            let mut path = #quotable_path.clone();
+            path.reverse();
+            let new_path = path_so_far.clone().into_iter().chain(path).collect();
             (#group).handle_ref_assignment(new_path);
           },
           quote!{
