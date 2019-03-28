@@ -29,15 +29,15 @@ impl UIEventHandlingInfo {
       .reversed_path
       .iter()
       .rev()
-      .fold(quote!{}, |accum, path_item| {
-        quote!{ #accum #path_item, }
+      .fold(quote! {}, |accum, path_item| {
+        quote! { #accum #path_item, }
       });
     let additional_dot_dot = if !self.event.is_some() {
-      quote!{ rest.. }
+      quote! { rest.. }
     } else {
-      quote!{}
+      quote! {}
     };
-    quote!{
+    quote! {
       [ #inner #additional_dot_dot ]
     }
   }

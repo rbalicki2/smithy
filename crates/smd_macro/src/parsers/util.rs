@@ -196,7 +196,7 @@ fn reduce_vec_to_tokens(v: &Vec<proc_macro2::TokenStream>) -> proc_macro2::Token
 
 pub fn reduce_vec_to_node(v: &Vec<proc_macro2::TokenStream>) -> proc_macro2::TokenStream {
   let inner = reduce_vec_to_tokens(v);
-  quote!{
+  quote! {
     smithy::types::Node::Vec(#inner)
   }
 }

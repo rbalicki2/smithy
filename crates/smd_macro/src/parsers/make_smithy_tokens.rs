@@ -67,7 +67,7 @@ where
 {
   let ret = v
     .into_iter()
-    .fold(quote!{}, |accum, item| quote!(#accum #item,));
+    .fold(quote! {}, |accum, item| quote!(#accum #item,));
   quote!(vec![#ret])
 }
 
@@ -83,18 +83,18 @@ pub fn make_component(
     .filter(|info| !info.event.is_some())
     .map(|info| (info.reversed_path.clone(), info.callback.clone()))
     .fold(
-      (quote!{}, quote!{}),
+      (quote! {}, quote! {}),
       |(ref_accum, group_accum), (reversed_path, group)| {
         let quotable_path = vec_to_quote(reversed_path);
         (
-          quote!{
+          quote! {
             #ref_accum
             let mut path = #quotable_path.clone();
             path.reverse();
             let new_path = path_so_far.clone().into_iter().chain(path).collect();
             (#group).handle_ref_assignment(new_path);
           },
-          quote!{
+          quote! {
             #group_accum
             event_handled = (#group).handle_window_event(window_event) || event_handled;
           },
@@ -104,17 +104,17 @@ pub fn make_component(
 
   let dom_ref_infos = dom_ref_infos
     .into_iter()
-    .fold(quote!{}, |accum, dom_ref_info| {
+    .fold(quote! {}, |accum, dom_ref_info| {
       let dom_ref = dom_ref_info.dom_ref;
       let path = vec_to_quote(dom_ref_info.reversed_path);
-      quote!{
+      quote! {
         #accum
         (#path, #dom_ref),
       }
     });
   let dom_ref_infos =
-    quote!{ { let dom_refs: Vec<smithy::types::DomRefWithPath> = vec![#dom_ref_infos]; dom_refs }};
-  let ref_assignment_quote = quote!{
+    quote! { { let dom_refs: Vec<smithy::types::DomRefWithPath> = vec![#dom_ref_infos]; dom_refs }};
+  let ref_assignment_quote = quote! {
     let document = web_sys::window().unwrap().document().unwrap();
     for (path, dom_ref) in (#dom_ref_infos).into_iter() {
       use wasm_bindgen::JsCast;
@@ -141,8 +141,8 @@ pub fn make_component(
     .iter()
     .filter(|info| !info.event.is_some())
     .map(|info| info.callback.clone())
-    .fold(quote!{}, |accum, group| {
-      quote!{{
+    .fold(quote! {}, |accum, group| {
+      quote! {{
         #accum
         (#group).handle_post_render();
       }}
@@ -177,10 +177,10 @@ pub fn make_component(
   let inner_window_event_handling =
     window_event_handling_infos
       .into_iter()
-      .fold(quote!{}, |accum, window_event_handling_info| {
+      .fold(quote! {}, |accum, window_event_handling_info| {
         let WindowEventHandlingInfo { event, callback } = window_event_handling_info;
         let event = Ident::new(&event, Span::call_site());
-        quote!{
+        quote! {
           #accum
           smithy::types::WindowEvent::#event(val) => {
             (#callback)(val);
@@ -194,9 +194,9 @@ pub fn make_component(
   let inner_lifecycle_event_handling =
     lifecycle_event_handling_infos
       .into_iter()
-      .fold(quote!{}, |accum, lifecycle_info| {
+      .fold(quote! {}, |accum, lifecycle_info| {
         let cb = lifecycle_info.callback;
-        quote!{
+        quote! {
           #accum
           (#cb)();
         }
