@@ -1,7 +1,4 @@
-use crate::{
-  HtmlToken,
-  Node,
-};
+use crate::Node;
 
 type Path = Vec<usize>;
 

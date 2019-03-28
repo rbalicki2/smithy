@@ -7,7 +7,6 @@ use enum_derive::{
   enum_derive_util,
   EnumFromInner,
 };
-use web_sys::Node as WebSysNode;
 
 pub type Attributes = std::collections::HashMap<String, String>;
 
@@ -27,11 +26,7 @@ pub trait AsInnerHtml {
 
 impl AsInnerHtml for Vec<CollapsedNode> {
   fn as_inner_html(&self) -> String {
-    self
-      .iter()
-      .enumerate()
-      .map(|(i, node)| node.as_inner_html())
-      .collect()
+    self.iter().map(|node| node.as_inner_html()).collect()
   }
 }
 
@@ -117,8 +112,7 @@ impl AsInnerHtml for CollapsedHtmlToken {
       let child_html = self
         .children
         .iter()
-        .enumerate()
-        .map(|(i, node)| node.as_inner_html())
+        .map(|node| node.as_inner_html())
         .collect::<Vec<String>>()
         .join("");
       format!(
