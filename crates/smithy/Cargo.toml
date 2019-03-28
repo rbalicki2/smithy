@@ -3,6 +3,8 @@ name = "smithy"
 version = "0.0.2"
 authors = ["Robert Balicki <robert.balicki@gmail.com>"]
 edition = "2018"
+keywords = ["web", "asmjs", "webasm", "javascript", "webassembly", "wasm"]
+categories = ["gui", "web-programming"]
 
 [dependencies]
 smd_macro = { path = "../smd_macro", version = "0.0.2" }
