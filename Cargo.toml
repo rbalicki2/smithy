@@ -6,6 +6,3 @@ members = [
   "crates/smithy_core",
   "crates/smithy",
 ]
-
-[replace]
-"proc-macro2:0.4.27" = { path = "./crates/proc-macro2" }
