@@ -1,6 +1,5 @@
 use crate::types::{
   AttributeOrEventHandler,
-  DomRefInfo,
   GlobalEventHandlingInfo,
   LifecycleEventHandlingInfo,
   SplitAttributeOrEventHandlers,
