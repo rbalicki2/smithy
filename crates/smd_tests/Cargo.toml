@@ -15,4 +15,4 @@ web-sys = { version = "0.3.5", features = [] }
 members = ["."]
 
 [replace]
-"proc-macro2:0.4.24" = { path = "../proc-macro2" }
+"proc-macro2:0.4.27" = { path = "../proc-macro2" }
