@@ -1,5 +1,3 @@
-#![feature(extern_crate_item_prelude)]
-
 extern crate custom_derive;
 extern crate enum_derive;
 
