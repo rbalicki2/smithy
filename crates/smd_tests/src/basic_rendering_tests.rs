@@ -2,6 +2,7 @@
 mod tests {
   use smithy::{
     self,
+    smd,
     types::*,
   };
   use std::collections::HashMap;

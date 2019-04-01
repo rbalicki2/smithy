@@ -1,10 +1,13 @@
 #[cfg(test)]
 mod tests {
-  use smithy_types::{
-    Component,
-    HtmlToken,
-    Node,
-    UiEvent,
+  use smithy::{
+    smd,
+    types::{
+      Component,
+      HtmlToken,
+      Node,
+      UiEvent,
+    },
   };
   use std::collections::HashMap;
 

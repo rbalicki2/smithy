@@ -1,8 +1,11 @@
+format :
+	cargo fmt && cargo fmt -- crates/smd_tests/src/*
+
 watch :
-	cargo watch -x fmt -x '+nightly build'
+	cargo watch -s 'make format' -x '+nightly build'
 
 watch-test :
-	cargo watch -x fmt -s 'cd crates/smd_tests && cargo +nightly test'
+	cargo watch -s 'make format' -s 'cd crates/smd_tests && cargo +nightly test'
 
 watch-test-nc :
-	 cargo watch -x fmt -s 'cd crates/smd_tests && cargo +nightly test -- --nocapture'
+	 cargo watch -s 'make format' -s 'cd crates/smd_tests && cargo +nightly test -- --nocapture'
