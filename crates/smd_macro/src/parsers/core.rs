@@ -184,13 +184,17 @@ named!(
   )
 );
 
-// N.B. this is the "entry point" of this file.
 named!(
   pub match_html_component <TokenTreeSlice, TokenStream>,
   map!(
     tuple!(
       many_0_custom!(match_window_event_handlers),
-      many_1_custom!(match_node)
+      // N.B. we would rather call many_0_custom!(match_node) here, but that
+      // does not appear to work. This is a workaround.
+      alt!(
+        many_1_custom!(match_node)
+          | call!(util::match_empty)
+      )
     ),
     |(global_event_handling_infos, dom_vec)| {
       // dom_vec is a vector of (TokenStream, Vec<UIHandlingInfo>, Vec<DomRefInfo>)

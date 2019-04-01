@@ -168,6 +168,17 @@ pub fn match_literal_as_string(input: TokenTreeSlice) -> TtsIResult<String> {
   match_literal(input).map(|(rest, lit)| (rest, format!("{}{}", lit.to_string(), filler_spaces)))
 }
 
+pub fn match_empty(input: TokenTreeSlice) -> TtsIResult<Vec<TokenStreamEventHandlingInfoPair>> {
+  if input.len() == 0 {
+    Ok((input, vec![]))
+  } else {
+    Err(nom::Err::Error(nom::error_position!(
+      input,
+      nom::ErrorKind::Custom(42)
+    )))
+  }
+}
+
 pub fn get_filler_spaces(input: TokenTreeSlice) -> String {
   let first_opt = input.get(0).map(|i| i.span().end());
   let second_opt = input.get(1).map(|i| i.span().start());
