@@ -1,5 +1,6 @@
 use crate::types::{
   AttributeOrEventHandler,
+  DomRefInfo,
   GlobalEventHandlingInfo,
   LifecycleEventHandlingInfo,
   SplitAttributeOrEventHandlers,
@@ -196,40 +197,59 @@ named!(
           | call!(util::match_empty)
       )
     ),
-    |(global_event_handling_infos, dom_vec)| {
-      // dom_vec is a vector of (TokenStream, Vec<UIHandlingInfo>, Vec<DomRefInfo>)
+    |
+      (global_event_handling_infos, dom_vec):
+        (
+          Vec<GlobalEventHandlingInfo>,
+          Vec<(TokenStream, Vec<UIEventHandlingInfo>, Vec<DomRefInfo>)>
+        )
+    | {
+      // What are we doing here? We're flattening vectors and appending
+      // the current index to some reversed paths.
       let (vec_of_node_tokens, event_handling_infos, dom_ref_vec) = dom_vec
         .into_iter()
         .enumerate()
         .fold(
           (vec![], vec![], vec![]),
-          |(mut vec_of_node_tokens, mut event_handling_infos, mut vec_of_dom_refs), (i, (token, current_event_handling_infos, dom_ref_vec))| {
+          |
+            (mut vec_of_node_tokens, mut event_handling_infos, mut vec_of_dom_refs):
+              (Vec<TokenStream>, Vec<UIEventHandlingInfo>, Vec<DomRefInfo>),
+            (i, (token, current_event_handling_infos, dom_ref_vec)):
+              (usize, (TokenStream, Vec<UIEventHandlingInfo>, Vec<DomRefInfo>))
+          | {
             vec_of_node_tokens.push(token);
 
             // append i to the path of the current_event_handling_infos and
             // append that vec to event_handling_infos
-            let mut vec = current_event_handling_infos.into_iter().map(|mut info| {
+            let mut current_event_handling_infos = current_event_handling_infos.into_iter().map(|mut info| {
               info.reversed_path.push(i);
               info
             }).collect::<Vec<UIEventHandlingInfo>>();
-            event_handling_infos.append(&mut vec);
+            event_handling_infos.append(&mut current_event_handling_infos);
 
-            for mut dom_ref in dom_ref_vec {
+            // and do the same thing for dom_ref's
+            let mut dom_ref_vec = dom_ref_vec.into_iter().map(|mut dom_ref| {
               dom_ref.reversed_path.push(i);
-              vec_of_dom_refs.push(dom_ref);
-            }
+              dom_ref
+            }).collect::<Vec<DomRefInfo>>();
+            vec_of_dom_refs.append(&mut dom_ref_vec);
 
             (vec_of_node_tokens, event_handling_infos, vec_of_dom_refs)
           }
         );
       let token = util::reduce_vec_to_node(&vec_of_node_tokens);
 
-      let (window_event_handler_infos, lifecycle_event_handling_infos): (Vec<WindowEventHandlingInfo>, Vec<LifecycleEventHandlingInfo>)
+      let (window_event_handler_infos, lifecycle_event_handling_infos):
+        (Vec<WindowEventHandlingInfo>, Vec<LifecycleEventHandlingInfo>)
         = global_event_handling_infos
           .into_iter()
           .fold(
             (vec![], vec![]),
-            |(mut window_event_handler_infos, mut lifecycle_event_handling_infos), current_global_event_handling_info| {
+            |
+              (mut window_event_handler_infos, mut lifecycle_event_handling_infos):
+                (Vec<WindowEventHandlingInfo>, Vec<LifecycleEventHandlingInfo>),
+              current_global_event_handling_info: GlobalEventHandlingInfo
+            | {
               // Can this be done more parsimoniously, e.g. using a library?
               match current_global_event_handling_info {
                 GlobalEventHandlingInfo::Window(window_event_handling_info) => {
@@ -242,7 +262,13 @@ named!(
               (window_event_handler_infos, lifecycle_event_handling_infos)
             }
           );
-      super::make_smithy_tokens::make_component(token, event_handling_infos, window_event_handler_infos, lifecycle_event_handling_infos, dom_ref_vec)
+
+      super::make_smithy_tokens::make_component(
+        token,
+        event_handling_infos,
+        window_event_handler_infos,
+        lifecycle_event_handling_infos, dom_ref_vec
+      )
     }
   )
 );
