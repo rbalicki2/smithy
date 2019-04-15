@@ -7,7 +7,7 @@ use quote::quote;
 #[derive(Debug)]
 pub struct UIEventHandlingInfo {
   pub reversed_path: Vec<usize>,
-  /// if event is none, this implies that this is a UIEventHandlingInfo
+  /// if event is None, this implies that this is a UIEventHandlingInfo
   /// for a group (e.g. { &mut child_el }).
   pub event: Option<String>,
   /// callback is actually the TokenStream group... it's a really bad name :(
@@ -40,6 +40,20 @@ impl UIEventHandlingInfo {
     quote! {
       [ #inner #additional_dot_dot ]
     }
+  }
+
+  pub fn is_group(&self) -> bool {
+    !self.event.is_some()
+  }
+
+  /// N.B. what should this be called???
+  /// TODO have two different types, Group and TrueUIEventHandlingInfo
+  /// except better named...
+  pub fn split_into_groups(
+    mut vec: Vec<UIEventHandlingInfo>,
+  ) -> (Vec<UIEventHandlingInfo>, Vec<UIEventHandlingInfo>) {
+    let groups = vec.drain_filter(|info| info.is_group()).collect();
+    (groups, vec)
   }
 }
 

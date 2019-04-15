@@ -104,6 +104,8 @@ named!(
       match_closing_tag
     ),
     |((name, attributes_and_event_handlers), children_and_events, closing_tag_name)| {
+      // TODO an Option<String> for closing_tag_name and only run this assertion if
+      // closing_tag_name.is_some(), allowing for <div>foo</>.
       assert_eq!(
         name,
         closing_tag_name,
@@ -111,10 +113,14 @@ named!(
         name,
         closing_tag_name,
       );
+
       let SplitAttributeOrEventHandlers(attributes, event_handlers, dom_ref_opt)
         = attributes_and_event_handlers.into();
       let SplitTokenStreamEventHandlingInfoPairs(children, child_event_infos, mut dom_ref_vec)
         = children_and_events.into();
+      // children: Vec<TokenStream>
+      // child_event_infos: Vec<UIEventHandlingInfo>
+      // dom_ref_vec: Vec<DomRefInfo>
 
       let token_stream = make_html_tokens(name, attributes, children);
 
@@ -237,7 +243,7 @@ named!(
             (vec_of_node_tokens, event_handling_infos, vec_of_dom_refs)
           }
         );
-      let token = util::reduce_vec_to_node(&vec_of_node_tokens);
+      let rendered_node = util::reduce_vec_to_node(&vec_of_node_tokens);
 
       let (window_event_handler_infos, lifecycle_event_handling_infos):
         (Vec<WindowEventHandlingInfo>, Vec<LifecycleEventHandlingInfo>)
@@ -264,7 +270,7 @@ named!(
           );
 
       super::make_smithy_tokens::make_component(
-        token,
+        rendered_node,
         event_handling_infos,
         window_event_handler_infos,
         lifecycle_event_handling_infos, dom_ref_vec

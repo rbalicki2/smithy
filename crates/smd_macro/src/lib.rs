@@ -1,5 +1,6 @@
 #![feature(proc_macro_span, proc_macro_raw_ident, slice_patterns)]
 #![recursion_limit = "128"]
+#![feature(drain_filter)]
 
 extern crate proc_macro;
 

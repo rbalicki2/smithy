@@ -72,15 +72,22 @@ where
 }
 
 pub fn make_component(
-  token: TokenStream,
+  rendered_node: TokenStream,
   ui_event_handling_infos: Vec<UIEventHandlingInfo>,
   window_event_handling_infos: Vec<WindowEventHandlingInfo>,
   lifecycle_event_handling_infos: Vec<LifecycleEventHandlingInfo>,
   dom_ref_infos: Vec<DomRefInfo>,
 ) -> TokenStream {
-  let (child_ref_assignment, group_window_event_handling) = ui_event_handling_infos
+  // TODO split ui_event_handling_infos into a vec of groups and a vec of non-groups
+  // and deal with them separately in this function.
+  // TODO even later: don't conflate these two! It's super weird that we have
+  // groups represented as UIEventHandlingInfo
+
+  let (groups, ui_event_handling_infos) =
+    UIEventHandlingInfo::split_into_groups(ui_event_handling_infos);
+
+  let (child_ref_assignment, group_window_event_handling) = groups
     .iter()
-    .filter(|info| !info.event.is_some())
     .map(|info| (info.reversed_path.clone(), info.callback.clone()))
     .fold(
       (quote! {}, quote! {}),
@@ -126,7 +133,8 @@ pub fn make_component(
         .collect::<Vec<String>>();
 
       let selector = strs.join(",");
-      // TODO avoid unwrapping here
+      // TODO avoid unwrapping here, and try to avoid calling .query_selector
+      // every time.
       let el_opt: Option<web_sys::HtmlElement> = document
         .query_selector(&format!("[data-smithy-path=\"{}\"]", selector))
         .unwrap()
@@ -137,27 +145,29 @@ pub fn make_component(
     #child_ref_assignment
   };
 
-  let group_lifecycle_event_handling = ui_event_handling_infos
-    .iter()
-    .filter(|info| !info.event.is_some())
-    .map(|info| info.callback.clone())
-    .fold(quote! {}, |accum, group| {
-      quote! {{
-        #accum
-        (#group).handle_post_render();
-      }}
-    });
+  let group_lifecycle_event_handling =
+    groups
+      .iter()
+      .map(|info| info.callback.clone())
+      .fold(quote! {}, |accum, group| {
+        quote! {{
+          #accum
+          (#group).handle_post_render();
+        }}
+      });
 
+  // inner_ui_event_handling is made in two parts.
+  // Part 1: handle events for non-groups (true ui event handlers)
   let inner_ui_event_handling =
     ui_event_handling_infos
       .into_iter()
-      .fold(quote!{}, |accum, ui_event_handling_info| {
+      .fold(quote! {}, |accum, ui_event_handling_info| {
         let path = ui_event_handling_info.get_path_match();
         let callback = ui_event_handling_info.callback;
         match ui_event_handling_info.event {
           Some(event) => {
             let event = Ident::new(&event, Span::call_site());
-            quote!{
+            quote! {
               #accum
               (smithy::types::UiEvent::#event(val), #path) => {
                 (#callback)(val);
@@ -165,14 +175,24 @@ pub fn make_component(
               },
             }
           },
-          None => quote!{
-            #accum
-            // N.B. path (aka get_path_match) matches the rest of the path as the variable rest
-            // which we pass onto the child
-            (evt, #path) => smithy::types::PhaseResult::UiEventHandling(#callback.handle_ui_event(evt, rest)),
-          },
+          None => panic!("should not happen, this is ensured by split_into_groups"),
         }
       });
+
+  // Part 2: handle groups
+  let inner_ui_event_handling = groups
+    .into_iter()
+    .fold(inner_ui_event_handling, |accum, group| {
+      let path = group.get_path_match();
+      let callback = group.callback;
+
+      quote! {
+        #accum
+        (evt, #path) => smithy::types::PhaseResult::UiEventHandling(
+          #callback.handle_ui_event(evt, rest)
+        ),
+      }
+    });
 
   let inner_window_event_handling =
     window_event_handling_infos
@@ -207,7 +227,7 @@ pub fn make_component(
     use smithy::types::Component;
     let component: smithy::types::SmithyComponent = smithy::types::SmithyComponent(Box::new(move |phase| {
       match phase {
-        smithy::types::Phase::Rendering => smithy::types::PhaseResult::Rendering(#token),
+        smithy::types::Phase::Rendering => smithy::types::PhaseResult::Rendering(#rendered_node),
         smithy::types::Phase::UiEventHandling(ui_event_handling) => {
           match ui_event_handling {
             #inner_ui_event_handling
