@@ -36,9 +36,12 @@ pub fn make_html_tokens(
     quote!(std::collections::HashMap::new())
   };
 
+  // children: Vec<TokenStream> where the TokenStream is a Node
   let child_initialization = if children.len() > 0 {
     let len = children.len();
     let child_insertion = children.into_iter().fold(quote!(), |accum, child| {
+      // child: TokenStream
+      // it is the result of a call to .render()
       quote!(
         #accum
         children.push(#child);
@@ -77,6 +80,7 @@ pub fn make_component(
   window_event_handling_infos: Vec<WindowEventHandlingInfo>,
   lifecycle_event_handling_infos: Vec<LifecycleEventHandlingInfo>,
   dom_ref_infos: Vec<DomRefInfo>,
+  should_move: bool,
 ) -> TokenStream {
   // TODO split ui_event_handling_infos into a vec of groups and a vec of non-groups
   // and deal with them separately in this function.
@@ -222,10 +226,13 @@ pub fn make_component(
         }
       });
 
+  // whether to move is a flag that we pass, and it depends on whether the macro invoked
+  // is smd! or smd_no_move!
+  let maybe_move = if should_move { quote!(move) } else { quote!() };
   quote!({
     #[allow(dead_code)]
     use smithy::types::Component;
-    let component: smithy::types::SmithyComponent = smithy::types::SmithyComponent(Box::new(move |phase| {
+    let component: smithy::types::SmithyComponent = smithy::types::SmithyComponent(Box::new(#maybe_move |phase| {
       match phase {
         smithy::types::Phase::Rendering => smithy::types::PhaseResult::Rendering(#rendered_node),
         smithy::types::Phase::UiEventHandling(ui_event_handling) => {

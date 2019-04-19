@@ -7,24 +7,30 @@ extern crate proc_macro;
 mod parsers;
 mod types;
 
+// TODO can we cache this?
+// e.g. in a thread local or something?
+// groups are duplicated in many places; if they include macros,
+// that will cause those child macros to be compiled 5 times. (At least...?)
+// doubly-nested macros will be compiled 5^2 times. Yikes!
+
 #[proc_macro]
 pub fn smd(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-  let input_2: proc_macro2::TokenStream = input.into();
-  // println!("input {:?}", input_2);
-  let vec_of_trees: Vec<proc_macro2::TokenTree> = input_2.into_iter().collect();
+  smd_inner(input, true)
+}
 
-  let parsed = parsers::match_html_component(&vec_of_trees);
-  // println!("\nin smd parsed - {:?}", parsed);
+#[proc_macro]
+pub fn smd_no_move(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+  smd_inner(input, false)
+}
+
+fn smd_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::TokenStream {
+  let input_2: proc_macro2::TokenStream = input.into();
+  let vec_of_trees: Vec<proc_macro2::TokenTree> = input_2.into_iter().collect();
+  let parsed = parsers::match_html_component(&vec_of_trees, should_move);
 
   let unwrapped = parsed.unwrap();
   #[cfg(feature = "smd-logs")]
   println!("\nlet mut a = {};\n", unwrapped.1);
-  let remaining = unwrapped.0;
-
-  // TODO handle this at the nom level
-  if remaining.len() > 0 {
-    panic!("the smd! macro had left over characters. Make sure you only pass one html node.");
-  }
 
   unwrapped.1.into()
 }

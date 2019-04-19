@@ -18,6 +18,7 @@ use nom::{
   error_position,
   map,
   named,
+  named_args,
   tuple,
   tuple_parser,
 };
@@ -53,14 +54,10 @@ named!(
       )
     ),
     |(name, attributes_and_event_handlers)| {
-      // does not work
       let SplitAttributeOrEventHandlers(attributes, event_handlers, dom_ref_vec)
         = attributes_and_event_handlers.into();
 
-      // let dom_ref_vec = dom_ref_opt.map(DomRefInfo::from_token_stream).into_iter().collect::<Vec<DomRefInfo>>();
-
       let component = make_html_tokens(name, attributes, vec![]);
-      // println!("\nself closing\n{:?}", dom_ref_vec);
 
       let event_handlers = event_handlers
         .into_iter()
@@ -130,7 +127,6 @@ named!(
         .collect();
       event_infos.extend(child_event_infos.into_iter());
 
-      // let dom_ref_opt = dom_ref_opt.map(DomRefInfo::from_token_stream);
       dom_ref_vec.extend(dom_ref_opt.into_iter());
 
       (token_stream, event_infos, dom_ref_vec)
@@ -191,8 +187,8 @@ named!(
   )
 );
 
-named!(
-  pub match_html_component <TokenTreeSlice, TokenStream>,
+named_args!(
+  pub match_html_component(should_move: bool) <TokenTreeSlice, TokenStream>,
   map!(
     tuple!(
       many_0_custom!(match_window_event_handlers),
@@ -273,7 +269,9 @@ named!(
         rendered_node,
         event_handling_infos,
         window_event_handler_infos,
-        lifecycle_event_handling_infos, dom_ref_vec
+        lifecycle_event_handling_infos,
+        dom_ref_vec,
+        should_move
       )
     }
   )
