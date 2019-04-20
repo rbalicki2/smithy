@@ -8,4 +8,7 @@ watch-test :
 	cargo watch -s 'make format' -s 'cd crates/smd_tests && cargo +nightly test'
 
 watch-test-nc :
-	 cargo watch -s 'make format' -s 'cd crates/smd_tests && cargo +nightly test -- --nocapture'
+	cargo watch -s 'make format' -s 'cd crates/smd_tests && cargo +nightly test -- --nocapture'
+
+watch-docs :
+	cargo watch -s 'cargo doc -p smithy --features all-events' -w ./crates/

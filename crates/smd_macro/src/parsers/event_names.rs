@@ -4,13 +4,12 @@ use std::collections::HashMap;
 
 lazy_static! {
   pub static ref UI_EVENT_NAMES: HashMap<String, String> = {
-    // Remember to update this as you add more!
-    let mut event_names = HashMap::with_capacity(54);
+    let mut event_names = HashMap::new();
 
     // TODO figure out why I can't wrap this in if (cfg![test])
     event_names.insert("on_test".into(), "OnTest".into());
     // --Clipboard
-    // #[cfg(feature = "copy-events")]
+    // #[cfg(feature = "clipboard-events")]
     {
       event_names.insert("on_copy".into(), "OnCopy".into());
       event_names.insert("on_cut".into(), "OnCut".into());

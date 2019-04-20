@@ -40,6 +40,7 @@ wasm-bindgen-futures = "0.3.5"
 console_error_panic_hook = "0.1.5"
 
 [features]
+# dom events
 copy-events = ["any-ui-events"]
 keyboard-events = ["any-ui-events"]
 focus-events = ["any-ui-events"]
@@ -53,7 +54,14 @@ image-events = ["web-sys-ui-events"]
 animation-events = ["any-ui-events"]
 transition-events = ["any-ui-events"]
 toggle-events = ["web-sys-ui-events"]
-# Private cfg flags... these should probably not be used.
+
+# global events
+before-unload-events = []
+hash-change-events = []
+pop-state-events = []
+promise-rejection-events = []
+
+# Private cfg flags... these should probably not be used by you.
 web-sys-ui-events = ["any-ui-events"]
 any-ui-events = []
 

@@ -1,3 +1,6 @@
+//! A crate containing the `smd` and `smd_no_move` macros, which are the
+//! workhorses that generate `SmithyComponent`s.
+
 #![feature(proc_macro_span, proc_macro_raw_ident, slice_patterns)]
 #![recursion_limit = "128"]
 #![feature(drain_filter)]
@@ -13,11 +16,15 @@ mod types;
 // that will cause those child macros to be compiled 5 times. (At least...?)
 // doubly-nested macros will be compiled 5^2 times. Yikes!
 
+/// proc-macro to take a `SmithyComponent`, capturing referenced variables.
 #[proc_macro]
 pub fn smd(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   smd_inner(input, true)
 }
 
+/// proc-macro to take a `SmithyComponent`, not capturing referenced variables.
+///
+/// A call to `smd_no_move!` should usually be inside of a call to `smd!`.
 #[proc_macro]
 pub fn smd_no_move(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   smd_inner(input, false)

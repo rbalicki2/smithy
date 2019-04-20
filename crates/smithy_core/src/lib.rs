@@ -92,6 +92,7 @@ fn attach_listeners(el: &Element) {
   attach_event_listeners::attach_window_event_listeners(&window);
 }
 
+/// Forces the currently mounted smithy app to re-render.
 pub fn rerender() {
   ROOT_COMPONENT.with_inner_value(|root_component| {
     let newly_rendered_nodes: Vec<CollapsedNode> = root_component.render().into();
@@ -123,6 +124,17 @@ pub fn rerender() {
   });
 }
 
+/// Mounts the smithy app at the specified element.
+///
+/// # Examples
+///
+/// ```rs
+/// let app = smd!(<div>hello world</div>);
+/// let el = web_sys::window()
+///   .and_then(|w| w.document())
+///   .query_selector("#app").unwrap();
+/// smithy::mount(app, el);
+/// ```
 pub fn mount(mut component: Box<Component>, el: Element) {
   console_error_panic_hook::set_once();
   render_initially(&mut component, &el);
@@ -133,6 +145,8 @@ pub fn mount(mut component: Box<Component>, el: Element) {
   ROOT_COMPONENT.store(component);
 }
 
+/// Converts a future into an `UnwrappedPromise`, which causes the
+/// app to re-render when the future succeeds or fails.
 pub fn unwrapped_promise_from_future<S: 'static, E: 'static>(
   future: impl Future<Item = S, Error = E> + 'static,
 ) -> UnwrappedPromise<S, E> {

@@ -2,6 +2,14 @@ use crate::Node;
 
 type Path = Vec<usize>;
 
+/// An enum representing the types of nodes that can be present in the DOM.
+///
+/// A `Vec<CollapsedNode>` is generated from a `Node` by calling
+/// `node.into_collapsed_node` on it. This will concatenate adjacent strings,
+/// and flattening any `Node::Vec`'s.
+///
+/// That is, a `CollapsedNode` is meant to be a closer representation of the
+/// DOM than a `Node`.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum CollapsedNode {
   Dom(CollapsedHtmlToken),
@@ -9,6 +17,7 @@ pub enum CollapsedNode {
   Comment(Option<String>),
 }
 
+/// A struct representing an element node in the DOM.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct CollapsedHtmlToken {
   pub node_type: String,

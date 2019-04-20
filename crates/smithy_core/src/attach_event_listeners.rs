@@ -10,44 +10,39 @@ use wasm_bindgen::{
 
 #[cfg(feature = "animation-events")]
 use web_sys::AnimationEvent;
-
 #[cfg(feature = "clipboard-events")]
 use web_sys::ClipboardEvent;
-
 #[cfg(feature = "focus-events")]
 use web_sys::FocusEvent;
-
-#[cfg(feature = "keyboard-events")]
-use web_sys::KeyboardEvent;
-
-#[cfg(feature = "mouse-events")]
-use web_sys::MouseEvent;
-
-#[cfg(feature = "pointer-events")]
-use web_sys::PointerEvent;
-
-#[cfg(feature = "scroll-events")]
-use web_sys::ScrollAreaEvent;
-
-#[cfg(feature = "touch-events")]
-use web_sys::TouchEvent;
-
-#[cfg(feature = "transition-events")]
-use web_sys::TransitionEvent;
-
 #[cfg(feature = "input-events")]
 use web_sys::InputEvent;
-
-#[cfg(feature = "web-sys-ui-event")]
+#[cfg(feature = "keyboard-events")]
+use web_sys::KeyboardEvent;
+#[cfg(feature = "mouse-events")]
+use web_sys::MouseEvent;
+#[cfg(feature = "pointer-events")]
+use web_sys::PointerEvent;
+#[cfg(feature = "scroll-events")]
+use web_sys::ScrollAreaEvent;
+#[cfg(feature = "touch-events")]
+use web_sys::TouchEvent;
+#[cfg(feature = "transition-events")]
+use web_sys::TransitionEvent;
+#[cfg(feature = "web-sys-ui-events")]
 use web_sys::UiEvent as WebSysUiEvent;
 
+#[cfg(feature = "before-unload-events")]
+use web_sys::BeforeUnloadEvent;
+#[cfg(feature = "hash-change-events")]
+use web_sys::HashChangeEvent;
+#[cfg(feature = "pop-state-events")]
+use web_sys::PopStateEvent;
+#[cfg(feature = "promise-rejection-events")]
+use web_sys::PromiseRejectionEvent;
+
 use web_sys::{
-  BeforeUnloadEvent,
   Event,
-  HashChangeEvent,
   HtmlElement,
-  PopStateEvent,
-  PromiseRejectionEvent,
 };
 
 fn derive_path(s: String) -> Result<Vec<usize>, std::num::ParseIntError> {
@@ -99,7 +94,7 @@ macro_rules! attach_ui_event_listener {
 
 pub fn attach_ui_event_listeners(html_el: &js_fns::HTMLElement) {
   // --Clipboard
-  #[cfg(feature = "copy-events")]
+  #[cfg(feature = "clipboard-events")]
   {
     attach_ui_event_listener!(html_el, ClipboardEvent, OnCopy, "copy", true);
     attach_ui_event_listener!(html_el, ClipboardEvent, OnCut, "cut", true);
@@ -295,9 +290,13 @@ macro_rules! attach_window_event_listener {
 }
 
 pub fn attach_window_event_listeners(window: &js_fns::WINDOW) {
+  #[cfg(feature = "before-unload-events")]
   attach_window_event_listener!(window, BeforeUnloadEvent, OnBeforeUnload, "beforeunload");
+  #[cfg(feature = "hash-change-events")]
   attach_window_event_listener!(window, HashChangeEvent, OnHashChange, "hashchange");
+  #[cfg(feature = "pop-state-events")]
   attach_window_event_listener!(window, PopStateEvent, OnPopState, "popstate");
+  #[cfg(feature = "promise-rejection-events")]
   attach_window_event_listener!(
     window,
     PromiseRejectionEvent,

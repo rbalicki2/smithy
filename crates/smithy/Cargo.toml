@@ -16,7 +16,9 @@ smithy_core = { path = "../smithy_core", version = "0.0.2" }
 smithy_types = { path = "../smithy_types", version = "0.0.2" }
 
 [features]
-default = ["keyboard-events", "input-events", "focus-events"]
+default = ["keyboard-events", "input-events", "focus-events", "all-events"]
+
+# dom events
 copy-events = ["smithy_core/copy-events", "smithy_types/copy-events"]
 keyboard-events = ["smithy_core/keyboard-events", "smithy_types/keyboard-events"]
 focus-events = ["smithy_core/focus-events", "smithy_types/focus-events"]
@@ -30,6 +32,33 @@ image-events = ["smithy_core/image-events", "smithy_types/image-events"]
 animation-events = ["smithy_core/animation-events", "smithy_types/animation-events"]
 transition-events = ["smithy_core/transition-events", "smithy_types/transition-events"]
 toggle-events = ["smithy_core/toggle-events", "smithy_types/toggle-events"]
+
+# window events
+before-unload-events = ["smithy_core/before-unload-events", "smithy_types/before-unload-events"]
+hash-change-events = ["smithy_core/hash-change-events", "smithy_types/hash-change-events"]
+pop-state-events = ["smithy_core/pop-state-events", "smithy_types/pop-state-events"]
+promise-rejection-events = ["smithy_core/promise-rejection-events", "smithy_types/promise-rejection-events"]
+
+all-events = [
+  "copy-events",
+  "keyboard-events",
+  "focus-events",
+  "input-events",
+  "mouse-events",
+  "pointer-events",
+  "select-events",
+  "touch-events",
+  "scroll-events",
+  "image-events",
+  "animation-events",
+  "transition-events",
+  "toggle-events",
+
+  "before-unload-events",
+  "hash-change-events",
+  "pop-state-events",
+  "promise-rejection-events",
+]
 
 debug-logs = ["smithy_core/debug-logs"]
 smd-logs = ["smd_macro/smd-logs"]
