@@ -11,6 +11,13 @@ use enum_derive::{
 pub type Attributes = std::collections::HashMap<String, String>;
 
 custom_derive! {
+  /// An enum representing the different types of nodes, plus a special
+  /// wrapper `Node::Vec`.
+  ///
+  /// A `Node` represents the result of a call to `.render()` from the
+  /// `Component` interface. It does not exactly represent node tree in
+  /// the DOM. Rather, `CollapsedNode` is a closer representation of the
+  /// DOM.
   #[derive(Debug, Clone, EnumFromInner, Eq, PartialEq)]
   pub enum Node {
     Dom(HtmlToken),
@@ -43,6 +50,7 @@ impl AsInnerHtml for CollapsedNode {
   }
 }
 
+/// A struct representing an HTML element.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct HtmlToken {
   pub node_type: String,
@@ -51,6 +59,7 @@ pub struct HtmlToken {
 }
 
 fn format_attributes(attr: &Attributes) -> String {
+  // TODO is calling `format!` bad from a package size perspective?
   attr.iter().fold("".to_string(), |accum, (key, val)| {
     if val != "" {
       format!("{} {}=\"{}\"", accum, key, val)
@@ -127,34 +136,11 @@ impl AsInnerHtml for CollapsedHtmlToken {
 
 pub type Path = [usize];
 
-/// A Component is invoked in one of two phases: Rendering and UiEventHandling.
+/// An enum representing the different phases that a Smithy app can go through.
 ///
-/// Internally, this is represented as a match statement, allowing us to handle
-/// situations like:
-///
-/// //TODO put this into triple backticks
-/// smd!(<div on_click={|_| app_state.count = app_state.count + 1}>{ app_state.count }</div>);
-///
-/// In the above, there are multiple references to app_state.count, one of which is a
-/// mutable reference. This works because after the macro expands, it becomes
-///
-/// match phase {
-///   Phase::Rendering => PhaseResult::Rendering(HtmlToken {
-///     node_type: "div".into(),
-///     children: vec![app_state.count.into()], // immutable reference
-///     attributes: HashMap::new(),
-///   }),
-///   Phase::UiEventHandling((event, path)) => {
-///     match (&event, &path) => {
-///       (|_| app_state.count = app_state.count + 1)(); // mutable reference
-///       PhaseResult::UiEventHandling(true)
-///     },
-///     _ => PhaseResult::UiEventHandling(false),
-///   }
-/// }
-///
-/// Thus, the mutable and immutable references end up in different branches
-/// of the match statement, causing them not to conflict.
+/// A call to `smd!` is a `SmithyComponent`, which is a wrapper around a
+/// `Box<FnMut(Phase) -> PhaseResult>`. The content of this
+/// function is a match statement over the `Phase` parameter.
 pub enum Phase<'a> {
   Rendering,
   PostRendering,
@@ -165,18 +151,15 @@ pub enum Phase<'a> {
 
 pub type EventHandled = bool;
 
-/// PhaseResult is returned from an EventHandler
+/// An enum representing the results of a `SmithyComponent` handling a `Phase`.
 ///
-/// This is the worst part of smithy at the moment, because a Component
-/// passed Phase::Rendering *must* return a PhaseResult::Rendering, and likewise
-/// a Component passed a Phase::UiEventHandling *must* return a
-/// PhaseResult::UiEventHandling.
+/// A call to `smd!` is a `SmithyComponent`, which is a wrapper around a
+/// `Box<FnMut(Phase) -> PhaseResult>`.
 ///
-/// This *should* be done through the type system, but currently, that is not
-/// possible.
-///
-/// This is OK, though, because EventHandlers are created with the smd! macro
-/// and conform to this restriction.
+/// The data contained in the `PhaseResult` will inform the future behavior of
+/// the app. For example, when responding to an event, the app will re-render
+/// as long as there was at least one handler for that event. That information
+/// is contained in the `EventHandled` data.
 #[derive(Debug)]
 pub enum PhaseResult {
   // TODO make this an Option<Node>
@@ -206,12 +189,10 @@ impl PhaseResult {
   }
 }
 
-/// The results of calling the smd! macro is a vector of SmithyComponents.
-///
-/// I would not recommend writing these yourself, although you absolutely
-/// can, if you want.
+/// The results of calling the `smd!` macro is a vector of `SmithyComponent`s.
 pub struct SmithyComponent<'a>(pub Box<FnMut(Phase) -> PhaseResult + 'a>);
 
+/// The main trait of Smithy.
 pub trait Component {
   fn render(&mut self) -> Node;
   fn handle_post_render(&mut self) {}

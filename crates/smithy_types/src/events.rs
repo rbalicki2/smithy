@@ -28,7 +28,7 @@ use web_sys::TransitionEvent;
 #[cfg(feature = "input-events")]
 use web_sys::InputEvent;
 
-#[cfg(feature = "web-sys-ui-event")]
+#[cfg(feature = "web-sys-ui-events")]
 use web_sys::UiEvent as WebSysUiEvent;
 
 use web_sys::{
@@ -41,7 +41,8 @@ use web_sys::{
 // TODO custom_derive iter_variant_names
 // or https://github.com/Lolirofle/enum_traits
 
-/// An enum of all Events a dom node can handle
+/// An enum of events that a DOM element can potentially
+/// handle.
 pub enum UiEvent {
   // TODO figure out why cfg(test) does not work here
   OnTest(bool),
@@ -198,9 +199,15 @@ pub enum UiEvent {
   OnToggle(WebSysUiEvent),
 }
 
+/// An enum representing global events that can occur and that a smithy
+/// app can potentially handle.
 pub enum WindowEvent {
+  #[cfg(feature = "before-unload-events")]
   OnBeforeUnload(BeforeUnloadEvent),
+  #[cfg(feature = "hash-change-events")]
   OnHashChange(HashChangeEvent),
+  #[cfg(feature = "pop-state-events")]
   OnPopState(PopStateEvent),
+  #[cfg(feature = "promise-rejection-events")]
   OnUnhandledRejection(PromiseRejectionEvent),
 }

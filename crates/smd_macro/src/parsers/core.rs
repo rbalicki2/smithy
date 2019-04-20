@@ -1,5 +1,6 @@
 use crate::types::{
   AttributeOrEventHandler,
+  DomRefInfo,
   GlobalEventHandlingInfo,
   LifecycleEventHandlingInfo,
   SplitAttributeOrEventHandlers,
@@ -17,6 +18,7 @@ use nom::{
   error_position,
   map,
   named,
+  named_args,
   tuple,
   tuple_parser,
 };
@@ -52,14 +54,10 @@ named!(
       )
     ),
     |(name, attributes_and_event_handlers)| {
-      // does not work
       let SplitAttributeOrEventHandlers(attributes, event_handlers, dom_ref_vec)
         = attributes_and_event_handlers.into();
 
-      // let dom_ref_vec = dom_ref_opt.map(DomRefInfo::from_token_stream).into_iter().collect::<Vec<DomRefInfo>>();
-
       let component = make_html_tokens(name, attributes, vec![]);
-      // println!("\nself closing\n{:?}", dom_ref_vec);
 
       let event_handlers = event_handlers
         .into_iter()
@@ -103,6 +101,8 @@ named!(
       match_closing_tag
     ),
     |((name, attributes_and_event_handlers), children_and_events, closing_tag_name)| {
+      // TODO an Option<String> for closing_tag_name and only run this assertion if
+      // closing_tag_name.is_some(), allowing for <div>foo</>.
       assert_eq!(
         name,
         closing_tag_name,
@@ -110,10 +110,14 @@ named!(
         name,
         closing_tag_name,
       );
+
       let SplitAttributeOrEventHandlers(attributes, event_handlers, dom_ref_opt)
         = attributes_and_event_handlers.into();
       let SplitTokenStreamEventHandlingInfoPairs(children, child_event_infos, mut dom_ref_vec)
         = children_and_events.into();
+      // children: Vec<TokenStream>
+      // child_event_infos: Vec<UIEventHandlingInfo>
+      // dom_ref_vec: Vec<DomRefInfo>
 
       let token_stream = make_html_tokens(name, attributes, children);
 
@@ -123,7 +127,6 @@ named!(
         .collect();
       event_infos.extend(child_event_infos.into_iter());
 
-      // let dom_ref_opt = dom_ref_opt.map(DomRefInfo::from_token_stream);
       dom_ref_vec.extend(dom_ref_opt.into_iter());
 
       (token_stream, event_infos, dom_ref_vec)
@@ -184,48 +187,71 @@ named!(
   )
 );
 
-// N.B. this is the "entry point" of this file.
-named!(
-  pub match_html_component <TokenTreeSlice, TokenStream>,
+named_args!(
+  pub match_html_component(should_move: bool) <TokenTreeSlice, TokenStream>,
   map!(
     tuple!(
       many_0_custom!(match_window_event_handlers),
-      many_1_custom!(match_node)
+      // N.B. we would rather call many_0_custom!(match_node) here, but that
+      // does not appear to work. This is a workaround.
+      alt!(
+        many_1_custom!(match_node)
+          | call!(util::match_empty)
+      )
     ),
-    |(global_event_handling_infos, dom_vec)| {
-      // dom_vec is a vector of (TokenStream, Vec<UIHandlingInfo>, Vec<DomRefInfo>)
+    |
+      (global_event_handling_infos, dom_vec):
+        (
+          Vec<GlobalEventHandlingInfo>,
+          Vec<(TokenStream, Vec<UIEventHandlingInfo>, Vec<DomRefInfo>)>
+        )
+    | {
+      // What are we doing here? We're flattening vectors and appending
+      // the current index to some reversed paths.
       let (vec_of_node_tokens, event_handling_infos, dom_ref_vec) = dom_vec
         .into_iter()
         .enumerate()
         .fold(
           (vec![], vec![], vec![]),
-          |(mut vec_of_node_tokens, mut event_handling_infos, mut vec_of_dom_refs), (i, (token, current_event_handling_infos, dom_ref_vec))| {
+          |
+            (mut vec_of_node_tokens, mut event_handling_infos, mut vec_of_dom_refs):
+              (Vec<TokenStream>, Vec<UIEventHandlingInfo>, Vec<DomRefInfo>),
+            (i, (token, current_event_handling_infos, dom_ref_vec)):
+              (usize, (TokenStream, Vec<UIEventHandlingInfo>, Vec<DomRefInfo>))
+          | {
             vec_of_node_tokens.push(token);
 
             // append i to the path of the current_event_handling_infos and
             // append that vec to event_handling_infos
-            let mut vec = current_event_handling_infos.into_iter().map(|mut info| {
+            let mut current_event_handling_infos = current_event_handling_infos.into_iter().map(|mut info| {
               info.reversed_path.push(i);
               info
             }).collect::<Vec<UIEventHandlingInfo>>();
-            event_handling_infos.append(&mut vec);
+            event_handling_infos.append(&mut current_event_handling_infos);
 
-            for mut dom_ref in dom_ref_vec {
+            // and do the same thing for dom_ref's
+            let mut dom_ref_vec = dom_ref_vec.into_iter().map(|mut dom_ref| {
               dom_ref.reversed_path.push(i);
-              vec_of_dom_refs.push(dom_ref);
-            }
+              dom_ref
+            }).collect::<Vec<DomRefInfo>>();
+            vec_of_dom_refs.append(&mut dom_ref_vec);
 
             (vec_of_node_tokens, event_handling_infos, vec_of_dom_refs)
           }
         );
-      let token = util::reduce_vec_to_node(&vec_of_node_tokens);
+      let rendered_node = util::reduce_vec_to_node(&vec_of_node_tokens);
 
-      let (window_event_handler_infos, lifecycle_event_handling_infos): (Vec<WindowEventHandlingInfo>, Vec<LifecycleEventHandlingInfo>)
+      let (window_event_handler_infos, lifecycle_event_handling_infos):
+        (Vec<WindowEventHandlingInfo>, Vec<LifecycleEventHandlingInfo>)
         = global_event_handling_infos
           .into_iter()
           .fold(
             (vec![], vec![]),
-            |(mut window_event_handler_infos, mut lifecycle_event_handling_infos), current_global_event_handling_info| {
+            |
+              (mut window_event_handler_infos, mut lifecycle_event_handling_infos):
+                (Vec<WindowEventHandlingInfo>, Vec<LifecycleEventHandlingInfo>),
+              current_global_event_handling_info: GlobalEventHandlingInfo
+            | {
               // Can this be done more parsimoniously, e.g. using a library?
               match current_global_event_handling_info {
                 GlobalEventHandlingInfo::Window(window_event_handling_info) => {
@@ -238,7 +264,15 @@ named!(
               (window_event_handler_infos, lifecycle_event_handling_infos)
             }
           );
-      super::make_smithy_tokens::make_component(token, event_handling_infos, window_event_handler_infos, lifecycle_event_handling_infos, dom_ref_vec)
+
+      super::make_smithy_tokens::make_component(
+        rendered_node,
+        event_handling_infos,
+        window_event_handler_infos,
+        lifecycle_event_handling_infos,
+        dom_ref_vec,
+        should_move
+      )
     }
   )
 );

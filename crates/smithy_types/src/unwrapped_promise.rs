@@ -10,6 +10,11 @@ use wasm_bindgen_futures::{
   JsFuture,
 };
 
+/// A wrapper around a future that can easily be rendered with
+/// a match statement.
+///
+/// It is used by Smithy to create promises that also cause smithy
+/// to re-render when they are completed.
 pub struct UnwrappedPromise<S, E> {
   promise_state: Rc<RefCell<PromiseState<S, E>>>,
   #[allow(dead_code)] // future must not be dropped before promise_state
@@ -60,6 +65,7 @@ impl<S, E> Deref for UnwrappedPromise<S, E> {
   }
 }
 
+/// An enum representing the three states of a Javascript promise.
 pub enum PromiseState<S, E> {
   Pending,
   Success(S),

@@ -93,8 +93,8 @@ mod tests {
 
   #[test]
   fn empty_macro() {
-    // let mut no_dom = smd!();
-    // let result = Node::Vec(vec![]);
-    // assert_eq!(no_dom.render(), result);
+    let mut no_dom = smd!();
+    let result = Node::Vec(vec![]);
+    assert_eq!(no_dom.render(), result);
   }
 }
