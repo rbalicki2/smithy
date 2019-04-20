@@ -130,10 +130,12 @@ pub fn rerender() {
 ///
 /// ```rs
 /// let app = smd!(<div>hello world</div>);
-/// let el = web_sys::window()
+/// let el_opt = web_sys::window()
 ///   .and_then(|w| w.document())
-///   .query_selector("#app").unwrap();
-/// smithy::mount(app, el);
+///   .query_selector("#app");
+/// if let Some(el) = el_opt {
+///   smithy::mount(app, el);
+/// }
 /// ```
 pub fn mount(mut component: Box<Component>, el: Element) {
   console_error_panic_hook::set_once();
