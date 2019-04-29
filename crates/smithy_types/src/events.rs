@@ -1,43 +1,3 @@
-#[cfg(feature = "animation-events")]
-use web_sys::AnimationEvent;
-
-#[cfg(feature = "clipboard-events")]
-use web_sys::ClipboardEvent;
-
-#[cfg(feature = "focus-events")]
-use web_sys::FocusEvent;
-
-#[cfg(feature = "keyboard-events")]
-use web_sys::KeyboardEvent;
-
-#[cfg(feature = "mouse-events")]
-use web_sys::MouseEvent;
-
-#[cfg(feature = "pointer-events")]
-use web_sys::PointerEvent;
-
-#[cfg(feature = "scroll-events")]
-use web_sys::ScrollAreaEvent;
-
-#[cfg(feature = "touch-events")]
-use web_sys::TouchEvent;
-
-#[cfg(feature = "transition-events")]
-use web_sys::TransitionEvent;
-
-#[cfg(feature = "input-events")]
-use web_sys::InputEvent;
-
-#[cfg(feature = "web-sys-ui-events")]
-use web_sys::UiEvent as WebSysUiEvent;
-
-use web_sys::{
-  BeforeUnloadEvent,
-  HashChangeEvent,
-  PopStateEvent,
-  PromiseRejectionEvent,
-};
-
 // TODO custom_derive iter_variant_names
 // or https://github.com/Lolirofle/enum_traits
 
@@ -48,111 +8,111 @@ pub enum UiEvent {
   OnTest(bool),
   // --Clipboard
   #[cfg(feature = "clipboard-events")]
-  OnCopy(ClipboardEvent),
+  OnCopy(web_sys::ClipboardEvent),
   #[cfg(feature = "clipboard-events")]
-  OnCut(ClipboardEvent),
+  OnCut(web_sys::ClipboardEvent),
   #[cfg(feature = "clipboard-events")]
-  OnPaste(ClipboardEvent),
+  OnPaste(web_sys::ClipboardEvent),
   // --Composition
   // onCompositionEnd
   // onCompositionStart
   // onCompositionUpdate
   // --Keyboard
   #[cfg(feature = "keyboard-events")]
-  OnKeyDown(KeyboardEvent),
+  OnKeyDown(web_sys::KeyboardEvent),
   #[cfg(feature = "keyboard-events")]
-  OnKeyPress(KeyboardEvent),
+  OnKeyPress(web_sys::KeyboardEvent),
   #[cfg(feature = "keyboard-events")]
-  OnKeyUp(KeyboardEvent),
+  OnKeyUp(web_sys::KeyboardEvent),
   // --Focus
   #[cfg(feature = "focus-events")]
-  OnFocus(FocusEvent),
+  OnFocus(web_sys::FocusEvent),
   #[cfg(feature = "focus-events")]
-  OnBlur(FocusEvent),
+  OnBlur(web_sys::FocusEvent),
   // --Form
   #[cfg(feature = "input-events")]
-  OnChange(InputEvent),
+  OnChange(web_sys::InputEvent),
   #[cfg(feature = "input-events")]
-  OnInput(InputEvent),
+  OnInput(web_sys::InputEvent),
   #[cfg(feature = "input-events")]
-  OnInvalid(InputEvent),
+  OnInvalid(web_sys::InputEvent),
   #[cfg(feature = "input-events")]
-  OnSubmit(InputEvent),
+  OnSubmit(web_sys::InputEvent),
   // --Mouse
   #[cfg(feature = "mouse-events")]
-  OnClick(MouseEvent),
+  OnClick(web_sys::MouseEvent),
   #[cfg(feature = "mouse-events")]
-  OnContextMenu(MouseEvent),
+  OnContextMenu(web_sys::MouseEvent),
   #[cfg(feature = "mouse-events")]
-  OnDblClick(MouseEvent),
+  OnDblClick(web_sys::MouseEvent),
 
   #[cfg(feature = "mouse-events")]
-  OnDrag(MouseEvent),
+  OnDrag(web_sys::MouseEvent),
   #[cfg(feature = "mouse-events")]
-  OnDragEnd(MouseEvent),
+  OnDragEnd(web_sys::MouseEvent),
   #[cfg(feature = "mouse-events")]
-  OnDragEnter(MouseEvent),
+  OnDragEnter(web_sys::MouseEvent),
   #[cfg(feature = "mouse-events")]
-  OnDragExit(MouseEvent),
+  OnDragExit(web_sys::MouseEvent),
   #[cfg(feature = "mouse-events")]
-  OnDragLeave(MouseEvent),
+  OnDragLeave(web_sys::MouseEvent),
   #[cfg(feature = "mouse-events")]
-  OnDragOver(MouseEvent),
+  OnDragOver(web_sys::MouseEvent),
   #[cfg(feature = "mouse-events")]
-  OnDragStart(MouseEvent),
+  OnDragStart(web_sys::MouseEvent),
   #[cfg(feature = "mouse-events")]
-  OnDrop(MouseEvent),
+  OnDrop(web_sys::MouseEvent),
 
   #[cfg(feature = "mouse-events")]
-  OnMouseDown(MouseEvent),
+  OnMouseDown(web_sys::MouseEvent),
   #[cfg(feature = "mouse-events")]
-  OnMouseEnter(MouseEvent),
+  OnMouseEnter(web_sys::MouseEvent),
   #[cfg(feature = "mouse-events")]
-  OnMouseLeave(MouseEvent),
+  OnMouseLeave(web_sys::MouseEvent),
   #[cfg(feature = "mouse-events")]
-  OnMouseMove(MouseEvent),
+  OnMouseMove(web_sys::MouseEvent),
   #[cfg(feature = "mouse-events")]
-  OnMouseOver(MouseEvent),
+  OnMouseOver(web_sys::MouseEvent),
   #[cfg(feature = "mouse-events")]
-  OnMouseOut(MouseEvent),
+  OnMouseOut(web_sys::MouseEvent),
   #[cfg(feature = "mouse-events")]
-  OnMouseUp(MouseEvent),
+  OnMouseUp(web_sys::MouseEvent),
   // --Pointer
   #[cfg(feature = "pointer-events")]
-  OnPointerDown(PointerEvent),
+  OnPointerDown(web_sys::PointerEvent),
   #[cfg(feature = "pointer-events")]
-  OnPointerMove(PointerEvent),
+  OnPointerMove(web_sys::PointerEvent),
   #[cfg(feature = "pointer-events")]
-  OnPointerUp(PointerEvent),
+  OnPointerUp(web_sys::PointerEvent),
   #[cfg(feature = "pointer-events")]
-  OnPointerCancel(PointerEvent),
+  OnPointerCancel(web_sys::PointerEvent),
   #[cfg(feature = "pointer-events")]
-  OnGotPointerCapture(PointerEvent),
+  OnGotPointerCapture(web_sys::PointerEvent),
   #[cfg(feature = "pointer-events")]
-  OnLostPointerCapture(PointerEvent),
+  OnLostPointerCapture(web_sys::PointerEvent),
   #[cfg(feature = "pointer-events")]
-  OnPointerEnter(PointerEvent),
+  OnPointerEnter(web_sys::PointerEvent),
   #[cfg(feature = "pointer-events")]
-  OnPointerLeave(PointerEvent),
+  OnPointerLeave(web_sys::PointerEvent),
   #[cfg(feature = "pointer-events")]
-  OnPointerOver(PointerEvent),
+  OnPointerOver(web_sys::PointerEvent),
   #[cfg(feature = "pointer-events")]
-  OnPointerOut(PointerEvent),
+  OnPointerOut(web_sys::PointerEvent),
   // --Selection
   #[cfg(feature = "select-events")]
-  OnSelect(WebSysUiEvent),
+  OnSelect(web_sys::WebSysUiEvent),
   // --Touch
   #[cfg(feature = "touch-events")]
-  OnTouchCancel(TouchEvent),
+  OnTouchCancel(web_sys::TouchEvent),
   #[cfg(feature = "touch-events")]
-  OnTouchEnd(TouchEvent),
+  OnTouchEnd(web_sys::TouchEvent),
   #[cfg(feature = "touch-events")]
-  OnTouchMove(TouchEvent),
+  OnTouchMove(web_sys::TouchEvent),
   #[cfg(feature = "touch-events")]
-  OnTouchStart(TouchEvent),
+  OnTouchStart(web_sys::TouchEvent),
   // --Scroll
   #[cfg(feature = "scroll-events")]
-  OnScroll(ScrollAreaEvent),
+  OnScroll(web_sys::ScrollAreaEvent),
   // --Wheel
   // onWheel
   // --Media
@@ -181,33 +141,33 @@ pub enum UiEvent {
   // onWaiting
   // --Image
   #[cfg(feature = "image-events")]
-  OnLoad(WebSysUiEvent),
+  OnLoad(web_sys::WebSysUiEvent),
   #[cfg(feature = "image-events")]
-  OnError(WebSysUiEvent),
+  OnError(web_sys::WebSysUiEvent),
   // --Animation
   #[cfg(feature = "animation-events")]
-  OnAnimationStart(AnimationEvent),
+  OnAnimationStart(web_sys::AnimationEvent),
   #[cfg(feature = "animation-events")]
-  OnAnimationEnd(AnimationEvent),
+  OnAnimationEnd(web_sys::AnimationEvent),
   #[cfg(feature = "animation-events")]
-  OnAnimationIteration(AnimationEvent),
+  OnAnimationIteration(web_sys::AnimationEvent),
   // --Transition
   #[cfg(feature = "transition-events")]
-  OnTransitionEnd(TransitionEvent),
+  OnTransitionEnd(web_sys::TransitionEvent),
   // --Other
   #[cfg(feature = "toggle-events")]
-  OnToggle(WebSysUiEvent),
+  OnToggle(web_sys::WebSysUiEvent),
 }
 
 /// An enum representing global events that can occur and that a smithy
 /// app can potentially handle.
 pub enum WindowEvent {
   #[cfg(feature = "before-unload-events")]
-  OnBeforeUnload(BeforeUnloadEvent),
+  OnBeforeUnload(web_sys::BeforeUnloadEvent),
   #[cfg(feature = "hash-change-events")]
-  OnHashChange(HashChangeEvent),
+  OnHashChange(web_sys::HashChangeEvent),
   #[cfg(feature = "pop-state-events")]
-  OnPopState(PopStateEvent),
+  OnPopState(web_sys::PopStateEvent),
   #[cfg(feature = "promise-rejection-events")]
-  OnUnhandledRejection(PromiseRejectionEvent),
+  OnUnhandledRejection(web_sys::PromiseRejectionEvent),
 }

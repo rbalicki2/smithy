@@ -7,6 +7,7 @@ authors = ["Robert Balicki <robert.balicki@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/rbalicki2/smithy"
 homepage = "https://github.com/rbalicki2/smithy"
+documentation = "https://docs.smithy.rs/smithy_types"
 
 [dependencies]
 web-sys = { version = "0.3.5", features = [

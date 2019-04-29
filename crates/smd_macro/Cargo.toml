@@ -7,6 +7,7 @@ authors = ["Robert Balicki <robert.balicki@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/rbalicki2/smithy"
 homepage = "https://github.com/rbalicki2/smithy"
+documentation = "https://docs.smithy.rs/smd_macro"
 
 [dependencies]
 smithy_types = { path = "../smithy_types", version = "0.0.2" }

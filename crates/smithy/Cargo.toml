@@ -9,6 +9,7 @@ categories = ["gui", "web-programming"]
 license = "MIT/Apache-2.0"
 repository = "https://github.com/rbalicki2/smithy"
 homepage = "https://github.com/rbalicki2/smithy"
+documentation = "https://docs.smithy.rs/smithy"
 
 [dependencies]
 smd_macro = { path = "../smd_macro", version = "0.0.2" }
@@ -16,7 +17,7 @@ smithy_core = { path = "../smithy_core", version = "0.0.2" }
 smithy_types = { path = "../smithy_types", version = "0.0.2" }
 
 [features]
-default = ["keyboard-events", "input-events", "focus-events", "all-events"]
+default = ["keyboard-events", "input-events", "focus-events"]
 
 # dom events
 copy-events = ["smithy_core/copy-events", "smithy_types/copy-events"]

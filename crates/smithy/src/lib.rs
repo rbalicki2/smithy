@@ -5,18 +5,18 @@
 //!
 //! # Example
 //!
-/// ```rs
-/// let app = smd!(<div>hello world</div>);
-/// let el_opt = web_sys::window()
-///   .and_then(|w| w.document())
-///   .query_selector("#app");
-/// if let Some(el) = el_opt {
-///   smithy::mount(app, el);
-/// }
-/// ```
+//! ```rs
+//! let app = smd!(<div>hello world</div>);
+//! let el_opt = web_sys::window()
+//!   .and_then(|w| w.document())
+//!   .query_selector("#app");
+//! if let Some(el) = el_opt {
+//!   smithy::mount(app, el);
+//! }
+//! ```
 //!
-//! **N.B.** these docs seem to omit `smd!` and `smd_no_move!`, which are
-//! re-exported from the `smd_macro` crate.
+//! **N.B.** these docs omit `smd!` and `smd_no_move!`, which are
+//! re-exported from the [`smd_macro`](/smd_macro/) crate.
 
 /// A module that re-exports useful Smithy types, and some others.
 pub mod types {
