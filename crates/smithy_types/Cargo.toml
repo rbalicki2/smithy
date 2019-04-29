@@ -16,27 +16,9 @@ web-sys = { version = "0.3.5", features = [
   "Element",
   "Window",
   "HtmlElement",
-  "HtmlTemplateElement",
-  "Event",
-  "UiEvent",
-  "ClipboardEvent",
-  "KeyboardEvent",
-  "InputEvent",
-  "FocusEvent",
-  "MouseEvent",
-  "PointerEvent",
-  "TouchEvent",
-  "ScrollAreaEvent",
-  "AnimationEvent",
-  "TransitionEvent",
   "EventTarget",
-  "PromiseRejectionEvent",
-  "PopStateEvent",
-  "HashChangeEvent",
-  "BeforeUnloadEvent",
   "Node",
   "NodeList",
-  "console"
 ] }
 enum_derive = "0.1.7"
 custom_derive = "0.1.7"
@@ -47,26 +29,26 @@ lazy_static = "1.2.0"
 
 [features]
 # dom events
-copy-events = ["any-ui-events"]
-keyboard-events = ["any-ui-events"]
-focus-events = ["any-ui-events"]
-input-events = ["any-ui-events"]
-mouse-events = ["any-ui-events"]
-pointer-events = ["any-ui-events"]
+clipboard-events = ["any-ui-events", "web-sys/ClipboardEvent"]
+keyboard-events = ["any-ui-events", "web-sys/KeyboardEvent"]
+focus-events = ["any-ui-events", "web-sys/FocusEvent"]
+input-events = ["any-ui-events", "web-sys/InputEvent"]
+mouse-events = ["any-ui-events", "web-sys/MouseEvent"]
+pointer-events = ["any-ui-events", "web-sys/PointerEvent"]
 select-events = ["web-sys-ui-events"]
-touch-events = ["any-ui-events"]
-scroll-events = ["any-ui-events"]
+touch-events = ["any-ui-events", "web-sys/TouchEvent"]
+scroll-events = ["any-ui-events", "web-sys/ScrollAreaEvent"]
 image-events = ["web-sys-ui-events"]
-animation-events = ["any-ui-events"]
-transition-events = ["any-ui-events"]
+animation-events = ["any-ui-events", "web-sys/AnimationEvent"]
+transition-events = ["any-ui-events", "web-sys/TransitionEvent"]
 toggle-events = ["web-sys-ui-events"]
 
 # global events
-before-unload-events = []
-hash-change-events = []
-pop-state-events = []
-promise-rejection-events = []
+before-unload-events = ["web-sys/BeforeUnloadEvent"]
+hash-change-events = ["web-sys/HashChangeEvent"]
+pop-state-events = ["web-sys/PopStateEvent"]
+promise-rejection-events = ["web-sys/PromiseRejectionEvent"]
 
 # Private cfg flags... these should probably not be used.
-web-sys-ui-events = ["any-ui-events"]
-any-ui-events = []
+web-sys-ui-events = ["any-ui-events", "web-sys/UiEvent"]
+any-ui-events = ["web-sys/Event"]

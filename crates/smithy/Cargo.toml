@@ -17,10 +17,10 @@ smithy_core = { path = "../smithy_core", version = "0.0.2" }
 smithy_types = { path = "../smithy_types", version = "0.0.2" }
 
 [features]
-default = ["keyboard-events", "input-events", "focus-events"]
+default = ["keyboard-events", "input-events"]
 
 # dom events
-copy-events = ["smithy_core/copy-events", "smithy_types/copy-events"]
+clipboard-events = ["smithy_core/clipboard-events", "smithy_types/clipboard-events"]
 keyboard-events = ["smithy_core/keyboard-events", "smithy_types/keyboard-events"]
 focus-events = ["smithy_core/focus-events", "smithy_types/focus-events"]
 input-events = ["smithy_core/input-events", "smithy_types/input-events"]
@@ -41,7 +41,7 @@ pop-state-events = ["smithy_core/pop-state-events", "smithy_types/pop-state-even
 promise-rejection-events = ["smithy_core/promise-rejection-events", "smithy_types/promise-rejection-events"]
 
 all-events = [
-  "copy-events",
+  "clipboard-events",
   "keyboard-events",
   "focus-events",
   "input-events",

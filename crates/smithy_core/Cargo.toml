@@ -16,24 +16,6 @@ wasm-bindgen = { version = "0.2.28", features = ["nightly"] }
 web-sys = { version = "0.3.5", features = [
   "Element",
   "HtmlCollection",
-
-  # ui and window element events
-  "AnimationEvent",
-  "BeforeUnloadEvent",
-  "ClipboardEvent",
-  "FocusEvent",
-  "HashChangeEvent",
-  "InputEvent",
-  "KeyboardEvent",
-  "MouseEvent",
-  "PointerEvent",
-  "PopStateEvent",
-  "PromiseRejectionEvent",
-  "ScrollAreaEvent",
-  "TouchEvent",
-  "TransitionEvent",
-  "UiEvent",
-  "BeforeUnloadEvent",
 ] }
 js-sys = "0.3.5"
 futures = "0.1.25"
@@ -42,28 +24,28 @@ console_error_panic_hook = "0.1.5"
 
 [features]
 # dom events
-copy-events = ["any-ui-events"]
-keyboard-events = ["any-ui-events"]
-focus-events = ["any-ui-events"]
-input-events = ["any-ui-events"]
-mouse-events = ["any-ui-events"]
-pointer-events = ["any-ui-events"]
+clipboard-events = ["any-ui-events", "web-sys/ClipboardEvent"]
+keyboard-events = ["any-ui-events", "web-sys/KeyboardEvent"]
+focus-events = ["any-ui-events", "web-sys/FocusEvent"]
+input-events = ["any-ui-events", "web-sys/InputEvent"]
+mouse-events = ["any-ui-events", "web-sys/MouseEvent"]
+pointer-events = ["any-ui-events", "web-sys/PointerEvent"]
 select-events = ["web-sys-ui-events"]
-touch-events = ["any-ui-events"]
-scroll-events = ["any-ui-events"]
+touch-events = ["any-ui-events", "web-sys/TouchEvent"]
+scroll-events = ["any-ui-events", "web-sys/ScrollAreaEvent"]
 image-events = ["web-sys-ui-events"]
-animation-events = ["any-ui-events"]
-transition-events = ["any-ui-events"]
+animation-events = ["any-ui-events", "web-sys/AnimationEvent"]
+transition-events = ["any-ui-events", "web-sys/TransitionEvent"]
 toggle-events = ["web-sys-ui-events"]
 
 # global events
-before-unload-events = []
-hash-change-events = []
-pop-state-events = []
-promise-rejection-events = []
+before-unload-events = ["web-sys/BeforeUnloadEvent"]
+hash-change-events = ["web-sys/HashChangeEvent"]
+pop-state-events = ["web-sys/PopStateEvent"]
+promise-rejection-events = ["web-sys/PromiseRejectionEvent"]
 
 # Private cfg flags... these should probably not be used by you.
-web-sys-ui-events = ["any-ui-events"]
+web-sys-ui-events = ["any-ui-events", "web-sys/UiEvent"]
 any-ui-events = []
 
 debug-logs = []
