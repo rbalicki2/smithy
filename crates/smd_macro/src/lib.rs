@@ -54,8 +54,8 @@ fn smd_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::T
     if let Some(proc_macro_result) = cache.get(&as_str) {
       proc_macro_result.clone()
     } else {
-      let input_2: proc_macro2::TokenStream = input.into();
-      let vec_of_trees: Vec<proc_macro2::TokenTree> = input_2.into_iter().collect();
+      let input: proc_macro2::TokenStream = input.into();
+      let vec_of_trees: Vec<proc_macro2::TokenTree> = input.into_iter().collect();
       let parsed = parsers::match_html_component(&vec_of_trees, should_move);
 
       let unwrapped = parsed.unwrap();
