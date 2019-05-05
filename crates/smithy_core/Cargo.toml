@@ -49,4 +49,4 @@ promise-rejection-events = ["web-sys/PromiseRejectionEvent"]
 web-sys-ui-events = ["any-ui-events", "web-sys/UiEvent"]
 any-ui-events = []
 
-debug-logs = []
+debug-logs = ["web-sys/console"]
