@@ -5,16 +5,21 @@
 #![recursion_limit = "128"]
 #![feature(drain_filter)]
 
+use std::{
+  cell::RefCell,
+  collections::HashMap,
+};
+
 extern crate proc_macro;
 
 mod parsers;
 mod types;
 
-// TODO can we cache this?
-// e.g. in a thread local or something?
-// groups are duplicated in many places; if they include macros,
-// that will cause those child macros to be compiled 5 times. (At least...?)
-// doubly-nested macros will be compiled 5^2 times. Yikes!
+type ProcMacroMap = HashMap<String, proc_macro::TokenStream>;
+thread_local! {
+  static SMD_CACHE: RefCell<ProcMacroMap> = RefCell::new(HashMap::new());
+  static SMD_NO_MOVE_CACHE: RefCell<ProcMacroMap> = RefCell::new(HashMap::new());
+}
 
 /// proc-macro to take a `SmithyComponent`, capturing referenced variables.
 #[proc_macro]
@@ -30,14 +35,36 @@ pub fn smd_no_move(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   smd_inner(input, false)
 }
 
+fn with_cache<T>(should_move: bool, callback: impl FnOnce(&mut ProcMacroMap) -> T) -> T {
+  let cache_local_key = if should_move {
+    &SMD_CACHE
+  } else {
+    &SMD_NO_MOVE_CACHE
+  };
+
+  cache_local_key.with(|cache_cell| {
+    let mut cache = cache_cell.borrow_mut();
+    callback(&mut cache)
+  })
+}
+
 fn smd_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::TokenStream {
-  let input_2: proc_macro2::TokenStream = input.into();
-  let vec_of_trees: Vec<proc_macro2::TokenTree> = input_2.into_iter().collect();
-  let parsed = parsers::match_html_component(&vec_of_trees, should_move);
+  with_cache(should_move, |cache| {
+    let as_str = input.to_string();
+    if let Some(proc_macro_result) = cache.get(&as_str) {
+      proc_macro_result.clone()
+    } else {
+      let input_2: proc_macro2::TokenStream = input.into();
+      let vec_of_trees: Vec<proc_macro2::TokenTree> = input_2.into_iter().collect();
+      let parsed = parsers::match_html_component(&vec_of_trees, should_move);
 
-  let unwrapped = parsed.unwrap();
-  #[cfg(feature = "smd-logs")]
-  println!("\nlet mut a = {};\n", unwrapped.1);
+      let unwrapped = parsed.unwrap();
+      #[cfg(feature = "smd-logs")]
+      println!("\nlet mut a = {};\n", unwrapped.1);
 
-  unwrapped.1.into()
+      let proc_macro_result: proc_macro::TokenStream = unwrapped.1.into();
+      cache.insert(as_str, proc_macro_result.clone());
+      proc_macro_result
+    }
+  })
 }
