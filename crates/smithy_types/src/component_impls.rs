@@ -24,6 +24,7 @@ macro_rules! basic_impl_component {
 
 basic_impl_component!(&str);
 
+// TODO determine whether basic_impl_component! will handle these cases.
 impl Component for String {
   fn render(&mut self) -> Node {
     Node::Text(self.clone())

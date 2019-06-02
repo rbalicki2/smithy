@@ -4,7 +4,7 @@
 /// An enum of events that a DOM element can potentially
 /// handle.
 ///
-/// These are included as part attributes on dom elements as follows:
+/// These are included on dom elements as follows:
 /// ```rs
 /// smd!(
 ///   <some-dom-node ui_event={ui_event_handler} />
