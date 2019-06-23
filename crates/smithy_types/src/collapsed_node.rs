@@ -61,12 +61,12 @@ impl Node {
         path: path.clone(),
         node_type: html_token.node_type,
         attributes: html_token.attributes,
-        children: html_token
-          .children
-          .into_iter()
-          .enumerate()
-          .flat_map(|(i, node)| node.into_collapsed_node(clone_and_extend(&path, i)))
-          .collect(),
+        children: {
+          // this is weird. We're wrapping children in a Node::Vec and collapsing
+          // that. It would make more sense to implement Into<Vec<CollapsedNode>> on
+          // Vec<Node>, presumably.
+          Node::Vec(html_token.children).into()
+        }
       })],
       Node::Text(text) => vec![CollapsedNode::Text(text)],
       Node::Comment(comment_opt) => vec![CollapsedNode::Comment(comment_opt)],
