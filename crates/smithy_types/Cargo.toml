@@ -2,7 +2,7 @@
 name = "smithy_types"
 description = "types related to Smithy"
 license = "MIT/Apache-2.0"
-version = "0.0.3"
+version = "0.0.4"
 authors = ["Robert Balicki <robert.balicki@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/rbalicki2/smithy"
