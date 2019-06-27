@@ -61,5 +61,5 @@ all-events = [
   "promise-rejection-events",
 ]
 
-debug-logs = ["smithy_core/debug-logs"]
+browser-logs = ["smithy_core/browser-logs"]
 smd-logs = ["smd_macro/smd-logs"]

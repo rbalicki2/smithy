@@ -58,7 +58,7 @@ fn node_from_str(s: &str) -> web_sys::Node {
 }
 
 fn apply_diff_item_to_element_ref(diff_op: &DiffOperation, target_el: &web_sys::Element) {
-  #[cfg(feature = "debug-logs")]
+  #[cfg(feature = "browser-logs")]
   web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
     "apply diff {:?}",
     diff_op
@@ -68,7 +68,7 @@ fn apply_diff_item_to_element_ref(diff_op: &DiffOperation, target_el: &web_sys::
       let child_opt = target_el
         .child_nodes()
         .get(replace_child_operation.child_index as u32);
-      #[cfg(feature = "debug-logs")]
+      #[cfg(feature = "browser-logs")]
       web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
         "replace op {:?} {:?}\nexisting inner {:?}",
         child_opt.is_some(),
@@ -98,7 +98,7 @@ fn apply_diff_item_to_element_ref(diff_op: &DiffOperation, target_el: &web_sys::
       };
     },
     DiffOperation::DeleteChild(delete_child_operation) => {
-      #[cfg(feature = "debug-logs")]
+      #[cfg(feature = "browser-logs")]
       web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
         "delete {:?} {:?}",
         target_el
@@ -124,7 +124,7 @@ fn apply_diff_item_to_element_ref(diff_op: &DiffOperation, target_el: &web_sys::
 
 impl ApplicableTo<&web_sys::Element> for DiffItem {
   fn apply_to(&self, el: &web_sys::Element) {
-    #[cfg(feature = "debug-logs")]
+    #[cfg(feature = "browser-logs")]
     web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
       "apply to {:?}",
       self
@@ -147,7 +147,7 @@ impl ApplicableTo<&web_sys::Element> for DiffItem {
         // existing node...
         // TODO don't unwrap
 
-        #[cfg(feature = "debug-logs")]
+        #[cfg(feature = "browser-logs")]
         web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
           "inner {:?}\n\nis_some {:?}\nselector {:?}",
           el.inner_html(),
