@@ -15,7 +15,7 @@
 //! }
 //! ```
 //!
-//! **N.B.** these docs omit `smd!` and `smd_no_move!`, which are
+//! **N.B.** these docs omit `smd!` and `smd_borrowed!`, which are
 //! re-exported from the [`smd_macro`](/smd_macro/) crate.
 
 /// A module that re-exports useful Smithy types, and some others.

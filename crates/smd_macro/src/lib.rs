@@ -1,4 +1,4 @@
-//! A crate containing the `smd` and `smd_no_move` macros, which are the
+//! A crate containing the `smd` and `smd_borrowed` macros, which are the
 //! workhorses that generate `SmithyComponent`s.
 
 #![feature(proc_macro_span, proc_macro_raw_ident, slice_patterns)]
@@ -18,7 +18,7 @@ mod types;
 type ProcMacroMap = HashMap<String, proc_macro::TokenStream>;
 thread_local! {
   static SMD_CACHE: RefCell<ProcMacroMap> = RefCell::new(HashMap::new());
-  static SMD_NO_MOVE_CACHE: RefCell<ProcMacroMap> = RefCell::new(HashMap::new());
+  static SMD_BORROWED_CACHE: RefCell<ProcMacroMap> = RefCell::new(HashMap::new());
 }
 
 /// proc-macro to take a `SmithyComponent`, capturing referenced variables.
@@ -29,9 +29,9 @@ pub fn smd(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 /// proc-macro to take a `SmithyComponent`, not capturing referenced variables.
 ///
-/// A call to `smd_no_move!` should usually be inside of a call to `smd!`.
+/// A call to `smd_borrowed!` should usually be inside of a call to `smd!`.
 #[proc_macro]
-pub fn smd_no_move(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+pub fn smd_borrowed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   smd_inner(input, false)
 }
 
@@ -39,7 +39,7 @@ fn with_cache<T>(should_move: bool, callback: impl FnOnce(&mut ProcMacroMap) -> 
   let cache_local_key = if should_move {
     &SMD_CACHE
   } else {
-    &SMD_NO_MOVE_CACHE
+    &SMD_BORROWED_CACHE
   };
 
   cache_local_key.with(|cache_cell| {

@@ -227,7 +227,7 @@ pub fn make_component(
       });
 
   // whether to move is a flag that we pass, and it depends on whether the macro invoked
-  // is smd! or smd_no_move!
+  // is smd! or smd_borrowed!
   let maybe_move = if should_move { quote!(move) } else { quote!() };
   quote!({
     #[allow(dead_code)]
