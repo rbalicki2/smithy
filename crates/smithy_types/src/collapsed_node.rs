@@ -66,7 +66,7 @@ impl Node {
           // that. It would make more sense to implement Into<Vec<CollapsedNode>> on
           // Vec<Node>, presumably.
           Node::Vec(html_token.children).into()
-        }
+        },
       })],
       Node::Text(text) => vec![CollapsedNode::Text(text)],
       Node::Comment(comment_opt) => vec![CollapsedNode::Comment(comment_opt)],
