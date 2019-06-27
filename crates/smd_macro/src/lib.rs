@@ -60,7 +60,7 @@ fn smd_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::T
 
       let unwrapped = parsed.unwrap();
       #[cfg(feature = "smd-logs")]
-      println!("\nlet mut a = {};\n", unwrapped.1);
+      println!("\nlet mut app = {};\n", unwrapped.1);
 
       let proc_macro_result: proc_macro::TokenStream = unwrapped.1.into();
       cache.insert(as_str, proc_macro_result.clone());
