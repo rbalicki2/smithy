@@ -45,14 +45,6 @@ pub fn smd_borrowed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   smd_inner(input, false)
 }
 
-// TODO
-// read the cache data from a folder, say ~/.smd-cache/$CARGO_PKG_VERSION/ and deserialize into a hashmap
-// hashmap has type String -> String
-// if it exists, call FromStr on it and return that
-// if not, execute it and write that to the cache, then write the cache to the file
-// fn with_cache<T>(should_move: bool, callback: impl FnOnce(&mut ProcMacroMap) -> T) -> T {
-// }
-
 fn get_file_path() -> String {
   format!(
     "{}/.smd/{}",
@@ -74,11 +66,8 @@ fn read_hash_map() -> Result<StringMap, ()> {
 fn write_hash_map(map: &StringMap) -> Result<(), ()> {
   let path = get_file_path();
   let parent = Path::new(&path).parent().unwrap();
-  println!("{:?}", parent);
 
-  if !parent.exists() {
-    create_dir_all(parent);
-  }
+  create_dir_all(parent);
 
   write(path, serde_json::to_string(map).unwrap()).map_err(|_| ())
 }
@@ -99,20 +88,16 @@ fn smd_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::T
   };
 
   match read_hash_map() {
-    Ok(mut map) => {
-      println!("got map");
-      match map.0.get(&input_as_str) {
-        Some(cached_item) => cached_item.parse().unwrap(),
-        None => {
-          let proc_macro_result = parse_input();
-          map.0.insert(input_as_str, proc_macro_result.to_string());
-          write_hash_map(&map);
-          proc_macro_result
-        },
-      }
+    Ok(mut map) => match map.0.get(&input_as_str) {
+      Some(cached_item) => cached_item.parse().unwrap(),
+      None => {
+        let proc_macro_result = parse_input();
+        map.0.insert(input_as_str, proc_macro_result.to_string());
+        write_hash_map(&map);
+        proc_macro_result
+      },
     },
     Err(_) => {
-      println!("err");
       let proc_macro_result = parse_input();
       let map = StringMap({
         let mut map = HashMap::new();
@@ -123,11 +108,4 @@ fn smd_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::T
       proc_macro_result
     },
   }
-  // println!("{}", env!("CARGO_PKG_VERSION"));
-  // with_cache(should_move, |cache| {
-  // let as_str = input.to_string();
-  // println!("{}", as_str);
-  //   if let Some(proc_macro_result) = cache.get(&as_str) {
-  //     proc_macro_result.clone()
-  //   } else {
 }
