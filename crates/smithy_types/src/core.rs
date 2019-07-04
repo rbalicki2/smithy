@@ -190,7 +190,7 @@ impl PhaseResult {
 }
 
 /// The results of calling the `smd!` macro is a vector of `SmithyComponent`s.
-pub struct SmithyComponent<'a>(pub Box<FnMut(Phase) -> PhaseResult + 'a>);
+pub struct SmithyComponent<'a>(pub Box<dyn FnMut(Phase) -> PhaseResult + 'a>);
 
 /// The main trait of Smithy.
 pub trait Component {
