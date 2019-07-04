@@ -19,3 +19,6 @@ shellexpand = "1.0.0"
 
 [workspace]
 members = ["."]
+
+[features]
+cache-logs = ["smd_macro/cache-logs"]

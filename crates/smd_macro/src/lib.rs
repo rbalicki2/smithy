@@ -26,10 +26,6 @@ mod parsers;
 mod types;
 
 type ProcMacroMap = HashMap<String, proc_macro::TokenStream>;
-thread_local! {
-  static SMD_CACHE: RefCell<ProcMacroMap> = RefCell::new(HashMap::new());
-  static SMD_BORROWED_CACHE: RefCell<ProcMacroMap> = RefCell::new(HashMap::new());
-}
 
 /// proc-macro to take a `SmithyComponent`, capturing referenced variables.
 #[proc_macro]
@@ -53,8 +49,7 @@ fn get_file_path() -> String {
   )
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-struct StringMap(HashMap<String, String>);
+type StringMap = HashMap<String, String>;
 
 fn read_hash_map() -> Result<StringMap, ()> {
   let path = get_file_path();
@@ -63,13 +58,14 @@ fn read_hash_map() -> Result<StringMap, ()> {
     .and_then(|s| serde_json::from_str(&s).map_err(|_| ()))
 }
 
-fn write_hash_map(map: &StringMap) -> Result<(), ()> {
+/// Attempts to write a hash map to the appropriate location.
+/// May fail silently, we don't really care.
+fn write_hash_map(map: &StringMap) {
   let path = get_file_path();
   let parent = Path::new(&path).parent().unwrap();
 
-  create_dir_all(parent);
-
-  write(path, serde_json::to_string(map).unwrap()).map_err(|_| ())
+  let _ = create_dir_all(parent);
+  let _ = write(path, serde_json::to_string(map).unwrap());
 }
 
 fn smd_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::TokenStream {
@@ -88,22 +84,42 @@ fn smd_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::T
   };
 
   match read_hash_map() {
-    Ok(mut map) => match map.0.get(&input_as_str) {
-      Some(cached_item) => cached_item.parse().unwrap(),
+    Ok(mut map) => match map.get(&input_as_str) {
+      Some(cached_item) => match cached_item.parse() {
+        Ok(item) => {
+          #[cfg(feature = "cache-logs")]
+          println!("Item found in hashmap");
+          item
+        },
+        Err(_) => {
+          #[cfg(feature = "cache-logs")]
+          println!("Error parsing item from hashmap");
+          // We encountered an item that was improperly written. We need to
+          // overwrite that item and re-write the hashmap to disk.
+          let proc_macro_result = parse_input();
+          map.insert(input_as_str, proc_macro_result.to_string());
+          write_hash_map(&map);
+          proc_macro_result
+        },
+      },
       None => {
+        #[cfg(feature = "cache-logs")]
+        println!("Cached item not found");
         let proc_macro_result = parse_input();
-        map.0.insert(input_as_str, proc_macro_result.to_string());
+        map.insert(input_as_str, proc_macro_result.to_string());
         write_hash_map(&map);
         proc_macro_result
       },
     },
     Err(_) => {
+      #[cfg(feature = "cache-logs")]
+      println!("Could not deserialize hashmap!!!");
       let proc_macro_result = parse_input();
-      let map = StringMap({
+      let map = {
         let mut map = HashMap::new();
         map.insert(input_as_str, proc_macro_result.to_string());
         map
-      });
+      };
       write_hash_map(&map);
       proc_macro_result
     },

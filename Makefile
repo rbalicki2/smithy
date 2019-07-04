@@ -8,7 +8,7 @@ watch-test :
 	cargo watch -s 'make format' -s 'cd crates/smd_tests && cargo +nightly test'
 
 watch-test-nc :
-	cargo watch -s 'make format' -s 'cd crates/smd_tests && cargo +nightly test -- --nocapture'
+	cargo watch -s 'make format' -s 'cd crates/smd_tests && cargo +nightly test --features=cache-logs -- --nocapture'
 
 watch-docs :
 	# N.B. for this to work properly, you *must* go to crates/smithy/Cargo.toml and add "all-features" to
