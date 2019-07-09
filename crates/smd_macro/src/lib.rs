@@ -5,12 +5,7 @@
 #![recursion_limit = "128"]
 #![feature(drain_filter)]
 
-use serde_derive::{
-  Deserialize,
-  Serialize,
-};
 use std::{
-  cell::RefCell,
   collections::HashMap,
   fs::{
     create_dir_all,
@@ -24,8 +19,6 @@ extern crate proc_macro;
 
 mod parsers;
 mod types;
-
-type ProcMacroMap = HashMap<String, proc_macro::TokenStream>;
 
 /// proc-macro to take a `SmithyComponent`, capturing referenced variables.
 #[proc_macro]
@@ -41,18 +34,21 @@ pub fn smd_borrowed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   smd_inner(input, false)
 }
 
-fn get_file_path() -> String {
+// TODO rename should_move to is_borrowed and invert the value
+// since that makes more sense.
+fn get_file_path(should_move: bool) -> String {
   format!(
-    "{}/.smd/{}",
+    "{}/.smd/{}{}",
     std::env::var("HOME").unwrap(),
-    env!("CARGO_PKG_VERSION")
+    env!("CARGO_PKG_VERSION"),
+    if should_move { "" } else { "-borrowed" }
   )
 }
 
 type StringMap = HashMap<String, String>;
 
-fn read_hash_map() -> Result<StringMap, ()> {
-  let path = get_file_path();
+fn read_hash_map(should_move: bool) -> Result<StringMap, ()> {
+  let path = get_file_path(should_move);
   read_to_string(path)
     .map_err(|_| ())
     .and_then(|s| serde_json::from_str(&s).map_err(|_| ()))
@@ -60,8 +56,8 @@ fn read_hash_map() -> Result<StringMap, ()> {
 
 /// Attempts to write a hash map to the appropriate location.
 /// May fail silently, we don't really care.
-fn write_hash_map(map: &StringMap) {
-  let path = get_file_path();
+fn write_hash_map(map: &StringMap, should_move: bool) {
+  let path = get_file_path(should_move);
   let parent = Path::new(&path).parent().unwrap();
 
   let _ = create_dir_all(parent);
@@ -83,7 +79,7 @@ fn smd_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::T
     proc_macro_result
   };
 
-  match read_hash_map() {
+  match read_hash_map(should_move) {
     Ok(mut map) => match map.get(&input_as_str) {
       Some(cached_item) => match cached_item.parse() {
         Ok(item) => {
@@ -98,7 +94,7 @@ fn smd_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::T
           // overwrite that item and re-write the hashmap to disk.
           let proc_macro_result = parse_input();
           map.insert(input_as_str, proc_macro_result.to_string());
-          write_hash_map(&map);
+          write_hash_map(&map, should_move);
           proc_macro_result
         },
       },
@@ -107,7 +103,7 @@ fn smd_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::T
         println!("Cached item not found");
         let proc_macro_result = parse_input();
         map.insert(input_as_str, proc_macro_result.to_string());
-        write_hash_map(&map);
+        write_hash_map(&map, should_move);
         proc_macro_result
       },
     },
@@ -120,7 +116,7 @@ fn smd_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::T
         map.insert(input_as_str, proc_macro_result.to_string());
         map
       };
-      write_hash_map(&map);
+      write_hash_map(&map, should_move);
       proc_macro_result
     },
   }
