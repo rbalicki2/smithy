@@ -1,7 +1,7 @@
 [package]
 name = "smithy"
 description = "Smithy, a framework for web development"
-version = "0.0.4"
+version = "0.0.5"
 authors = ["Robert Balicki <robert.balicki@gmail.com>"]
 edition = "2018"
 keywords = ["web", "javascript", "webassembly", "wasm", "frontend"]
@@ -12,9 +12,9 @@ homepage = "https://github.com/rbalicki2/smithy"
 documentation = "https://docs.smithy.rs/smithy"
 
 [dependencies]
-smd_macro = { path = "../smd_macro", version = "0.0.4" }
-smithy_core = { path = "../smithy_core", version = "0.0.4" }
-smithy_types = { path = "../smithy_types", version = "0.0.4" }
+smd_macro = { path = "../smd_macro", version = "0.0.5" }
+smithy_core = { path = "../smithy_core", version = "0.0.5" }
+smithy_types = { path = "../smithy_types", version = "0.0.5" }
 
 [features]
 default = ["keyboard-events", "input-events"]

@@ -1,3 +1,10 @@
+# Version 0.0.5 (2019-07-08)
+
+# Features
+
+* Now works with rustc 1.37.0-nightly (8ebd67e4e 2019-06-27) due to
+  the smd! macro using a file cache instead of an in-memory cache
+
 # Version 0.0.4 (2019-06-26)
 
 ## Features and breaking changes
