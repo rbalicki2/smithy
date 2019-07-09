@@ -139,7 +139,7 @@ pub type Path = [usize];
 /// An enum representing the different phases that a Smithy app can go through.
 ///
 /// A call to `smd!` is a `SmithyComponent`, which is a wrapper around a
-/// `Box<FnMut(Phase) -> PhaseResult>`. The content of this
+/// `Box<dyn FnMut(Phase) -> PhaseResult>`. The content of this
 /// function is a match statement over the `Phase` parameter.
 pub enum Phase<'a> {
   Rendering,
@@ -154,7 +154,7 @@ pub type EventHandled = bool;
 /// An enum representing the results of a `SmithyComponent` handling a `Phase`.
 ///
 /// A call to `smd!` is a `SmithyComponent`, which is a wrapper around a
-/// `Box<FnMut(Phase) -> PhaseResult>`.
+/// `Box<dyn FnMut(Phase) -> PhaseResult>`.
 ///
 /// The data contained in the `PhaseResult` will inform the future behavior of
 /// the app. For example, when responding to an event, the app will re-render
@@ -190,7 +190,7 @@ impl PhaseResult {
 }
 
 /// The results of calling the `smd!` macro is a vector of `SmithyComponent`s.
-pub struct SmithyComponent<'a>(pub Box<FnMut(Phase) -> PhaseResult + 'a>);
+pub struct SmithyComponent<'a>(pub Box<dyn FnMut(Phase) -> PhaseResult + 'a>);
 
 /// The main trait of Smithy.
 pub trait Component {

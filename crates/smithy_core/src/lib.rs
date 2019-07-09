@@ -35,7 +35,7 @@ use self::node_diff::{
 thread_local! {
   static ROOT_ELEMENT: RefCell<Option<Element>> = RefCell::new(None);
   static LAST_RENDERED_NODE: RefCell<Option<Vec<CollapsedNode>>> = RefCell::new(None);
-  static ROOT_COMPONENT: RefCell<Option<Box<Component>>> = RefCell::new(None);
+  static ROOT_COMPONENT: RefCell<Option<Box<dyn Component>>> = RefCell::new(None);
   static EVENT_DEPTH: RefCell<u32> = RefCell::new(0);
 }
 
@@ -43,7 +43,7 @@ fn get_window() -> Window {
   web_sys::window().unwrap()
 }
 
-fn render_initially(component: &mut Box<Component>, el: &Element) {
+fn render_initially(component: &mut Box<dyn Component>, el: &Element) {
   let node: Vec<CollapsedNode> = component.render().into();
   el.set_inner_html(&node.as_inner_html());
   LAST_RENDERED_NODE.store(node);
@@ -137,7 +137,7 @@ pub fn rerender() {
 ///   smithy::mount(app, el);
 /// }
 /// ```
-pub fn mount(mut component: Box<Component>, el: Element) {
+pub fn mount(mut component: Box<dyn Component>, el: Element) {
   console_error_panic_hook::set_once();
   render_initially(&mut component, &el);
   attach_listeners(&el);

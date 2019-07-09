@@ -76,7 +76,8 @@ macro_rules! attach_ui_event_listener {
         };
 
         if crate::event_handling_phase_is_ongoing() {
-          let request_animation_frame_cb = Closure::wrap(Box::new(handle_event) as Box<FnMut()>);
+          let request_animation_frame_cb =
+            Closure::wrap(Box::new(handle_event) as Box<dyn FnMut()>);
           let window = web_sys::window().unwrap();
 
           let _ =
@@ -275,7 +276,7 @@ macro_rules! attach_window_event_listener {
         }
       };
       if crate::event_handling_phase_is_ongoing() {
-        let request_animation_frame_cb = Closure::wrap(Box::new(handle_event) as Box<FnMut()>);
+        let request_animation_frame_cb = Closure::wrap(Box::new(handle_event) as Box<dyn FnMut()>);
         let window = web_sys::window().unwrap();
         let _ = window.request_animation_frame(request_animation_frame_cb.as_ref().unchecked_ref());
         request_animation_frame_cb.forget();

@@ -14,12 +14,12 @@ extern "C" {
   pub fn attach_event_listener(
     this: &HTMLElement,
     event_name: &str,
-    cb: &Closure<FnMut(Event)>,
+    cb: &Closure<dyn FnMut(Event)>,
     should_bubble: bool,
   );
 
   pub type WINDOW;
 
   #[wasm_bindgen(method, js_name=addEventListener)]
-  pub fn attach_event_listener(this: &WINDOW, event_name: &str, cb: &Closure<FnMut(Event)>);
+  pub fn attach_event_listener(this: &WINDOW, event_name: &str, cb: &Closure<dyn FnMut(Event)>);
 }

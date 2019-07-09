@@ -204,7 +204,7 @@ fn get_vec_path_diff(old_nodes: &Vec<CollapsedNode>, new_nodes: &Vec<CollapsedNo
   let max_len = std::cmp::max(old_nodes.len(), new_nodes.len());
   let path = vec![];
 
-  let zipped: Box<Iterator<Item = (Option<&CollapsedNode>, Option<&CollapsedNode>)>> =
+  let zipped: Box<dyn Iterator<Item = (Option<&CollapsedNode>, Option<&CollapsedNode>)>> =
     if potentially_deleting {
       let zipped = crate::zip_util::optionalize_and_zip(old_nodes.iter(), new_nodes.iter());
       let mut vec = zipped.collect::<Vec<(Option<&CollapsedNode>, Option<&CollapsedNode>)>>();
@@ -295,7 +295,7 @@ fn get_html_token_diff(
     let potentially_deleting = old_token.children.len() > new_token.children.len();
     let max_len = std::cmp::max(old_token.children.len(), new_token.children.len());
 
-    let zipped: Box<Iterator<Item = (Option<&CollapsedNode>, Option<&CollapsedNode>)>> =
+    let zipped: Box<dyn Iterator<Item = (Option<&CollapsedNode>, Option<&CollapsedNode>)>> =
       if potentially_deleting {
         let zipped = crate::zip_util::optionalize_and_zip(
           old_token.children.iter(),

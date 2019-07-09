@@ -8,19 +8,13 @@ watch-test :
 	cargo watch -s 'make format' -s 'cd crates/smd_tests && cargo +nightly test'
 
 watch-test-nc :
-	cargo watch -s 'make format' -s 'cd crates/smd_tests && cargo +nightly test -- --nocapture'
+	cargo watch -s 'make format' -s 'cd crates/smd_tests && cargo +nightly test --features=cache-logs -- --nocapture'
 
 watch-docs :
-	# N.B. for this to work properly, you *must* go to crates/smithy/Cargo.toml and add "all-features" to
-	# the default feature list :(
-	echo "smithy: please make sure the feature \"all-features\" is enabled in your Cargo.toml"
-	RUSTDOCFLAGS="-Z unstable-options --index-page $$(pwd)/index.md" cargo watch -s 'rm -f target/doc/index.html && cargo doc -p smithy --features all-events' -w ./crates/ -w ./index.md
+	RUSTDOCFLAGS="-Z unstable-options --index-page $$(pwd)/index.md" cargo watch -s 'rm -f target/doc/index.html && cargo doc -p smithy --no-deps --all-features' -w ./crates/ -w ./index.md
 
 build-docs :
-	# N.B. for this to work properly, you *must* go to crates/smithy/Cargo.toml and add "all-features" to
-	# the default feature list :(
-	echo "smithy: please make sure the feature \"all-features\" is enabled in your Cargo.toml"
-	RUSTDOCFLAGS="-Z unstable-options --index-page $$(pwd)/index.md" cargo doc -p smithy --no-deps
+	RUSTDOCFLAGS="-Z unstable-options --index-page $$(pwd)/index.md" cargo doc -p smithy --no-deps --all-features
 
 clear-docs :
 	rm -rf target/doc
