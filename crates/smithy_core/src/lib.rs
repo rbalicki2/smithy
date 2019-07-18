@@ -45,7 +45,7 @@ fn get_window() -> Window {
 
 fn render_initially(component: &mut Box<dyn Component>, el: &Element) {
   let node: Vec<CollapsedNode> = component.render().into();
-  el.set_inner_html(&node.as_inner_html());
+  el.set_inner_html(&node.as_inner_html(&vec![]));
   LAST_RENDERED_NODE.store(node);
 }
 
@@ -102,8 +102,8 @@ pub fn rerender() {
       #[cfg(feature = "browser-logs")]
       web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
         "\n\n\nrerender\n------------------------\n\nfrom {:?}\n\nto {:?}\n\ndiff {:#?}\n\n",
-        last_rendered_node.as_inner_html(),
-        newly_rendered_nodes.as_inner_html(),
+        last_rendered_node.as_inner_html(&vec![]),
+        newly_rendered_nodes.as_inner_html(&vec![]),
         diff
       )));
       ROOT_ELEMENT.with_inner_value(|el| {

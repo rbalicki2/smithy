@@ -27,26 +27,46 @@ custom_derive! {
   }
 }
 
+fn clone_and_extend(path: &Vec<usize>, next_item: usize) -> Vec<usize> {
+  let mut path = path.clone();
+  path.extend(&[next_item]);
+  path
+}
+
 pub trait AsInnerHtml {
-  fn as_inner_html(&self) -> String;
+  fn as_inner_html(&self, path_so_far: &Vec<usize>) -> String;
 }
 
 impl AsInnerHtml for Vec<CollapsedNode> {
-  fn as_inner_html(&self) -> String {
-    self.iter().map(|node| node.as_inner_html()).collect()
+  fn as_inner_html(&self, path_so_far: &Vec<usize>) -> String {
+    let a = self
+      .iter()
+      .enumerate()
+      .map(|(i, node)| node.as_inner_html(&clone_and_extend(path_so_far, i)))
+      .collect();
+    web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+      "as inner html for vec\npath so far {:?} \nself - {:?} \ncollected as inner html- {:?}",
+      path_so_far, self, a
+    )));
+    a
   }
 }
 
 impl AsInnerHtml for CollapsedNode {
-  fn as_inner_html(&self) -> String {
-    match self {
-      CollapsedNode::Dom(token) => token.as_inner_html(),
+  fn as_inner_html(&self, path_so_far: &Vec<usize>) -> String {
+    let a = match self {
+      CollapsedNode::Dom(token) => token.as_inner_html(path_so_far),
       CollapsedNode::Text(s) => s.to_string(),
       CollapsedNode::Comment(str_opt) => match str_opt {
         Some(s) => format!("<!-- {} -->", s),
         None => "<!-- -->".into(),
       },
-    }
+    };
+    web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+      "as inner html collapsed node \nself {:?}\npath {:?}\na {:?}",
+      self, path_so_far, a
+    )));
+    a
   }
 }
 
@@ -108,20 +128,27 @@ lazy_static! {
   };
 }
 
+// TODO as_inner_html needs to accept a path vec
 impl AsInnerHtml for CollapsedHtmlToken {
-  fn as_inner_html(&self) -> String {
-    let path_string = format!(" data-smithy-path=\"{}\"", format_path(&self.path));
+  fn as_inner_html(&self, path_so_far: &Vec<usize>) -> String {
+    web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+      "abc- as inner html for collapsed html token {:#?} \npath so far {:?}",
+      self, path_so_far
+    )));
+    let path_string = format!(" data-smithy-path=\"{}\"", format_path(path_so_far));
     let attributes_string = if self.attributes.len() > 0 {
       format!(" {}", format_attributes(&self.attributes))
     } else {
       "".to_string()
     };
 
+    // I think we need to use the path here???
     if !VOID_TAGS.contains(&self.node_type) {
       let child_html = self
         .children
         .iter()
-        .map(|node| node.as_inner_html())
+        .enumerate()
+        .map(|(i, node)| node.as_inner_html(&clone_and_extend(path_so_far, i)))
         .collect::<Vec<String>>()
         .join("");
       format!(

@@ -234,7 +234,7 @@ fn get_vec_path_diff(old_nodes: &Vec<CollapsedNode>, new_nodes: &Vec<CollapsedNo
         (None, Some(new_node)) => vec![(
           path.clone(),
           DiffOperation::InsertChild(InsertChildOperation {
-            new_inner_html: new_node.as_inner_html(),
+            new_inner_html: new_node.as_inner_html(&vec![]),
             child_index: real_i,
           }),
         )],
@@ -281,7 +281,7 @@ fn get_html_token_diff(
   let old_node_type = &old_token.node_type;
   let new_node_type = &new_token.node_type;
   if old_node_type != new_node_type {
-    let new_inner_html = new_token.as_inner_html();
+    let new_inner_html = new_token.as_inner_html(&vec![]);
 
     vec![(
       path_to_parent.to_vec(),
@@ -329,7 +329,7 @@ fn get_html_token_diff(
         (None, Some(new_child)) => vec![(
           old_token.path.clone(),
           DiffOperation::InsertChild(InsertChildOperation {
-            new_inner_html: new_child.as_inner_html(),
+            new_inner_html: new_child.as_inner_html(&vec![]),
             child_index: get_i(i, max_len, potentially_deleting),
           }),
         )],
@@ -394,7 +394,7 @@ fn get_comment_diff(
 }
 
 fn get_replace_diff(new_node: &CollapsedNode, path_to_parent: &Path, child_index: usize) -> Diff {
-  let new_inner_html = new_node.as_inner_html();
+  let new_inner_html = new_node.as_inner_html(&vec![]);
   vec![(
     path_to_parent.to_vec(),
     DiffOperation::ReplaceChild(ReplaceChildOperation {

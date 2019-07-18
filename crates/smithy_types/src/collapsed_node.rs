@@ -42,7 +42,7 @@ impl CollapsedHtmlToken {
   }
 }
 
-fn clone_and_extend(path: &Path, next_item: usize) -> Path {
+pub fn clone_and_extend(path: &Path, next_item: usize) -> Path {
   let mut path = path.clone();
   path.extend(&[next_item]);
   path
