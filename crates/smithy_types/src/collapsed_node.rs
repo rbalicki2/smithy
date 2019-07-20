@@ -65,7 +65,7 @@ impl Node {
           // this is weird. We're wrapping children in a Node::Vec and collapsing
           // that. It would make more sense to implement Into<Vec<CollapsedNode>> on
           // Vec<Node>, presumably.
-          Node::Vec(html_token.children).into()
+          Node::Vec(html_token.children).into_collapsed_node(path)
         },
       })],
       Node::Text(text) => vec![CollapsedNode::Text(text)],
@@ -116,7 +116,7 @@ impl Node {
 }
 
 impl Into<Vec<CollapsedNode>> for Node {
-  // TODO collapse text nodes
+  // TODO collapse text nodes... but maybe we do?
   fn into(self) -> Vec<CollapsedNode> {
     self.into_collapsed_node(vec![])
   }
