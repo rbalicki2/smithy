@@ -117,6 +117,8 @@ impl Node {
 
 impl Into<Vec<CollapsedNode>> for Node {
   // TODO collapse text nodes... but maybe we do?
+  // N.B. this is only correct if this is being called on the top level.
+  // TODO remove this and call into_collapsed_node(vec![]) directly to be more explicit
   fn into(self) -> Vec<CollapsedNode> {
     self.into_collapsed_node(vec![])
   }
