@@ -67,6 +67,11 @@ macro_rules! attach_ui_event_listener {
         .and_then(|el| el.get_attribute(DATA_SMITHY_PATH))
         .and_then(|attr| derive_path(attr).ok())
       {
+        #[cfg(feature = "event-logs")]
+        web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(
+          &format!("\nEvent: {}, Path: {:?}", $event_name, path)
+        ));
+
         let event_wrapped = UiEvent::$smithy_event_type(evt);
         let handle_event = move || {
           let handled = crate::handle_ui_event(&event_wrapped, &path);

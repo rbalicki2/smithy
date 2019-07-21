@@ -64,3 +64,4 @@ all-events = [
 browser-logs = ["smithy_core/browser-logs"]
 smd-logs = ["smd_macro/smd-logs"]
 cache-logs = ["smd_macro/cache-logs"]
+event-logs = ["smithy_core/event-logs"]

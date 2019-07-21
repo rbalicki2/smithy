@@ -50,3 +50,4 @@ web-sys-ui-events = ["any-ui-events", "web-sys/UiEvent"]
 any-ui-events = []
 
 browser-logs = ["web-sys/console"]
+event-logs = ["web-sys/console"]
