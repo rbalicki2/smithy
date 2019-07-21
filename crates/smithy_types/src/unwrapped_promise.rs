@@ -66,6 +66,7 @@ impl<S, E> Deref for UnwrappedPromise<S, E> {
 }
 
 /// An enum representing the three states of a Javascript promise.
+#[derive(Clone, Debug)]
 pub enum PromiseState<S, E> {
   Pending,
   Success(S),
