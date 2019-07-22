@@ -174,7 +174,6 @@ lazy_static! {
 }
 
 pub fn should_include_rest_param(opt: &Option<String>) -> bool {
-  println!("\n\nopt {:?}", opt);
   opt
     .as_ref()
     .and_then(|provided_event_name| {
