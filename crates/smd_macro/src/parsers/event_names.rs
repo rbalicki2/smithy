@@ -180,7 +180,7 @@ pub fn should_include_rest_param(opt: &Option<String>) -> bool {
       UI_EVENT_NAMES
         .iter()
         .find_map(|(_key, (event_name, should_include_rest_param))| {
-          if (provided_event_name != event_name) {
+          if provided_event_name != event_name {
             return None;
           }
           return Some(*should_include_rest_param);
