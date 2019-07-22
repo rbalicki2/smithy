@@ -24,7 +24,7 @@ impl UIEventHandlingInfo {
   }
 
   /// N.B. this also reverses the path
-  pub fn get_path_match(&self) -> TokenStream {
+  pub fn get_path_match(&self, include_rest_param: bool) -> TokenStream {
     let inner = self
       .reversed_path
       .iter()
@@ -32,7 +32,7 @@ impl UIEventHandlingInfo {
       .fold(quote! {}, |accum, path_item| {
         quote! { #accum #path_item, }
       });
-    let additional_dot_dot = if !self.event.is_some() {
+    let additional_dot_dot = if include_rest_param {
       quote! { rest.. }
     } else {
       quote! {}
