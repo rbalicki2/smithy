@@ -87,8 +87,10 @@ pub fn make_component(
   // TODO even later: don't conflate these two! It's super weird that we have
   // groups represented as UIEventHandlingInfo
 
-  let (groups, ui_event_handling_infos) =
+  let (groups, mut ui_event_handling_infos) =
     UIEventHandlingInfo::split_into_groups(ui_event_handling_infos);
+  // reverse the non-groups
+  ui_event_handling_infos.reverse();
 
   let (child_ref_assignment, group_window_event_handling) = groups
     .iter()
@@ -161,42 +163,49 @@ pub fn make_component(
       });
 
   // inner_ui_event_handling is made in two parts.
-  // Part 1: handle events for non-groups (true ui event handlers)
-  let inner_ui_event_handling =
-    ui_event_handling_infos
-      .into_iter()
-      .fold(quote! {}, |accum, ui_event_handling_info| {
-        let path = ui_event_handling_info.get_path_match();
-        let callback = ui_event_handling_info.callback;
-        match ui_event_handling_info.event {
-          Some(event) => {
-            let event = Ident::new(&event, Span::call_site());
-            quote! {
-              #accum
-              (smithy::types::UiEvent::#event(val), #path) => {
-                (#callback)(val);
-                smithy::types::PhaseResult::UiEventHandling(true)
-              },
-            }
-          },
-          None => panic!("should not happen, this is ensured by split_into_groups"),
-        }
-      });
+  // Part 1: handle groups
+  let inner_ui_event_handling = groups.into_iter().fold(quote! {}, |accum, group| {
+    let path = group.get_path_match(true);
+    let callback = group.callback;
 
-  // Part 2: handle groups
-  let inner_ui_event_handling = groups
-    .into_iter()
-    .fold(inner_ui_event_handling, |accum, group| {
-      let path = group.get_path_match();
-      let callback = group.callback;
+    quote! {
+      #accum
+      (evt, #path) => smithy::types::PhaseResult::UiEventHandling(
+        #callback.handle_ui_event(evt, rest)
+      ),
+    }
+  });
 
-      quote! {
-        #accum
-        (evt, #path) => smithy::types::PhaseResult::UiEventHandling(
-          #callback.handle_ui_event(evt, rest)
-        ),
+  // Part 2: handle events for non-groups (true ui event handlers)
+  let inner_ui_event_handling = ui_event_handling_infos.into_iter().fold(
+    inner_ui_event_handling,
+    |accum, ui_event_handling_info| {
+      let path = ui_event_handling_info.get_path_match(
+        crate::parsers::event_names::should_include_rest_param(&ui_event_handling_info.event),
+      );
+      let callback = ui_event_handling_info.callback;
+      match ui_event_handling_info.event {
+        Some(event) => {
+          let event = Ident::new(&event, Span::call_site());
+          quote! {
+            #accum
+            (smithy::types::UiEvent::#event(val), #path) => {
+              (#callback)(val);
+              smithy::types::PhaseResult::UiEventHandling(true)
+            },
+          }
+        },
+        None => panic!("should not happen, this is ensured by split_into_groups"),
       }
-    });
+    },
+  );
+
+  // N.B. this is incorrect. A group would receive an event, *regardless of whether
+  // it would handle it.*
+  //
+  // Thus, click_handler in <div on_click={click_handler}>{ child_component }</div>
+  // would never be called, though it could be in
+  // <div on_click={click_handler}><span>whatever</span></div>
 
   let inner_window_event_handling =
     window_event_handling_infos

@@ -43,7 +43,9 @@ fn assert_is_not_event_handler(string: &String) {
 impl AttributeOrEventHandler {
   fn create_from_string(string: String, t: TokenStream) -> AttributeOrEventHandler {
     match UI_EVENT_NAMES.get(&string) {
-      Some(event_name) => AttributeOrEventHandler::EventHandler((event_name.to_string(), t)),
+      Some((event_name, _should_include_rest_param)) => {
+        AttributeOrEventHandler::EventHandler((event_name.to_string(), t))
+      },
       None => {
         // TODO make this less awkward
         if string == "ref" {
