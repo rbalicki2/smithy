@@ -25,3 +25,4 @@ proc-macro = true
 [features]
 smd-logs = []
 cache-logs = []
+do-not-cache-smd = []

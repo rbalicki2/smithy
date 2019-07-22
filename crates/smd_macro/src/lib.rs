@@ -79,6 +79,7 @@ fn smd_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::T
     proc_macro_result
   };
 
+  #[cfg(not(feature = "do-not-cache-smd"))]
   match read_hash_map(should_move) {
     Ok(mut map) => match map.get(&input_as_str) {
       Some(cached_item) => match cached_item.parse() {
@@ -120,4 +121,7 @@ fn smd_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::T
       proc_macro_result
     },
   }
+
+  #[cfg(feature = "do-not-cache-smd")]
+  parse_input()
 }

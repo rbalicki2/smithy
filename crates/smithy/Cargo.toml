@@ -61,7 +61,9 @@ all-events = [
   "promise-rejection-events",
 ]
 
-browser-logs = ["smithy_core/browser-logs"]
 smd-logs = ["smd_macro/smd-logs"]
+do-not-cache-smd = ["smd_macro/do-not-cache-smd"]
 cache-logs = ["smd_macro/cache-logs"]
+
+browser-logs = ["smithy_core/browser-logs"]
 event-logs = ["smithy_core/event-logs"]
