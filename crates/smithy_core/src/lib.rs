@@ -138,7 +138,6 @@ pub fn rerender() {
 /// }
 /// ```
 pub fn mount(mut component: Box<dyn Component>, el: Element) {
-  console_error_panic_hook::set_once();
   render_initially(&mut component, &el);
   attach_listeners(&el);
   ROOT_ELEMENT.store(el);
