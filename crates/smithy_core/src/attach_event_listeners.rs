@@ -1,8 +1,9 @@
 use crate::js_fns;
 use smithy_types::{
   UiEvent,
-  WindowEvent,
 };
+#[allow(unused_imports)]
+use smithy_types::WindowEvent;
 use wasm_bindgen::{
   closure::Closure,
   JsCast,
@@ -51,6 +52,7 @@ fn derive_path(s: String) -> Result<Vec<usize>, std::num::ParseIntError> {
 
 const DATA_SMITHY_PATH: &'static str = "data-smithy-path";
 
+#[allow(unused_macros)]
 macro_rules! attach_ui_event_listener {
   (
     $html_el:expr,
@@ -265,6 +267,7 @@ pub fn attach_ui_event_listeners(html_el: &js_fns::HTMLElement) {
   }
 }
 
+#[allow(unused_macros)]
 macro_rules! attach_window_event_listener {
   (
     $window:expr,
@@ -296,6 +299,7 @@ macro_rules! attach_window_event_listener {
   };
 }
 
+#[allow(unused_variables)]
 pub fn attach_window_event_listeners(window: &js_fns::WINDOW) {
   #[cfg(feature = "before-unload-events")]
   attach_window_event_listener!(window, BeforeUnloadEvent, OnBeforeUnload, "beforeunload");

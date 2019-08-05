@@ -70,12 +70,14 @@ fn event_handling_phase_is_ongoing() -> bool {
   get_event_depth() > 0
 }
 
+#[allow(dead_code)]
 fn handle_window_event(w: &WindowEvent) -> bool {
   with_increased_event_depth(|| {
     ROOT_COMPONENT.with_inner_value(|root_component| root_component.handle_window_event(w))
   })
 }
 
+#[allow(dead_code)]
 fn handle_ui_event(ui_event: &UiEvent, path: &Path) -> bool {
   with_increased_event_depth(|| {
     ROOT_COMPONENT

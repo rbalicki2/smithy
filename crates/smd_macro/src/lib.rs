@@ -36,6 +36,7 @@ pub fn smd_borrowed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 // TODO rename should_move to is_borrowed and invert the value
 // since that makes more sense.
+#[cfg(not(feature = "do-not-cache-smd"))]
 fn get_file_path(should_move: bool) -> String {
   format!(
     "{}/.smd/{}{}",
@@ -45,8 +46,10 @@ fn get_file_path(should_move: bool) -> String {
   )
 }
 
+#[cfg(not(feature = "do-not-cache-smd"))]
 type StringMap = HashMap<String, String>;
 
+#[cfg(not(feature = "do-not-cache-smd"))]
 fn read_hash_map(should_move: bool) -> Result<StringMap, ()> {
   let path = get_file_path(should_move);
   read_to_string(path)
@@ -56,6 +59,7 @@ fn read_hash_map(should_move: bool) -> Result<StringMap, ()> {
 
 /// Attempts to write a hash map to the appropriate location.
 /// May fail silently, we don't really care.
+#[cfg(not(feature = "do-not-cache-smd"))]
 fn write_hash_map(map: &StringMap, should_move: bool) {
   let path = get_file_path(should_move);
   let parent = Path::new(&path).parent().unwrap();
