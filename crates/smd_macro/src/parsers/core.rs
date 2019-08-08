@@ -10,17 +10,22 @@ use crate::types::{
   UIEventHandlingInfo,
   WindowEventHandlingInfo,
 };
+
+#[allow(unused_imports)]
+use nom::{
+  error_position,
+  tuple_parser,
+};
+
 use nom::{
   alt,
   apply,
   call,
   delimited,
-  error_position,
   map,
   named,
   named_args,
   tuple,
-  tuple_parser,
 };
 use proc_macro2::{
   Delimiter,

@@ -6,15 +6,20 @@ use crate::types::{
   AttributeOrEventHandler,
   TokenTreeSlice,
 };
+
+#[allow(unused_imports)]
+use nom::{
+  error_position,
+  tuple_parser,
+};
+
 use nom::{
   alt,
   apply,
   call,
-  error_position,
   map,
   named,
   tuple,
-  tuple_parser,
 };
 use proc_macro2::{
   Delimiter,
