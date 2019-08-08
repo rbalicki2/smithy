@@ -1,7 +1,5 @@
 use crate::js_fns;
-use smithy_types::{
-  UiEvent,
-};
+use smithy_types::UiEvent;
 #[allow(unused_imports)]
 use smithy_types::WindowEvent;
 use wasm_bindgen::{
