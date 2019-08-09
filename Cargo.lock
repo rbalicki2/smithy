@@ -55,15 +55,6 @@ version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "console_error_panic_hook"
-version = "0.1.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "cfg-if 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "wasm-bindgen 0.2.40 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "custom_derive"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -266,7 +257,7 @@ dependencies = [
 
 [[package]]
 name = "smd_macro"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "lazy_static 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "nom 4.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -275,27 +266,26 @@ dependencies = [
  "serde 1.0.94 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.94 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.40 (registry+https://github.com/rust-lang/crates.io-index)",
- "smithy_types 0.0.5",
+ "smithy_types 0.0.6",
 ]
 
 [[package]]
 name = "smithy"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
- "smd_macro 0.0.5",
- "smithy_core 0.0.5",
- "smithy_types 0.0.5",
+ "smd_macro 0.0.6",
+ "smithy_core 0.0.6",
+ "smithy_types 0.0.6",
 ]
 
 [[package]]
 name = "smithy_core"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
- "console_error_panic_hook 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.25 (registry+https://github.com/rust-lang/crates.io-index)",
  "js-sys 0.3.17 (registry+https://github.com/rust-lang/crates.io-index)",
- "smd_macro 0.0.5",
- "smithy_types 0.0.5",
+ "smd_macro 0.0.6",
+ "smithy_types 0.0.6",
  "wasm-bindgen 0.2.40 (registry+https://github.com/rust-lang/crates.io-index)",
  "wasm-bindgen-futures 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "web-sys 0.3.17 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -303,7 +293,7 @@ dependencies = [
 
 [[package]]
 name = "smithy_types"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "custom_derive 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "enum_derive 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -529,7 +519,6 @@ dependencies = [
 "checksum bumpalo 2.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f6a6bc2ba935b1e2f810787ceba8dfe86cbc164cee55925cae715541186673c4"
 "checksum cc 1.0.25 (registry+https://github.com/rust-lang/crates.io-index)" = "f159dfd43363c4d08055a07703eb7a3406b0dac4d0584d96965a3262db3c9d16"
 "checksum cfg-if 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "082bb9b28e00d3c9d39cc03e64ce4cea0f1bb9b3fde493f0cbc008472d22bdf4"
-"checksum console_error_panic_hook 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "6c5dd2c094474ec60a6acaf31780af270275e3153bafff2db5995b715295762e"
 "checksum custom_derive 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)" = "ef8ae57c4978a2acd8b869ce6b9ca1dfe817bff704c220209fdef2c0b75a01b9"
 "checksum enum_derive 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)" = "406ac2a8c9eedf8af9ee1489bee9e50029278a6456c740f7454cf8a158abc816"
 "checksum env_logger 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "afb070faf94c85d17d50ca44f6ad076bce18ae92f0037d350947240a36e9d42e"
