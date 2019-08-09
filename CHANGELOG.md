@@ -1,3 +1,10 @@
+# Version 0.0.6 (2019-08-08)
+
+* Update the README to point users to the `create-smithy-app`[https://github.com/rbalicki2/create-smithy-app/]
+  repository.
+* Got rid of some compiler warnings.
+* Do not call `console_error_panic_hook` in Smithy.
+
 # Version 0.0.5 (2019-07-08)
 
 # Features

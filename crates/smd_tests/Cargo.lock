@@ -263,7 +263,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "smd_macro"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "lazy_static 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "nom 4.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -272,38 +272,38 @@ dependencies = [
  "serde 1.0.94 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.94 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.39 (registry+https://github.com/rust-lang/crates.io-index)",
- "smithy_types 0.0.5",
+ "smithy_types 0.0.6",
 ]
 
 [[package]]
 name = "smd_tests"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "shellexpand 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "smd_macro 0.0.5",
- "smithy 0.0.5",
- "smithy_types 0.0.5",
+ "smd_macro 0.0.6",
+ "smithy 0.0.6",
+ "smithy_types 0.0.6",
  "wasm-bindgen 0.2.29 (registry+https://github.com/rust-lang/crates.io-index)",
  "web-sys 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "smithy"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
- "smd_macro 0.0.5",
- "smithy_core 0.0.5",
- "smithy_types 0.0.5",
+ "smd_macro 0.0.6",
+ "smithy_core 0.0.6",
+ "smithy_types 0.0.6",
 ]
 
 [[package]]
 name = "smithy_core"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "futures 0.1.25 (registry+https://github.com/rust-lang/crates.io-index)",
  "js-sys 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "smd_macro 0.0.5",
- "smithy_types 0.0.5",
+ "smd_macro 0.0.6",
+ "smithy_types 0.0.6",
  "wasm-bindgen 0.2.29 (registry+https://github.com/rust-lang/crates.io-index)",
  "wasm-bindgen-futures 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "web-sys 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -311,7 +311,7 @@ dependencies = [
 
 [[package]]
 name = "smithy_types"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "custom_derive 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "enum_derive 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
