@@ -5,6 +5,7 @@
 #![recursion_limit = "128"]
 #![feature(drain_filter)]
 
+#[cfg(not(feature = "do-not-cache-smd"))]
 use std::{
   collections::HashMap,
   fs::{
@@ -69,7 +70,9 @@ fn write_hash_map(map: &StringMap, should_move: bool) {
 }
 
 fn smd_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::TokenStream {
+  #[cfg(not(feature = "do-not-cache-smd"))]
   let input_as_str = input.to_string();
+
   let parse_input = || {
     let input: proc_macro2::TokenStream = input.into();
     let vec_of_trees: Vec<proc_macro2::TokenTree> = input.into_iter().collect();
