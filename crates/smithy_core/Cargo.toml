@@ -6,7 +6,7 @@ version = "0.0.6"
 authors = ["Robert Balicki <robert.balicki@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/rbalicki2/smithy"
-homepage = "https://github.com/rbalicki2/smithy"
+homepage = "https://www.smithy.rs"
 documentation = "https://docs.smithy.rs/smithy_core"
 
 [dependencies]
