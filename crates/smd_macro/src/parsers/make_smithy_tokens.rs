@@ -97,14 +97,13 @@ pub fn make_component(
     .map(|info| (info.reversed_path.clone(), info.callback.clone()))
     .fold(
       (quote! {}, quote! {}),
-      |(ref_accum, group_accum), (reversed_path, group)| {
+      |(ref_accum, group_accum), (mut reversed_path, group)| {
+        reversed_path.reverse();
         let quotable_path = vec_to_quote(reversed_path);
         (
           quote! {
             #ref_accum
-            let mut path = #quotable_path.clone();
-            path.reverse();
-            let new_path = path_so_far.clone().into_iter().chain(path).collect();
+            let new_path = path_so_far.clone().into_iter().chain(#quotable_path).collect();
             (#group).handle_ref_assignment(new_path);
           },
           quote! {
