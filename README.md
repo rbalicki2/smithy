@@ -8,6 +8,10 @@
 
 Smithy is a framework for writing WebAssembly applications entirely in Rust. Its goal is to allow you to do so using idiomatic Rust, without giving up any of the compiler's safety guarantees.
 
+## Smithy works on nightly
+
+Smithy currently works on `rustc 1.37.0-nightly (5f9c0448d 2019-06-25)`.
+
 ## Getting started
 
 Getting started in Smithy is easy!
