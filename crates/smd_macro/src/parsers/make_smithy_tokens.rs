@@ -115,40 +115,43 @@ pub fn make_component(
       },
     );
 
-  let dom_ref_infos = dom_ref_infos
-    .into_iter()
-    .fold(quote! {}, |accum, dom_ref_info| {
-      let dom_ref = dom_ref_info.dom_ref;
-      let path = vec_to_quote(dom_ref_info.reversed_path);
-      quote! {
-        #accum
-        (#path, #dom_ref),
+  let ref_assignment_quote = if dom_ref_infos.len() > 0 {
+    let dom_ref_infos = dom_ref_infos
+      .into_iter()
+      .fold(quote! {}, |accum, dom_ref_info| {
+        let dom_ref = dom_ref_info.dom_ref;
+        let path = vec_to_quote(dom_ref_info.reversed_path);
+        quote! {
+          #accum
+          (#path, #dom_ref),
+        }
+      });
+    let dom_ref_infos = quote! { { let dom_refs: Vec<smithy::types::DomRefWithPath> = vec![#dom_ref_infos]; dom_refs }};
+    quote! {
+      let document = web_sys::window().unwrap().document().unwrap();
+      for (path, dom_ref) in (#dom_ref_infos).into_iter() {
+        use wasm_bindgen::JsCast;
+        let strs = path_so_far
+          .clone()
+          .into_iter()
+          .chain(path)
+          .map(|x| x.to_string())
+          .collect::<Vec<String>>();
+
+        let selector = strs.join(",");
+        // TODO avoid unwrapping here, and try to avoid calling .query_selector
+        // every time.
+        let el_opt: Option<web_sys::HtmlElement> = document
+          .query_selector(&format!("[data-smithy-path=\"{}\"]", selector))
+          .unwrap()
+          .map(JsCast::unchecked_into);
+
+        *dom_ref = el_opt;
       }
-    });
-  let dom_ref_infos =
-    quote! { { let dom_refs: Vec<smithy::types::DomRefWithPath> = vec![#dom_ref_infos]; dom_refs }};
-  let ref_assignment_quote = quote! {
-    let document = web_sys::window().unwrap().document().unwrap();
-    for (path, dom_ref) in (#dom_ref_infos).into_iter() {
-      use wasm_bindgen::JsCast;
-      let strs = path_so_far
-        .clone()
-        .into_iter()
-        .chain(path)
-        .map(|x| x.to_string())
-        .collect::<Vec<String>>();
-
-      let selector = strs.join(",");
-      // TODO avoid unwrapping here, and try to avoid calling .query_selector
-      // every time.
-      let el_opt: Option<web_sys::HtmlElement> = document
-        .query_selector(&format!("[data-smithy-path=\"{}\"]", selector))
-        .unwrap()
-        .map(JsCast::unchecked_into);
-
-      *dom_ref = el_opt;
+      #child_ref_assignment
     }
-    #child_ref_assignment
+  } else {
+    child_ref_assignment
   };
 
   let group_lifecycle_event_handling =
