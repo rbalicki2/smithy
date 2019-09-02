@@ -1,3 +1,8 @@
+# Version 0.0.7 (2019-09-02)
+
+* Update the README to indicate with which version of the nightly compiler Smithy is compatible.
+* Make Smithy more efficient: remove unnecessary code in the expansion of the `smd!` and `smd_borrowed!` macros, and move some path manipulation to compile time.
+
 # Version 0.0.6 (2019-08-08)
 
 * Update the README to point users to the `create-smithy-app`[https://github.com/rbalicki2/create-smithy-app/]

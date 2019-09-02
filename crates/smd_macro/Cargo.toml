@@ -2,7 +2,7 @@
 name = "smd_macro"
 description = "A crate for the smd! macro"
 license = "MIT/Apache-2.0"
-version = "0.0.6"
+version = "0.0.7"
 authors = ["Robert Balicki <robert.balicki@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/rbalicki2/smithy"
@@ -10,7 +10,7 @@ homepage = "https://www.smithy.rs"
 documentation = "https://docs.smithy.rs/smd_macro"
 
 [dependencies]
-smithy_types = { path = "../smithy_types", version = "0.0.6" }
+smithy_types = { path = "../smithy_types", version = "0.0.7" }
 proc-macro2 = { version = "0.4.27", features = ["span-locations"] }
 quote = "0.6.10"
 nom = "4.1.1"
