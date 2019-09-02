@@ -33,7 +33,7 @@ impl UIEventHandlingInfo {
         quote! { #accum #path_item, }
       });
     let additional_dot_dot = if include_rest_param {
-      quote! { rest.. }
+      quote! { rest @ .. }
     } else {
       quote! {}
     };
