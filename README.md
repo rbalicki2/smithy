@@ -150,7 +150,7 @@ As you can see from the expansion of the `smd!` macro above, phases are a core c
 * ref assignment, in which any app with `ref={&mut optional_web_sys_html_element}` will have `Some(some_html_element)` assigned to that ref.
 * post rendering, in which any `post_render={|_| ...}` callbacks will be executed. These callbacks are guaranteed to have all refs already assigned, thus allowing you to do any direct DOM manipulation you need to do.
 * UI event handling and window event handling, in which Smithy executes callbacks in response to events. After a callback is executed, Smithy will re-run the app through the different phases.
-  * (UI event handling and window event handling are treated as separate phases, though conceptually very similar.)
+  * (UI event handling and window event handling are treated as separate phases, though conceptually they are very similar.)
 
 ## `smd!` vs `smd_borrowed!`
 
