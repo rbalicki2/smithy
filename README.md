@@ -30,7 +30,7 @@ See [the create-smithy-app repository](https://github.com/rbalicki2/create-smith
 
 A simple click counter is as follows:
 
-```rs
+```rust
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), wasm_bindgen::JsValue> {
   let root_element = get_root_element()?;
@@ -57,7 +57,7 @@ fn get_root_element() -> Result<web_sys::Element, wasm_bindgen::JsValue> {
 
 The `smd!` and `smd_borrowed!` macros convert something that looks like JSX into a wrapper around an `FnMut(smithy::types::Phase) -> smithy::types::PhaseResult`. For example, the `smd!` call in:
 
-```rs
+```rust
 let mut count = 0;
 let app = smithy::smd!(
   <div on_click={|_| count = count + 1}>
@@ -68,7 +68,7 @@ let app = smithy::smd!(
 
 is converted into
 
-```rs
+```rust
 let mut app = {
   #[allow(dead_code)]
   use smithy::types::Component;
