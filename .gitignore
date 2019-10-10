@@ -2,3 +2,5 @@ target
 .vscode
 *.swp
 Cargo.lock
+crates/smd_tests/target
+crates/smd_tests/Cargo.lock

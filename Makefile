@@ -22,3 +22,6 @@ clear-docs :
 upload-docs :
 	aws s3 sync ./target/doc s3://smithy-rs-site/docs/prod/current --cache-control max-age=0,no-cache --acl public-read
 	aws cloudfront create-invalidation  --distribution-id E1159YR865AV4M --paths "/*"
+
+watch-offline :
+	cargo watch -s 'make format' -x '+nightly build --offline'
