@@ -3,6 +3,7 @@
 mod basic_event_handler_tests;
 mod basic_post_rendering_tests;
 mod basic_rendering_tests;
+mod rsx_tests;
 
 // TODO figure out how to test handle_ref_assignment without erroring:
 // thread 'basic_ref_assignment_tests::tests::stuff' panicked at

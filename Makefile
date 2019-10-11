@@ -8,7 +8,7 @@ watch-test :
 	cargo watch -s 'make format' -s 'cd crates/smd_tests && cargo +nightly test'
 
 watch-test-nc :
-	cargo watch -s 'make format' -s 'cd crates/smd_tests && cargo +nightly test --features=cache-logs -- --nocapture'
+	cargo watch -s 'make format' -s 'cd crates/smd_tests && cargo +nightly test --offline --features=cache-logs --features=smd-logs -- --nocapture'
 
 watch-docs :
 	RUSTDOCFLAGS="-Z unstable-options --index-page $$(pwd)/index.md" cargo watch -s 'rm -f target/doc/index.html && cargo doc -p smithy --no-deps --all-features' -w ./crates/ -w ./index.md

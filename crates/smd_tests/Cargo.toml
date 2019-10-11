@@ -11,6 +11,7 @@ documentation = "https://docs.smithy.rs/smd_tests"
 
 [dependencies]
 smd_macro = { path = "../smd_macro", version = "0.0.7" }
+rsx_macro = { path = "../rsx_macro", version = "0.0.7" }
 smithy_types = { path = "../smithy_types", version = "0.0.7" }
 smithy = { path = "../smithy", version = "0.0.7" }
 wasm-bindgen = { version = "0.2.28", features = ["nightly"] }
@@ -22,3 +23,4 @@ members = ["."]
 
 [features]
 cache-logs = ["smd_macro/cache-logs"]
+smd-logs = ["smd_macro/smd-logs"]
