@@ -17,8 +17,10 @@ pub fn rsx_borrowed(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 fn rsx_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::TokenStream {
   let input: proc_macro2::TokenStream = input.into();
 
-  let a = parsers::parse_items(input).unwrap();
+  let (rest, parsed) = parsers::parse_items(input).unwrap();
+  let (rest, _) = crate::utils::ensure_consumed(rest).unwrap();
 
+  println!("parsed {:?}", parsed);
   // input.into()
   quote::quote!(3).into()
 }
