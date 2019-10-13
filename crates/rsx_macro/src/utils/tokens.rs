@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use proc_macro2::{
   Delimiter,
+  Ident,
+  Literal,
   Punct,
   Spacing,
 };
@@ -57,6 +59,20 @@ pub fn match_punct(
     },
     _ => Err(Err::Error(((), ErrorKind::IsA))),
   })
+}
+
+pub fn match_literal(input: TokenStream) -> TokenStreamIResult<Literal> {
+  match_single_tree(|t| match t {
+    TokenTree::Literal(lit) => Ok(((), lit.clone())),
+    _ => Err(Err::Error(((), ErrorKind::IsA))),
+  })(input)
+}
+
+pub fn match_ident(input: TokenStream) -> TokenStreamIResult<Ident> {
+  match_single_tree(|t| match t {
+    TokenTree::Ident(ident) => Ok(((), ident.clone())),
+    _ => Err(Err::Error(((), ErrorKind::IsA))),
+  })(input)
 }
 
 fn match_single_tree<T>(
