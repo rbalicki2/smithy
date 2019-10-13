@@ -45,9 +45,9 @@ fn get_window() -> Window {
   web_sys::window().unwrap()
 }
 
-fn render_initially(component: &mut Box<dyn Component>, el: &Box<dyn RenderingTarget>) {
+fn render_initially(component: &mut Box<dyn Component>, el: &mut Box<dyn RenderingTarget>) {
   let node: Vec<CollapsedNode> = component.render().into();
-  el.render(&node);
+  el.render(node.clone());
   LAST_RENDERED_NODE.store(node);
 }
 
@@ -92,7 +92,7 @@ pub fn rerender() {
   ROOT_COMPONENT.with_inner_value(|root_component| {
     let newly_rendered_nodes: Vec<CollapsedNode> = root_component.render().into();
     ROOT_ELEMENT.with_inner_value(|el| {
-      el.apply_diff(&newly_rendered_nodes);
+      el.apply_diff(newly_rendered_nodes.clone());
     });
 
     // LAST_RENDERED_NODE.with_inner_value(|last_rendered_node| {
@@ -136,8 +136,8 @@ pub fn rerender() {
 ///   smithy::mount(app, el);
 /// }
 /// ```
-pub fn mount(mut component: Box<dyn Component>, el: Box<dyn RenderingTarget>) {
-  render_initially(&mut component, &el);
+pub fn mount(mut component: Box<dyn Component>, mut el: Box<dyn RenderingTarget>) {
+  render_initially(&mut component, &mut el);
   el.attach_listeners();
   ROOT_ELEMENT.store(el);
   component.handle_ref_assignment(vec![]);
@@ -146,18 +146,18 @@ pub fn mount(mut component: Box<dyn Component>, el: Box<dyn RenderingTarget>) {
 }
 
 pub trait RenderingTarget {
-  fn render(&self, nodes: &Vec<CollapsedNode>);
-  fn apply_diff(&self, nodes: &Vec<CollapsedNode>);
+  fn render(&mut self, nodes: Vec<CollapsedNode>);
+  fn apply_diff(&mut self, nodes: Vec<CollapsedNode>);
   fn attach_listeners(&self);
 }
 
 impl RenderingTarget for Element {
-  fn render(&self, nodes: &Vec<CollapsedNode>) {
+  fn render(&mut self, nodes: Vec<CollapsedNode>) {
     let inner_html = nodes.as_inner_html();
     self.set_inner_html(&inner_html);
   }
 
-  fn apply_diff(&self, nodes: &Vec<CollapsedNode>) {}
+  fn apply_diff(&mut self, nodes: Vec<CollapsedNode>) {}
 
   fn attach_listeners(&self) {
     let html_el = unsafe { transmute::<&Element, &js_fns::HTMLElement>(self) };
