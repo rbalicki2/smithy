@@ -2,5 +2,5 @@
 fn basic_rsx_tests() {
   use rsx_macro::rsx;
 
-  let app = rsx![(div)(foo)];
+  let _app = rsx![(div), a + b, (div)];
 }
