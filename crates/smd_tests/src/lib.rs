@@ -1,8 +1,8 @@
 #![feature(proc_macro_hygiene, slice_patterns)]
 
-mod basic_event_handler_tests;
-mod basic_post_rendering_tests;
-mod basic_rendering_tests;
+// mod basic_event_handler_tests;
+// mod basic_post_rendering_tests;
+// mod basic_rendering_tests;
 mod rsx_tests;
 
 // TODO figure out how to test handle_ref_assignment without erroring:
