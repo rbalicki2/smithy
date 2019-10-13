@@ -1,7 +1,7 @@
 extern crate proc_macro;
 
 mod parsers;
-mod types;
+mod prelude;
 mod utils;
 
 #[proc_macro]

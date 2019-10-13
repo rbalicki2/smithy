@@ -64,7 +64,7 @@ fn foo() {
       (head [
         (meta { charset: "UTF-8"}),
         (title ["My Smithy App"]),
-      ])
+      ]),
       (body [
         (script { src: "./index.js" }),
         (script ["if (typeof wasm_bindgen !== 'undefined') { wasm_bindgen('./index_bg.wasm') }"]),
@@ -177,7 +177,7 @@ fn foo() {
           if let Some(input) = input_ref {
             input.set_value(val);
           }
-        })
+        }),
         with_ref_opt!(
           input_ref,
           (input {
@@ -222,6 +222,15 @@ fn foo() {
   ];
 
   let a = rsx![on_hash_change!(|_| val = "hash changed")];
+
+  let a = rsx![
+    (div {} {} [
+      with_ref!(my_ref, (div)),
+      my_ref_opt.map(|my_ref| with_ref!((div))),
+    ])
+  ];
+
+  let a = rsx!["asdf", (div), some_item];
 
   println!("A={}", a);
 }

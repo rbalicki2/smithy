@@ -1,14 +1,14 @@
-use crate::types::*;
+use crate::prelude::*;
 
 fn parse_macro_item(input: proc_macro2::TokenStream) -> TokenStreamIResult<TokenStream> {
   let (rest, group_contents) =
-    crate::utils::parse_group_with_delimiter(input, Some(proc_macro2::Delimiter::Parenthesis))?;
+    crate::utils::match_group_with_delimiter(proc_macro2::Delimiter::Parenthesis)(input)?;
   Ok((rest, group_contents))
 }
 
 fn parse_literal(input: proc_macro2::TokenStream) -> TokenStreamIResult<TokenStream> {
   let (rest, group_contents) =
-    crate::utils::parse_group_with_delimiter(input, Some(proc_macro2::Delimiter::Parenthesis))?;
+    crate::utils::match_group_with_delimiter(proc_macro2::Delimiter::Parenthesis)(input)?;
   Ok((rest, group_contents))
 }
 
