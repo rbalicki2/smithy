@@ -10,15 +10,15 @@ use nom::combinator::opt;
 use proc_macro2::Delimiter;
 
 #[derive(Debug, Clone)]
-pub enum RsxItem {
+pub enum RsxItemOrLiteral {
   Literal(TokenStream),
-  MacroItem(MacroItem),
+  Node(Node),
 }
 
 #[derive(Debug, Clone)]
-pub struct MacroItem {
+pub struct Node {
   node_type: TokenStreamOrString,
-  children: Vec<RsxItem>,
+  children: Vec<RsxItemOrLiteral>,
 }
 
 #[derive(Debug, Clone)]
@@ -55,14 +55,14 @@ fn parse_event_handler_group(input: TokenStream) -> TokenStreamIResult<TokenStre
   match_group_with_delimiter(Delimiter::Brace)(input)
 }
 
-fn parse_children_group(input: TokenStream) -> TokenStreamIResult<Vec<RsxItem>> {
+fn parse_children_group(input: TokenStream) -> TokenStreamIResult<Vec<RsxItemOrLiteral>> {
   let (rest, group_contents) = match_group_with_delimiter(Delimiter::Bracket)(input)?;
   let (inner_rest, vec) = parse_items(group_contents)?;
   ensure_consumed(inner_rest)?;
   Ok((rest, vec))
 }
 
-fn parse_macro_item_contents(input: TokenStream) -> TokenStreamIResult<MacroItem> {
+fn parse_macro_item_contents(input: TokenStream) -> TokenStreamIResult<Node> {
   let (rest, (node_type, attributes, event_handlers, children)) = nom::sequence::tuple((
     parse_node_type,
     opt(parse_attribute_group),
@@ -71,27 +71,33 @@ fn parse_macro_item_contents(input: TokenStream) -> TokenStreamIResult<MacroItem
   ))(input)?;
   Ok((
     rest,
-    MacroItem {
+    Node {
       node_type,
       children: children.unwrap_or(vec![]),
     },
   ))
 }
 
-fn parse_macro_item(input: TokenStream) -> TokenStreamIResult<RsxItem> {
+fn parse_macro_item(input: TokenStream) -> TokenStreamIResult<RsxItemOrLiteral> {
   let (rest, group_contents) =
     match_group_with_delimiter(proc_macro2::Delimiter::Parenthesis)(input)?;
   let (inner_rest, macro_item) = parse_macro_item_contents(group_contents)?;
   ensure_consumed(inner_rest)?;
-  Ok((rest, RsxItem::MacroItem(macro_item)))
+  Ok((rest, RsxItemOrLiteral::Node(macro_item)))
 }
 
-fn parse_literal(input: proc_macro2::TokenStream) -> TokenStreamIResult<RsxItem> {
-  crate::utils::take_until(crate::utils::match_punct(Some(','), None))(input)
-    .map(|(rest, parsed)| (rest, RsxItem::Literal(parsed.into_iter().collect())))
+fn parse_literal(input: proc_macro2::TokenStream) -> TokenStreamIResult<RsxItemOrLiteral> {
+  crate::utils::take_until(crate::utils::match_punct(Some(','), None))(input).map(
+    |(rest, parsed)| {
+      (
+        rest,
+        RsxItemOrLiteral::Literal(parsed.into_iter().collect()),
+      )
+    },
+  )
 }
 
-pub fn parse_items(input: proc_macro2::TokenStream) -> TokenStreamIResult<Vec<RsxItem>> {
+pub fn parse_items(input: proc_macro2::TokenStream) -> TokenStreamIResult<Vec<RsxItemOrLiteral>> {
   let (rest, parsed) = crate::utils::many_0_delimited(
     nom::branch::alt((parse_macro_item, parse_literal)),
     crate::utils::match_punct(Some(','), None),
