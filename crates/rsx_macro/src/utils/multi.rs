@@ -14,6 +14,7 @@ pub fn many_0<T>(
         Ok((i1, o)) => {
           // TODO I'm not sure if this block is necessary, but there was a similar
           // block in the original (nom) source code.
+          // N.B. this was *removed* from many_0_delimited and is probably not necessary
           let new_len = i1.to_tree_vec().len();
           if last_len == new_len {
             if acc.len() > 0 {
@@ -39,32 +40,18 @@ pub fn many_0_delimited<T, U>(
   // and the final comma will be consumed
   move |mut i: TokenStream| {
     let mut acc = vec![];
-    let mut last_len = i.to_tree_vec().len();
     loop {
       match f(i.clone()) {
         Err(Err::Error(_)) => return Ok((i, acc)),
-        Err(e) => return Err(e),
+        Err(e) => {
+          return Err(e);
+        },
         Ok((i1, o)) => {
-          // TODO I'm not sure if this block is necessary, but there was a similar
-          // block in the original (nom) source code.
-          let new_len = i1.to_tree_vec().len();
-          if last_len == new_len {
-            if acc.len() > 0 {
-              return Ok((i, acc));
-            }
-            return Err(Err::Error((i, ErrorKind::Many0)));
-          }
-          last_len = new_len;
-
           acc.push(o);
 
           match delim_f(i1) {
-            Err(Err::Error((rest, _e))) => {
-              return Ok((rest, acc));
-            },
-            Err(e) => {
-              return Err(e);
-            },
+            Err(Err::Error((rest, _e))) => return Ok((rest, acc)),
+            Err(e) => return Err(e),
             Ok((rest, _delim)) => {
               i = rest;
             },
@@ -96,7 +83,9 @@ pub fn take_until<T>(
             },
           }
         },
-        Err(e) => return Err(e),
+        Err(e) => {
+          return Err(e);
+        },
         Ok((_rest, _parsed)) => {
           // We matched the "until" case, so we succeed with acc as it currently
           // is. What we matched on the until case remains in the queue.
