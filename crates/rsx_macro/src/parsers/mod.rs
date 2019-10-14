@@ -18,6 +18,7 @@ pub enum RsxItem {
 #[derive(Debug, Clone)]
 pub struct MacroItem {
   node_type: TokenStreamOrString,
+  children: Vec<RsxItem>,
 }
 
 #[derive(Debug, Clone)]
@@ -62,7 +63,7 @@ fn parse_children_group(input: TokenStream) -> TokenStreamIResult<Vec<RsxItem>> 
 }
 
 fn parse_macro_item_contents(input: TokenStream) -> TokenStreamIResult<MacroItem> {
-  let (rest, result) = nom::sequence::tuple((
+  let (rest, (node_type, attributes, event_handlers, children)) = nom::sequence::tuple((
     parse_node_type,
     opt(parse_attribute_group),
     opt(parse_event_handler_group),
@@ -71,7 +72,8 @@ fn parse_macro_item_contents(input: TokenStream) -> TokenStreamIResult<MacroItem
   Ok((
     rest,
     MacroItem {
-      node_type: result.0,
+      node_type,
+      children: children.unwrap_or(vec![]),
     },
   ))
 }

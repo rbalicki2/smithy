@@ -82,7 +82,7 @@ pub fn take_until<T>(
     let mut acc = vec![];
     loop {
       match until(i.clone()) {
-        Err(Err::Error((rest, err))) => {
+        Err(Err::Error((rest, _err))) => {
           // We encountered an error, push the item onto acc and continue.
           match rest.to_tree_vec().split_first() {
             Some((first, rest)) => {
