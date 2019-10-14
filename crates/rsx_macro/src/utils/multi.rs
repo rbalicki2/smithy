@@ -65,9 +65,12 @@ pub fn many_0_delimited<T, U>(
 pub fn take_until<T>(
   until: impl Fn(TokenStream) -> TokenStreamIResult<T>,
 ) -> impl Fn(TokenStream) -> TokenStreamIResult<Vec<TokenTree>> {
+  // TODO this function does not work as it is supposed to
   move |mut i: TokenStream| {
     let mut acc = vec![];
+    let mut count = 0;
     loop {
+      count += 1;
       match until(i.clone()) {
         Err(Err::Error((rest, _err))) => {
           // We encountered an error, push the item onto acc and continue.

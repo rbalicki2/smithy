@@ -86,8 +86,8 @@ fn match_single_tree<T>(
         match f(first) {
           Ok((_rest, matched)) => Ok((rest, matched)),
           Err(e) => match e {
-            Err::Error((_rest, err)) => Err(Err::Error((rest, err))),
-            Err::Failure((_rest, err)) => Err(Err::Failure((rest, err))),
+            Err::Error((_rest, err)) => Err(Err::Error((input, err))),
+            Err::Failure((_rest, err)) => Err(Err::Failure((input, err))),
             Err::Incomplete(e) => Err(Err::Incomplete(e)),
           },
         }
