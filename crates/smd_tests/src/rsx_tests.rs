@@ -2,5 +2,5 @@
 fn basic_rsx_tests() {
   use rsx_macro::rsx;
 
-  let _app = rsx![(asdafa { a: 123 })];
+  let app = rsx![(div { readonly, ...foo } {})];
 }

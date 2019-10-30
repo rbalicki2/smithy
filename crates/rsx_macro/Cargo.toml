@@ -14,7 +14,7 @@ documentation = "https://docs.smithy.rs/rsx_macro"
 [dependencies]
 smithy_types = { path = "../smithy_types", version = "0.0.7" }
 proc-macro2 = { version = "1.0.5", features = ["span-locations"] }
-quote = "0.6.10"
+quote = "1.0"
 nom = "5.0.1"
 lazy_static = "1.2.0"
 serde = "1.0.94"

@@ -3,9 +3,12 @@ use rsx_macro::rsx;
 #[test]
 fn foo() {
   // static tag name
+  // (div)
   // dynamic tag name
+  // ({ div_tag })
 
   // tag w/empty attributes
+  // (div {})
   // tag w/static attributes
   // tag w/static attribute keys and dynamic attribute values
   // tag w/dynamic attribute keys and static attribute values
@@ -230,6 +233,11 @@ fn foo() {
     ])
   ];
 
+  let a = rsx![div];
+  let a = rsx![(div)];
+  // if the entire item is enclosed in parens, it will be treated
+  // as a node
+  let a = rsx![(a + b) * c];
   let a = rsx!["asdf", (div), some_item];
 
   println!("A={}", a);

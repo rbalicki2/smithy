@@ -12,7 +12,10 @@ use nom::{
   combinator::opt,
   sequence::tuple,
 };
-use proc_macro2::Delimiter;
+use proc_macro2::{
+  Delimiter,
+  Spacing,
+};
 
 #[derive(Debug, Clone)]
 pub enum RsxItemOrLiteral {
@@ -64,7 +67,6 @@ fn parse_token_stream_or_string(input: TokenStream) -> TokenStreamIResult<TokenS
 }
 
 fn match_attribute_assignment(input: TokenStream) -> TokenStreamIResult<AttributeInstruction> {
-  // TODO here
   let (rest, items) = tuple((
     parse_token_stream_or_string,
     match_punct(Some(':'), None),
@@ -72,20 +74,41 @@ fn match_attribute_assignment(input: TokenStream) -> TokenStreamIResult<Attribut
   ))(input)?;
   Ok((
     rest,
-    AttributeInstruction::Assign(items.0, items.2.iter().map(|x| x.clone()).collect()),
+    AttributeInstruction::Assign(items.0, items.2.into_iter().collect()),
+  ))
+}
+
+fn match_solo_attribute(input: TokenStream) -> TokenStreamIResult<AttributeInstruction> {
+  let (rest, solo_attribute) = parse_token_stream_or_string(input)?;
+  Ok((
+    rest,
+    AttributeInstruction::Assign(solo_attribute, quote::quote!("true")),
   ))
 }
 
 fn match_attribute_explosion(input: TokenStream) -> TokenStreamIResult<AttributeInstruction> {
-  // TODO work here!
-  unimplemented!()
+  let (rest, parsed) = tuple((
+    match_punct(Some('.'), Some(Spacing::Joint)),
+    match_punct(Some('.'), Some(Spacing::Joint)),
+    match_punct(Some('.'), Some(Spacing::Alone)),
+    take_until_comma,
+  ))(input)?;
+
+  Ok((
+    rest,
+    AttributeInstruction::Explode(parsed.3.into_iter().collect()),
+  ))
 }
 
 fn parse_attribute_group_contents(
   input: TokenStream,
 ) -> TokenStreamIResult<Vec<AttributeInstruction>> {
   many_0_delimited(
-    alt((match_attribute_assignment, match_attribute_explosion)),
+    alt((
+      match_attribute_assignment,
+      match_solo_attribute,
+      match_attribute_explosion,
+    )),
     match_punct(Some(','), None),
   )(input)
 }
@@ -93,9 +116,7 @@ fn parse_attribute_group_contents(
 fn parse_attribute_group(input: TokenStream) -> TokenStreamIResult<Vec<AttributeInstruction>> {
   let (rest, contents) = match_group_with_delimiter(Delimiter::Brace)(input)?;
   let (inner_rest, attribute_vec) = parse_attribute_group_contents(contents)?;
-  ensure_consumed(inner_rest)?;
-
-  Ok((rest, attribute_vec))
+  crate::utils::ensure2(inner_rest, rest, attribute_vec)
 }
 
 fn parse_event_handler_group(input: TokenStream) -> TokenStreamIResult<TokenStream> {
@@ -127,11 +148,9 @@ fn parse_macro_item_contents(input: TokenStream) -> TokenStreamIResult<Node> {
 }
 
 fn parse_macro_item(input: TokenStream) -> TokenStreamIResult<RsxItemOrLiteral> {
-  let (rest, group_contents) =
-    match_group_with_delimiter(proc_macro2::Delimiter::Parenthesis)(input)?;
+  let (rest, group_contents) = match_group_with_delimiter(Delimiter::Parenthesis)(input)?;
   let (inner_rest, macro_item) = parse_macro_item_contents(group_contents)?;
-  ensure_consumed(inner_rest)?;
-  Ok((rest, RsxItemOrLiteral::Node(macro_item)))
+  crate::utils::ensure2(inner_rest, rest, RsxItemOrLiteral::Node(macro_item))
 }
 
 fn take_until_comma(input: TokenStream) -> TokenStreamIResult<Vec<TokenTree>> {
@@ -139,13 +158,20 @@ fn take_until_comma(input: TokenStream) -> TokenStreamIResult<Vec<TokenTree>> {
   Ok((rest, parsed))
 }
 
+fn is_group(item: &TokenTree) -> bool {
+  match item {
+    TokenTree::Group(_) => true,
+    _ => false,
+  }
+}
+
 fn parse_literal(input: TokenStream) -> TokenStreamIResult<RsxItemOrLiteral> {
-  take_until_comma(input).map(|(rest, parsed)| {
-    (
-      rest,
-      RsxItemOrLiteral::Literal(parsed.into_iter().collect()),
-    )
-  })
+  let (rest, val) = take_until_comma(input.clone())?;
+  if val.len() == 1 && is_group(val.get(0).unwrap()) {
+    Err(Err::Error((input, ErrorKind::TakeTill1)))
+  } else {
+    Ok((rest, RsxItemOrLiteral::Literal(val.into_iter().collect())))
+  }
 }
 
 pub fn parse_items(input: TokenStream) -> TokenStreamIResult<Vec<RsxItemOrLiteral>> {

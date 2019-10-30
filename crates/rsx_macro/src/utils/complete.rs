@@ -7,3 +7,12 @@ pub fn ensure_consumed(rest: TokenStream) -> TokenStreamIResult<()> {
     Ok((rest, ()))
   }
 }
+
+// TODO rename
+pub fn ensure2<T>(rest: TokenStream, real_rest: TokenStream, t: T) -> TokenStreamIResult<T> {
+  if !rest.is_empty() {
+    Err(Err::Error((real_rest, ErrorKind::TakeTill1)))
+  } else {
+    Ok((real_rest, t))
+  }
+}

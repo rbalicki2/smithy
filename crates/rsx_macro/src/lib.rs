@@ -18,9 +18,10 @@ fn rsx_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::T
   let input: proc_macro2::TokenStream = input.into();
 
   let (rest, parsed) = parsers::parse_items(input).unwrap();
+  println!("final rest '{}'", rest);
   let _ = crate::utils::ensure_consumed(rest).unwrap();
 
-  println!("parsed\n{:?}", parsed);
+  println!("final rsx parsed into\n{:?}", parsed);
   // input.into()
   quote::quote!(3).into()
 }
