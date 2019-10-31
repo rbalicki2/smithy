@@ -45,7 +45,7 @@ fn foo() {
       // event handlers
       { on_click: |_| {}, on_mouse_over: handler, {handler_name}: byah }
       [
-        (div)
+        (div),
         {component}
       ]
     )

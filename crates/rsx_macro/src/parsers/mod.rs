@@ -20,20 +20,23 @@ use proc_macro2::{
 #[derive(Debug, Clone)]
 pub enum RsxItemOrLiteral {
   Literal(TokenStream),
-  Node(Node),
+  Node(NodeConstructionInstructions),
 }
 
 #[derive(Debug, Clone)]
-pub struct Node {
+pub struct NodeConstructionInstructions {
   node_type: TokenStreamOrString,
   children: Vec<RsxItemOrLiteral>,
   attribute_instructions: Vec<AttributeInstruction>,
+  event_handler_instructions: Vec<AssignmentInstruction>,
 }
+
+pub type AssignmentInstruction = (TokenStreamOrString, TokenStream);
 
 #[derive(Debug, Clone)]
 pub enum AttributeInstruction {
   Explode(TokenStream),
-  Assign(TokenStreamOrString, TokenStream),
+  Assign(AssignmentInstruction),
 }
 
 #[derive(Debug, Clone)]
@@ -74,7 +77,7 @@ fn match_attribute_assignment(input: TokenStream) -> TokenStreamIResult<Attribut
   ))(input)?;
   Ok((
     rest,
-    AttributeInstruction::Assign(items.0, items.2.into_iter().collect()),
+    AttributeInstruction::Assign((items.0, items.2.into_iter().collect())),
   ))
 }
 
@@ -82,7 +85,7 @@ fn match_solo_attribute(input: TokenStream) -> TokenStreamIResult<AttributeInstr
   let (rest, solo_attribute) = parse_token_stream_or_string(input)?;
   Ok((
     rest,
-    AttributeInstruction::Assign(solo_attribute, quote::quote!("true")),
+    AttributeInstruction::Assign((solo_attribute, quote::quote!(true))),
   ))
 }
 
@@ -130,7 +133,9 @@ fn parse_children_group(input: TokenStream) -> TokenStreamIResult<Vec<RsxItemOrL
   Ok((rest, vec))
 }
 
-fn parse_macro_item_contents(input: TokenStream) -> TokenStreamIResult<Node> {
+fn parse_macro_item_contents(
+  input: TokenStream,
+) -> TokenStreamIResult<NodeConstructionInstructions> {
   let (rest, (node_type, attribute_instructions, event_handlers, children)) = tuple((
     parse_node_type,
     opt(parse_attribute_group),
@@ -139,10 +144,11 @@ fn parse_macro_item_contents(input: TokenStream) -> TokenStreamIResult<Node> {
   ))(input)?;
   Ok((
     rest,
-    Node {
+    NodeConstructionInstructions {
       node_type,
       children: children.unwrap_or(vec![]),
       attribute_instructions: attribute_instructions.unwrap_or(vec![]),
+      event_handler_instructions: vec![],
     },
   ))
 }
@@ -158,16 +164,16 @@ fn take_until_comma(input: TokenStream) -> TokenStreamIResult<Vec<TokenTree>> {
   Ok((rest, parsed))
 }
 
-fn is_group(item: &TokenTree) -> bool {
+fn is_group(item: &TokenTree, delimiter: Option<Delimiter>) -> bool {
   match item {
-    TokenTree::Group(_) => true,
+    TokenTree::Group(g) => delimiter.map(|d| g.delimiter() == d).unwrap_or(true),
     _ => false,
   }
 }
 
 fn parse_literal(input: TokenStream) -> TokenStreamIResult<RsxItemOrLiteral> {
   let (rest, val) = take_until_comma(input.clone())?;
-  if val.len() == 1 && is_group(val.get(0).unwrap()) {
+  if val.len() == 1 && is_group(val.get(0).unwrap(), Some(Delimiter::Parenthesis)) {
     Err(Err::Error((input, ErrorKind::TakeTill1)))
   } else {
     Ok((rest, RsxItemOrLiteral::Literal(val.into_iter().collect())))
