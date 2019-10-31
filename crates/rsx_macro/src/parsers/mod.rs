@@ -69,16 +69,18 @@ fn parse_token_stream_or_string(input: TokenStream) -> TokenStreamIResult<TokenS
   ))(input)
 }
 
-fn match_attribute_assignment(input: TokenStream) -> TokenStreamIResult<AttributeInstruction> {
-  let (rest, items) = tuple((
+fn match_assignment(input: TokenStream) -> TokenStreamIResult<AssignmentInstruction> {
+  let (rest, val) = tuple((
     parse_token_stream_or_string,
     match_punct(Some(':'), None),
     take_until_comma,
   ))(input)?;
-  Ok((
-    rest,
-    AttributeInstruction::Assign((items.0, items.2.into_iter().collect())),
-  ))
+  Ok((rest, (val.0, val.2.into_iter().collect())))
+}
+
+fn match_attribute_assignment(input: TokenStream) -> TokenStreamIResult<AttributeInstruction> {
+  let (rest, assignment) = match_assignment(input)?;
+  Ok((rest, AttributeInstruction::Assign(assignment)))
 }
 
 fn match_solo_attribute(input: TokenStream) -> TokenStreamIResult<AttributeInstruction> {
@@ -122,8 +124,17 @@ fn parse_attribute_group(input: TokenStream) -> TokenStreamIResult<Vec<Attribute
   crate::utils::ensure2(inner_rest, rest, attribute_vec)
 }
 
-fn parse_event_handler_group(input: TokenStream) -> TokenStreamIResult<TokenStream> {
-  match_group_with_delimiter(Delimiter::Brace)(input)
+fn parse_event_handler_group_contents(
+  input: TokenStream,
+) -> TokenStreamIResult<Vec<AssignmentInstruction>> {
+  many_0_delimited(match_assignment, match_punct(Some(','), None))(input)
+}
+
+fn parse_event_handler_group(input: TokenStream) -> TokenStreamIResult<Vec<AssignmentInstruction>> {
+  let (rest, contents) = match_group_with_delimiter(Delimiter::Brace)(input)?;
+  let (inner_rest, event_handler_assignment_instruction_vec) =
+    parse_event_handler_group_contents(contents)?;
+  crate::utils::ensure2(inner_rest, rest, event_handler_assignment_instruction_vec)
 }
 
 fn parse_children_group(input: TokenStream) -> TokenStreamIResult<Vec<RsxItemOrLiteral>> {
@@ -148,7 +159,7 @@ fn parse_macro_item_contents(
       node_type,
       children: children.unwrap_or(vec![]),
       attribute_instructions: attribute_instructions.unwrap_or(vec![]),
-      event_handler_instructions: vec![],
+      event_handler_instructions: event_handlers.unwrap_or(vec![]),
     },
   ))
 }
