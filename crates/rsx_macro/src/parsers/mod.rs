@@ -4,6 +4,7 @@ use crate::{
     ensure_consumed,
     many_0_delimited,
     match_group_with_delimiter,
+    match_ident,
     match_punct,
   },
 };
@@ -25,24 +26,32 @@ pub enum RsxItemOrLiteral {
 
 #[derive(Debug, Clone)]
 pub struct NodeConstructionInstructions {
-  node_type: TokenStreamOrString,
-  children: Vec<RsxItemOrLiteral>,
-  attribute_instructions: Vec<AttributeInstruction>,
-  event_handler_instructions: Vec<AssignmentInstruction>,
+  pub node_type: TokenStreamOrString,
+  pub children: Vec<RsxItemOrLiteral>,
+  pub attribute_instructions: Vec<AttributeInstruction>,
+  pub event_handler_instructions: Vec<(String, TokenStream)>,
 }
-
-pub type AssignmentInstruction = (TokenStreamOrString, TokenStream);
 
 #[derive(Debug, Clone)]
 pub enum AttributeInstruction {
   Explode(TokenStream),
-  Assign(AssignmentInstruction),
+  Assign(TokenStreamOrString, TokenStream),
 }
 
 #[derive(Debug, Clone)]
 pub enum TokenStreamOrString {
   String(String),
   TokenStream(TokenStream),
+}
+
+impl TokenStreamOrString {
+  pub fn to_token_stream(&self) -> TokenStream {
+    match self {
+      TokenStreamOrString::String(s) => quote::quote!(#s),
+      // TODO this seems fishy that we need to clone
+      TokenStreamOrString::TokenStream(token_stream) => token_stream.clone(),
+    }
+  }
 }
 
 // match:
@@ -58,9 +67,9 @@ fn parse_node_type(input: TokenStream) -> TokenStreamIResult<TokenStreamOrString
 fn parse_token_stream_or_string(input: TokenStream) -> TokenStreamIResult<TokenStreamOrString> {
   alt((
     // TODO don't just match a single ident. Instead, match adjacent idents and puncts.
+    // e.g. data-name
     |input| {
-      crate::utils::match_ident(input)
-        .map(|(rest, ident)| (rest, TokenStreamOrString::String(ident.to_string())))
+      match_ident(input).map(|(rest, ident)| (rest, TokenStreamOrString::String(ident.to_string())))
     },
     |input| {
       match_group_with_delimiter(Delimiter::Brace)(input)
@@ -69,25 +78,23 @@ fn parse_token_stream_or_string(input: TokenStream) -> TokenStreamIResult<TokenS
   ))(input)
 }
 
-fn match_assignment(input: TokenStream) -> TokenStreamIResult<AssignmentInstruction> {
-  let (rest, val) = tuple((
+fn match_attribute_assignment(input: TokenStream) -> TokenStreamIResult<AttributeInstruction> {
+  let (rest, items) = tuple((
     parse_token_stream_or_string,
     match_punct(Some(':'), None),
     take_until_comma,
   ))(input)?;
-  Ok((rest, (val.0, val.2.into_iter().collect())))
-}
-
-fn match_attribute_assignment(input: TokenStream) -> TokenStreamIResult<AttributeInstruction> {
-  let (rest, assignment) = match_assignment(input)?;
-  Ok((rest, AttributeInstruction::Assign(assignment)))
+  Ok((
+    rest,
+    AttributeInstruction::Assign(items.0, items.2.into_iter().collect()),
+  ))
 }
 
 fn match_solo_attribute(input: TokenStream) -> TokenStreamIResult<AttributeInstruction> {
   let (rest, solo_attribute) = parse_token_stream_or_string(input)?;
   Ok((
     rest,
-    AttributeInstruction::Assign((solo_attribute, quote::quote!(true))),
+    AttributeInstruction::Assign(solo_attribute, quote::quote!(true)),
   ))
 }
 
@@ -124,13 +131,18 @@ fn parse_attribute_group(input: TokenStream) -> TokenStreamIResult<Vec<Attribute
   crate::utils::ensure2(inner_rest, rest, attribute_vec)
 }
 
-fn parse_event_handler_group_contents(
-  input: TokenStream,
-) -> TokenStreamIResult<Vec<AssignmentInstruction>> {
-  many_0_delimited(match_assignment, match_punct(Some(','), None))(input)
+fn match_event_handler_assignment(input: TokenStream) -> TokenStreamIResult<(String, TokenStream)> {
+  let (rest, val) = tuple((match_ident, match_punct(Some(':'), None), take_until_comma))(input)?;
+  Ok((rest, (val.0.to_string(), val.2.into_iter().collect())))
 }
 
-fn parse_event_handler_group(input: TokenStream) -> TokenStreamIResult<Vec<AssignmentInstruction>> {
+fn parse_event_handler_group_contents(
+  input: TokenStream,
+) -> TokenStreamIResult<Vec<(String, TokenStream)>> {
+  many_0_delimited(match_event_handler_assignment, match_punct(Some(','), None))(input)
+}
+
+fn parse_event_handler_group(input: TokenStream) -> TokenStreamIResult<Vec<(String, TokenStream)>> {
   let (rest, contents) = match_group_with_delimiter(Delimiter::Brace)(input)?;
   let (inner_rest, event_handler_assignment_instruction_vec) =
     parse_event_handler_group_contents(contents)?;
@@ -157,9 +169,9 @@ fn parse_macro_item_contents(
     rest,
     NodeConstructionInstructions {
       node_type,
-      children: children.unwrap_or(vec![]),
       attribute_instructions: attribute_instructions.unwrap_or(vec![]),
       event_handler_instructions: event_handlers.unwrap_or(vec![]),
+      children: children.unwrap_or(vec![]),
     },
   ))
 }

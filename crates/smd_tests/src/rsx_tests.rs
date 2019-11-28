@@ -16,5 +16,18 @@ fn basic_rsx_tests() {
   // rsx![(div {} {})];
   // rsx![(div { {attr}})];
   // rsx![(div { {attr}: true })];
-  rsx![(div {} { on_click: |_| i += 1 })];
+  // let mut other_attributes = std::collections::HashMap::new();
+  // other_attributes.insert("A", "B");
+  // let attr_key = "key";
+  // let attr_val = "val";
+  let mut result = rsx![
+    (div {} {
+      on_click: { |_| println!("ASFASFDFDA") }
+    })
+  ];
+
+  use smithy::types::Component as _;
+  let component = result.render();
+  println!("rendered {:?}", component);
+  // rsx![(div[1 + 3, 4+6])];
 }

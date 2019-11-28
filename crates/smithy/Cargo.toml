@@ -13,6 +13,7 @@ documentation = "https://docs.smithy.rs/smithy"
 
 [dependencies]
 smd_macro = { path = "../smd_macro", version = "0.0.7" }
+rsx_macro = { path = "../rsx_macro", version = "0.0.7" }
 smithy_core = { path = "../smithy_core", version = "0.0.7" }
 smithy_types = { path = "../smithy_types", version = "0.0.7" }
 

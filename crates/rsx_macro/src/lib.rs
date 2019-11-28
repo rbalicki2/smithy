@@ -1,5 +1,6 @@
 extern crate proc_macro;
 
+mod convert_to_component;
 mod parsers;
 mod prelude;
 mod utils;
@@ -22,7 +23,10 @@ fn rsx_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::T
   println!("final rest (should be empty to not panic) '{}'", rest);
   let _ = crate::utils::ensure_consumed(rest).unwrap();
 
-  println!("final rsx parsed into\n{:#?}", parsed);
+  // println!("final rsx parsed into\n{:#?}", parsed);
+
+  let converted = convert_to_component::convert_to_component(parsed, should_move);
+  println!("converted to\n{}", converted);
   // input.into()
-  quote::quote!(3).into()
+  converted.into()
 }

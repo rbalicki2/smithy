@@ -56,7 +56,7 @@ fn foo() {
       "come to ",
       (b ["google"]),
       (if { true } {}),
-      (hr + 3),
+      hr + 3,
       some_text,
       some_fn(&mut some_var)
     ])
