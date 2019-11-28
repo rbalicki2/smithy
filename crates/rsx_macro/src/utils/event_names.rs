@@ -1,3 +1,8 @@
+// TODO this is a copy of the same file from smd_macro... it should
+// be moved to smithy_types or a separate crate
+//
+// But also, we should think about how to make Smithy generic over this.
+
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 // see attributes.rs for an explanation
@@ -41,7 +46,7 @@ lazy_static! {
       event_names.insert("on_submit".into(), ("OnSubmit".into(), false));
     }
     // --Mouse
-    #[cfg(feature = "mouse-events")]
+    // #[cfg(feature = "mouse-events")]
     {
       event_names.insert("on_click".into(), ("OnClick".into(), true));
       event_names.insert("on_context_menu".into(), ("OnContextMenu".into(), true));

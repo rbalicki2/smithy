@@ -129,7 +129,7 @@ pub enum UiEvent {
   /// ```
   ///
   /// Requires the `mouse-events` feature.
-  #[cfg(feature = "mouse-events")]
+  // #[cfg(feature = "mouse-events")]
   OnClick(web_sys::MouseEvent),
   /// Usage:
   /// ```rs

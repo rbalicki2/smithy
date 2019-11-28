@@ -1,10 +1,18 @@
 use crate::prelude::*;
 use quote::quote;
 
-use crate::parsers::{
-  AttributeInstruction,
-  RsxItemOrLiteral,
+use crate::{
+  parsers::{
+    AttributeInstruction,
+    RsxItemOrLiteral,
+  },
+  utils::event_names,
 };
+use proc_macro2::{
+  Ident,
+  Span,
+};
+
 type ParsedOutput = Vec<RsxItemOrLiteral>;
 
 pub fn convert_to_component(parsed_output: ParsedOutput, should_move: bool) -> TokenStream {
@@ -21,12 +29,97 @@ fn get_match_statement(
   phase_variable_name: &TokenStream,
 ) -> TokenStream {
   let rendering_result = get_rendering_result(&parsed_output);
+  let ui_event_handling_result = get_ui_event_handling_result(&parsed_output);
   quote!(
     match #phase_variable_name {
       ::smithy::types::Phase::Rendering => #rendering_result,
+      ::smithy::types::Phase::UiEventHandling(ui_event_handling) => {
+        #ui_event_handling_result
+      },
+      // this is for post-render, window event handling and ref assignment phases
+      // TODO PhaseResult::Ignored
       _ => ::smithy::types::PhaseResult::UiEventHandling(false)
     }
   )
+}
+
+fn get_ui_event_handling_result(parsed_output: &ParsedOutput) -> TokenStream {
+  let result = get_ui_event_handling_result_inner(parsed_output, &vec![]);
+
+  quote!(match ui_event_handling {
+    #result
+    _ => ::smithy::types::PhaseResult::UiEventHandling(false),
+  })
+}
+
+fn join(path: &Vec<usize>, next: usize) -> Vec<usize> {
+  let mut path = path.clone();
+  path.push(next);
+  path
+}
+
+fn quotify_path(path: &Vec<usize>, include_rest_param: bool) -> TokenStream {
+  let inner = path.iter().fold(quote! {}, |accum, path_item| {
+    quote! { #accum #path_item, }
+  });
+  let additional_dot_dot = if include_rest_param {
+    quote! { rest @ .. }
+  } else {
+    quote! {}
+  };
+  quote! {
+    [ #inner #additional_dot_dot ]
+  }
+}
+
+fn get_ui_event_handling_result_inner(
+  parsed_output: &ParsedOutput,
+  path_so_far: &Vec<usize>,
+) -> TokenStream {
+  parsed_output
+    .iter()
+    .enumerate()
+    .fold(quote!(), |match_arms, (i, current)| {
+      let joined_path = join(path_so_far, i);
+      let result = match current {
+        RsxItemOrLiteral::Literal(token_stream) => unimplemented!(),
+        RsxItemOrLiteral::Node(node) => {
+          let current_match_arms = node.event_handler_instructions.iter().fold(
+            quote!(),
+            |match_arms, (event_name, callback)| {
+              // TODO what is should_include_rest? Should it be include_rest_param?
+              let (enum_event_name, should_include_rest) =
+                event_names::UI_EVENT_NAMES.get(event_name).expect(&format!(
+                  "rsx compilation error: event handler not recognized: {}",
+                  event_name
+                ));
+              let event = Ident::new(&enum_event_name, Span::call_site());
+              let path = quotify_path(&joined_path, false);
+
+              // TODO use opaque name for js_event, ui_event_handling, etc.
+              quote!(
+                #match_arms
+                (::smithy::types::UiEvent::#event(js_event), #path) => {
+                  // TODO explore why the following doesn't work:
+                  // let cb = |_| {};
+                  // rsx![(div {} { on_click: cb })]
+                  // N.B. annotating the parameter type to cb fixes it.
+                  (#callback)(js_event);
+                  ::smithy::types::PhaseResult::UiEventHandling(true)
+                },
+              )
+            },
+          );
+          let children_match_arms =
+            get_ui_event_handling_result_inner(&node.children, &joined_path);
+          quote!(
+            #current_match_arms
+            #children_match_arms
+          )
+        },
+      };
+      quote!(#match_arms #result)
+    })
 }
 
 fn get_attributes_token_stream(attribute_instructions: &Vec<AttributeInstruction>) -> TokenStream {
