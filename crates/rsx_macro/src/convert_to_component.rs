@@ -17,7 +17,7 @@ type ParsedOutput = Vec<RsxItemOrLiteral>;
 
 pub fn convert_to_component(parsed_output: ParsedOutput, should_move: bool) -> TokenStream {
   let parsed_output = dbg!(parsed_output);
-  // TODO figure out how to get this to be an opaque variable name
+  // TODO use Span::def_site() for phase_variable_name
   let phase_variable_name = quote!(phase);
   let match_statement = get_match_statement(&parsed_output, &phase_variable_name);
   outer_wrap(match_statement, should_move, &phase_variable_name)
@@ -82,7 +82,14 @@ fn get_ui_event_handling_result_inner(
     .fold(quote!(), |match_arms, (i, current)| {
       let joined_path = join(path_so_far, i);
       let result = match current {
-        RsxItemOrLiteral::Literal(token_stream) => unimplemented!(),
+        RsxItemOrLiteral::Literal(token_stream) => {
+          let path = quotify_path(&joined_path, true);
+          quote!(
+            (event, #path) => smithy::types::PhaseResult::UiEventHandling(
+              #token_stream.handle_ui_event(event, rest)
+            ),
+          )
+        },
         RsxItemOrLiteral::Node(node) => {
           let current_match_arms = node.event_handler_instructions.iter().fold(
             quote!(),
@@ -96,7 +103,7 @@ fn get_ui_event_handling_result_inner(
               let event = Ident::new(&enum_event_name, Span::call_site());
               let path = quotify_path(&joined_path, false);
 
-              // TODO use opaque name for js_event, ui_event_handling, etc.
+              // TODO use Span::def_site() for js_event, ui_event_handling, etc.
               quote!(
                 #match_arms
                 (::smithy::types::UiEvent::#event(js_event), #path) => {

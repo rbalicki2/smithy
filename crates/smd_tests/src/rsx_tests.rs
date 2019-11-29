@@ -23,14 +23,7 @@ fn basic_rsx_tests() {
 
   let cb = |_: &bool| println!("byahhhh");
   let cb2 = |_: &bool| println!("byahhhh");
-  let mut result = rsx![
-    (div {} {
-      on_test: cb
-    } [(inner {} {
-      on_test: cb2
-    })]),
-    (span {} { on_test: cb })
-  ];
+  let mut result = rsx![{ 123 }];
 
   use smithy::types::Component as _;
   let component = result.render();
