@@ -176,13 +176,18 @@ fn parse_macro_item_contents(
   ))
 }
 
-fn parse_macro_item(input: TokenStream) -> TokenStreamIResult<RsxItemOrLiteral> {
+pub fn parse_macro_item(input: TokenStream) -> TokenStreamIResult<RsxItemOrLiteral> {
   let (rest, group_contents) = match_group_with_delimiter(Delimiter::Parenthesis)(input)?;
   let (inner_rest, macro_item) = parse_macro_item_contents(group_contents)?;
   crate::utils::ensure2(inner_rest, rest, RsxItemOrLiteral::Node(macro_item))
 }
 
-fn take_until_comma(input: TokenStream) -> TokenStreamIResult<Vec<TokenTree>> {
+// N.B. this is *broken*! In most cases, a statement with a top-level comma
+// (i.e. one that's not in a group)
+// will actually be multiple statements, but not in the case of
+// X::<T1, T2>().
+// TODO explore if syn has "parse statement" style matchers.
+pub fn take_until_comma(input: TokenStream) -> TokenStreamIResult<Vec<TokenTree>> {
   let (rest, parsed) = crate::utils::take_until(match_punct(Some(','), None))(input)?;
   Ok((rest, parsed))
 }

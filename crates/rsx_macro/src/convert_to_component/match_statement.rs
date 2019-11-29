@@ -27,6 +27,7 @@ pub fn get_match_arms(parsed_output: &ParsedOutput) -> TokenStream {
     ::smithy::types::Phase::UiEventHandling(ui_event_handling) =>
       #ui_event_handling_result,
     ::smithy::types::Phase::PostRendering => #post_rendering_result,
+    // TODO pass ref assignment to interpolated items
   )
 }
 
@@ -39,7 +40,7 @@ fn get_ui_event_handling_result(parsed_output: &ParsedOutput) -> TokenStream {
   })
 }
 
-fn join(path: &Vec<usize>, next: usize) -> Vec<usize> {
+pub fn join(path: &Vec<usize>, next: usize) -> Vec<usize> {
   let mut path = path.clone();
   path.push(next);
   path

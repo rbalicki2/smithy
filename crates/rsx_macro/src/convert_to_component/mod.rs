@@ -1,4 +1,4 @@
-mod match_statement;
+pub mod match_statement;
 
 use crate::prelude::*;
 use quote::quote;
@@ -8,7 +8,6 @@ use crate::parsers::RsxItemOrLiteral;
 type ParsedOutput = Vec<RsxItemOrLiteral>;
 
 pub fn convert_to_component(parsed_output: ParsedOutput, should_move: bool) -> TokenStream {
-  let parsed_output = dbg!(parsed_output);
   // TODO use Span::def_site() for phase_variable_name
   // as well as for ::smithy
   let match_arms = match_statement::get_match_arms(&parsed_output);
