@@ -168,6 +168,7 @@ pub enum PhaseResult {
   UiEventHandling(EventHandled),
   WindowEventHandling(EventHandled),
   RefAssignment,
+  // TODO return Option<PhaseResult> from SmithyComponent's
 }
 
 impl PhaseResult {
