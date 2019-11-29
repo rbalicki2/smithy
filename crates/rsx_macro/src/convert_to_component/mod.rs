@@ -10,21 +10,31 @@ type ParsedOutput = Vec<RsxItemOrLiteral>;
 pub fn convert_to_component(parsed_output: ParsedOutput, should_move: bool) -> TokenStream {
   let parsed_output = dbg!(parsed_output);
   // TODO use Span::def_site() for phase_variable_name
-  let phase_variable_name = quote!(phase);
-  let match_statement = match_statement::get_match_statement(&parsed_output, &phase_variable_name);
-  outer_wrap(match_statement, should_move, &phase_variable_name)
+  // as well as for ::smithy
+  let match_arms = match_statement::get_match_arms(&parsed_output);
+  outer_wrap(match_arms, should_move, true)
 }
 
-fn outer_wrap(
-  match_statement: TokenStream,
+pub fn outer_wrap(
+  match_arms: TokenStream,
   should_move: bool,
-  phase_variable_name: &TokenStream,
+  include_catch_all_case: bool,
 ) -> TokenStream {
+  let phase_variable_name = quote!(phase);
   let move_keyword = if should_move { quote!(move) } else { quote!() };
+  let catch_all_case = if include_catch_all_case {
+    // TODO PhaseResult::Ignored or the like
+    quote!(_ => ::smithy::types::PhaseResult::UiEventHandling(false))
+  } else {
+    quote!()
+  };
   quote!({
     use ::smithy::types::Component as _;
     ::smithy::types::SmithyComponent(::std::boxed::Box::new(#move_keyword |#phase_variable_name| {
-      #match_statement
+      match #phase_variable_name {
+        #match_arms
+        #catch_all_case
+      }
     }))
   })
 }

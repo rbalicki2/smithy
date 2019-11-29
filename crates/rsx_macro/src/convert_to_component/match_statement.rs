@@ -1,3 +1,5 @@
+// TODO organize module better
+
 use crate::prelude::*;
 use quote::quote;
 
@@ -15,23 +17,15 @@ use proc_macro2::{
 
 type ParsedOutput = Vec<RsxItemOrLiteral>;
 
-/// N.B. must return a TokenStream that evaluates to a ::smithy::types::PhaseResult
-pub fn get_match_statement(
-  parsed_output: &ParsedOutput,
-  phase_variable_name: &TokenStream,
-) -> TokenStream {
+/// N.B. must return a TokenStream that evaluates to match arms
+pub fn get_match_arms(parsed_output: &ParsedOutput) -> TokenStream {
   let rendering_result = get_rendering_result(&parsed_output);
   let ui_event_handling_result = get_ui_event_handling_result(&parsed_output);
   quote!(
-    match #phase_variable_name {
-      ::smithy::types::Phase::Rendering => #rendering_result,
-      ::smithy::types::Phase::UiEventHandling(ui_event_handling) => {
-        #ui_event_handling_result
-      },
-      // this is for post-render, window event handling and ref assignment phases
-      // TODO PhaseResult::Ignored
-      _ => ::smithy::types::PhaseResult::UiEventHandling(false)
-    }
+    ::smithy::types::Phase::Rendering => #rendering_result,
+    ::smithy::types::Phase::UiEventHandling(ui_event_handling) => {
+      #ui_event_handling_result
+    },
   )
 }
 

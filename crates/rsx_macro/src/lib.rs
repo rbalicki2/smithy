@@ -30,3 +30,22 @@ fn rsx_inner(input: proc_macro::TokenStream, should_move: bool) -> proc_macro::T
   // input.into()
   converted.into()
 }
+
+#[proc_macro]
+pub fn post_render(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+  let input: proc_macro2::TokenStream = input.into();
+  convert_to_component::outer_wrap(
+    quote::quote!(
+      // TODO remove this hack!
+      ::smithy::types::Phase::Rendering =>
+        ::smithy::types::PhaseResult::Rendering(::smithy::types::Node::Vec(vec![])),
+      ::smithy::types::Phase::PostRendering => {
+        (#input)();
+        ::smithy::types::PhaseResult::PostRendering
+      },
+    ),
+    false,
+    true,
+  )
+  .into()
+}
