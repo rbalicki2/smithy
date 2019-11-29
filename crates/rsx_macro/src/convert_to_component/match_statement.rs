@@ -15,16 +15,8 @@ use proc_macro2::{
 
 type ParsedOutput = Vec<RsxItemOrLiteral>;
 
-pub fn convert_to_component(parsed_output: ParsedOutput, should_move: bool) -> TokenStream {
-  let parsed_output = dbg!(parsed_output);
-  // TODO use Span::def_site() for phase_variable_name
-  let phase_variable_name = quote!(phase);
-  let match_statement = get_match_statement(&parsed_output, &phase_variable_name);
-  outer_wrap(match_statement, should_move, &phase_variable_name)
-}
-
 /// N.B. must return a TokenStream that evaluates to a ::smithy::types::PhaseResult
-fn get_match_statement(
+pub fn get_match_statement(
   parsed_output: &ParsedOutput,
   phase_variable_name: &TokenStream,
 ) -> TokenStream {
@@ -95,7 +87,7 @@ fn get_ui_event_handling_result_inner(
             quote!(),
             |match_arms, (event_name, callback)| {
               // TODO what is should_include_rest? Should it be include_rest_param?
-              let (enum_event_name, should_include_rest) =
+              let (enum_event_name, _should_include_rest) =
                 event_names::UI_EVENT_NAMES.get(event_name).expect(&format!(
                   "rsx compilation error: event handler not recognized: {}",
                   event_name
@@ -193,18 +185,4 @@ fn get_rendering_result(parsed_output: &ParsedOutput) -> TokenStream {
   quote!(::smithy::types::PhaseResult::Rendering(
     ::smithy::types::Node::Vec(#result)
   ))
-}
-
-fn outer_wrap(
-  match_statement: TokenStream,
-  should_move: bool,
-  phase_variable_name: &TokenStream,
-) -> TokenStream {
-  let move_keyword = if should_move { quote!(move) } else { quote!() };
-  quote!({
-    use ::smithy::types::Component as _;
-    ::smithy::types::SmithyComponent(::std::boxed::Box::new(#move_keyword |#phase_variable_name| {
-      #match_statement
-    }))
-  })
 }

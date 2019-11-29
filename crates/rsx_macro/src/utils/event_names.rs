@@ -177,19 +177,3 @@ lazy_static! {
     lifecycle_event_names
   };
 }
-
-pub fn should_include_rest_param(opt: &Option<String>) -> bool {
-  opt
-    .as_ref()
-    .and_then(|provided_event_name| {
-      UI_EVENT_NAMES
-        .iter()
-        .find_map(|(_key, (event_name, should_include_rest_param))| {
-          if provided_event_name != event_name {
-            return None;
-          }
-          return Some(*should_include_rest_param);
-        })
-    })
-    .unwrap_or(false)
-}

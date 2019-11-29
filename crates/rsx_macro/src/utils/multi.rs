@@ -40,10 +40,9 @@ pub fn many_0_delimited<T, U>(
   // and the final comma will be consumed
   move |mut i: TokenStream| {
     let mut acc = vec![];
-    let mut count = 0;
     loop {
       match f(i.clone()) {
-        Err(Err::Error((rest, err))) => {
+        Err(Err::Error(_)) => {
           return Ok((i, acc));
         },
         Err(e) => {
