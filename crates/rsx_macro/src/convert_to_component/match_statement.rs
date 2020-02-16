@@ -1,4 +1,5 @@
 // TODO organize module better
+// TODO handle final comma e.g. rsx![(div), ]
 
 use crate::prelude::*;
 use quote::quote;
@@ -22,11 +23,13 @@ pub fn get_match_arms(parsed_output: &ParsedOutput) -> TokenStream {
   let rendering_result = get_rendering_result(&parsed_output);
   let ui_event_handling_result = get_ui_event_handling_result(&parsed_output);
   let post_rendering_result = get_post_rendering_result(&parsed_output);
+  // let ref_assignment_result = get_ref_assignment_result(&parsed_output);
   quote!(
     ::smithy::types::Phase::Rendering => #rendering_result,
     ::smithy::types::Phase::UiEventHandling(ui_event_handling) =>
       #ui_event_handling_result,
     ::smithy::types::Phase::PostRendering => #post_rendering_result,
+    // ::smithy::types::Phase::RefAssignment => #ref_assignment_result,
     // TODO pass ref assignment to interpolated items
   )
 }
@@ -192,10 +195,35 @@ fn get_post_rendering_result(parsed_output: &ParsedOutput) -> TokenStream {
         #prev_result
         (#token_stream).handle_post_render();
       ),
-      _ => prev_result,
+      RsxItemOrLiteral::Node(node_construction_instructions) => {
+        let result = get_post_rendering_result(&node_construction_instructions.children);
+        quote!(
+          #prev_result
+          #result;
+        )
+      },
     });
   quote!({
     #result
     ::smithy::types::PhaseResult::PostRendering
+  })
+}
+
+fn get_ref_assignment_result(parsed_output: &ParsedOutput) -> TokenStream {
+  let result =
+    parsed_output
+      .iter()
+      .enumerate()
+      .fold(quote!(), |prev_result, (i, item)| match item {
+        RsxItemOrLiteral::Literal(token_stream) => quote!(
+          #prev_result
+          (#token_stream).handle_ref_assignment(vec![]);
+        ),
+        _ => prev_result,
+      });
+
+  quote!({
+    #result
+    ::smithy::types::PhaseResult::RefAssignment
   })
 }
