@@ -196,13 +196,18 @@ pub fn get_filler_spaces(input: TokenTreeSlice) -> String {
   }
 }
 
+// Poorly named function... takes a vec of TokenStreams and combines them into a TokenStream
+// like { let mut vec = vec![]; push each item; vec }
 fn reduce_vec_to_tokens(v: &Vec<proc_macro2::TokenStream>) -> proc_macro2::TokenStream {
   let vec_contents = v
     .iter()
-    .fold(quote!(), |existing, token| quote!(#existing #token,));
-  quote!(vec![
+    .fold(quote!(), |existing, token| quote!(#existing vec.push(#token);));
+  let len = v.len();
+  quote!({
+    let mut vec = Vec::with_capacity(#len);
     #vec_contents
-  ])
+    vec
+  })
 }
 
 pub fn reduce_vec_to_node(v: &Vec<proc_macro2::TokenStream>) -> proc_macro2::TokenStream {
